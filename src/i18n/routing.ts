@@ -9,9 +9,23 @@ import { createNavigation } from "next-intl/navigation";
  * Adding one means three things and no more: an entry here, a `messages/<code>.json`
  * translated from `en.json`, and a label in LOCALE_LABELS below.
  */
+export const LOCALE_COOKIE = "NEXT_LOCALE";
+
 export const routing = defineRouting({
   locales: ["en", "fr", "es", "sv", "pt"],
   defaultLocale: "en",
+  // Every path carries its locale (/en, /fr, …) so a URL is shareable and a
+  // page always knows which language to render.
+  localePrefix: "always",
+  // On a first visit with no stored choice, honour the browser's Accept-Language
+  // before falling back to English.
+  localeDetection: true,
+  // The chosen locale survives across visits. The proxy writes this cookie on
+  // every language switch; the client mirrors it into localStorage too.
+  localeCookie: {
+    name: LOCALE_COOKIE,
+    maxAge: 60 * 60 * 24 * 365,
+  },
 });
 
 export type Locale = (typeof routing.locales)[number];

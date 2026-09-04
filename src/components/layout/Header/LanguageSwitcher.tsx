@@ -2,6 +2,7 @@
 
 import { useLocale } from "next-intl";
 import { useRouter, usePathname, routing, LOCALE_LABELS, type Locale } from "@/i18n/routing";
+import { LOCALE_STORAGE_KEY } from "@/providers/LocaleSync";
 import { Check, Globe } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
@@ -41,6 +42,14 @@ export function LanguageSwitcher() {
   function switchTo(next: Locale) {
     setOpen(false);
     if (next === locale) return;
+    try {
+      localStorage.setItem(LOCALE_STORAGE_KEY, next);
+    } catch {
+      // storage unavailable — the cookie set by the proxy still persists it
+    }
+    // next-intl swaps only the locale segment of the current path, so switching
+    // language on a product page keeps you on that product. The proxy writes the
+    // NEXT_LOCALE cookie on the resulting navigation.
     router.replace(pathname, { locale: next });
   }
 
