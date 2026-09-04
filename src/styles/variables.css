@@ -1,0 +1,166 @@
+/*
+ * Solvetaworld Design Tokens — "Emerald on Charcoal".
+ *
+ * The store sells electrical materials to people who are working, not
+ * browsing: electricians, installers, site buyers. So the palette is quiet and
+ * technical rather than shop-bright. One accent does all the work — a deep
+ * emerald that carries white text at AA — over near-neutral surfaces that shade
+ * to charcoal, never navy. The lighter mint is the second voice: it exists to
+ * separate a highlight from the accent on dark ground, and is never used for
+ * body text.
+ *
+ * These CSS variables are the single source of truth for colour. The Tailwind
+ * @theme in globals.css and tailwind.config.ts both read them, so every utility
+ * (bg-brand, text-ink, border-line, …) resolves here and nowhere else.
+ */
+
+:root {
+  /* ── Brand & accents ── */
+  --color-primary: #12171a;             /* charcoal, used for body text & headings */
+  --color-secondary: #ffffff;
+  --color-accent: #0e8a5a;              /* Emerald — primary brand. 4.7:1 on white */
+  --color-accent-hover: #0b7048;
+  --color-accent-light: rgba(14, 138, 90, 0.08);
+  --color-accent-2: #3ed598;            /* Mint — highlight voice, never body text */
+  --color-accent-3: #e14942;            /* Sale / discount red */
+  --color-success: #0e8a5a;
+  --color-warning: #c07d18;
+  --color-danger: #e14942;
+  --color-info: #2b7f9e;
+
+  /* ── Primary scale (emerald) ── */
+  --color-primary-50:  #ecfaf3;
+  --color-primary-100: #cdf0e1;
+  --color-primary-200: #9be0c4;
+  --color-primary-300: #63cda3;
+  --color-primary-400: #2fb57f;
+  --color-primary-500: #0e8a5a;
+  --color-primary-600: #0b7048;
+  --color-primary-700: #095b3b;
+  --color-primary-800: #07452d;
+  --color-primary-900: #052e1e;
+
+  /* ── Accent scale (mint) ── */
+  --color-accent-50:  #ecfcf4;
+  --color-accent-100: #d0f7e4;
+  --color-accent-200: #a5efca;
+  --color-accent-300: #74e4ac;
+  --color-accent-400: #4fdca3;
+  --color-accent-500: #3ed598;
+  --color-accent-600: #2db37d;
+  --color-accent-700: #218a60;
+  --color-accent-800: #175f42;
+  --color-accent-900: #0c3626;
+
+  /* ── Gradients ──
+     Kept shallow on purpose: these are surfaces, not decoration, so they move
+     one or two steps along the scale rather than sweeping across two hues. */
+  --gradient-primary: linear-gradient(135deg, #0b7048 0%, #0e8a5a 55%, #2fb57f 100%);
+  --gradient-accent: linear-gradient(135deg, #0e8a5a 0%, #2fb57f 100%);
+  --gradient-warm: linear-gradient(135deg, #e14942 0%, #d0872a 100%);
+  --gradient-cool: linear-gradient(135deg, #2fb57f 0%, #0b7048 100%);
+  --gradient-hero: linear-gradient(135deg, #f4f7f5 0%, #e9f4ee 45%, #ecfaf3 78%, #f4f7f5 100%);
+  --gradient-card-hover: linear-gradient(135deg, rgba(14, 138, 90, 0.05) 0%, rgba(62, 213, 152, 0.05) 100%);
+  --gradient-badge: linear-gradient(135deg, #e14942 0%, #ef7a63 100%);
+
+  /* ── Surfaces ── */
+  --color-bg: #ffffff;
+  --color-bg-secondary: #f7f9f8;
+  --color-bg-tertiary: #eff2f1;
+  --color-bg-warm: #ecfaf3;
+  --color-surface-dark: #12171a;         /* charcoal surface for hero/cards */
+
+  /* ── Text ── */
+  --color-text: #12171a;
+  --color-text-secondary: #545c5f;
+  --color-text-tertiary: #8c9497;
+
+  /* ── Borders ── */
+  --color-border: #e4e7e7;
+  --color-border-hover: #cbd1d1;
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 3px rgba(18, 23, 26, 0.04), 0 1px 2px rgba(18, 23, 26, 0.02);
+  --shadow-md: 0 4px 16px rgba(18, 23, 26, 0.06), 0 2px 4px rgba(18, 23, 26, 0.03);
+  --shadow-lg: 0 12px 40px rgba(18, 23, 26, 0.08), 0 4px 12px rgba(18, 23, 26, 0.04);
+  --shadow-xl: 0 24px 60px rgba(18, 23, 26, 0.1), 0 8px 20px rgba(18, 23, 26, 0.05);
+  --shadow-accent: 0 8px 30px rgba(14, 138, 90, 0.2);
+  --shadow-card: 0 2px 8px rgba(18, 23, 26, 0.04), 0 0 1px rgba(18, 23, 26, 0.06);
+  --shadow-card-hover: 0 12px 32px rgba(18, 23, 26, 0.1), 0 4px 8px rgba(18, 23, 26, 0.04);
+
+  /* ── Radii ── */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.5rem;
+  --radius-pill: 9999px;
+
+  /* ── Layout ── */
+  --max-width: 1320px;
+  --header-height: 64px;
+  --announcement-height: 36px;
+
+  /* ── Fonts & easing ── */
+  --font-sans: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* ── Promo tints ── */
+  --promo-bg-blue: #ecfaf3;
+  --promo-bg-warm: #fdf4ec;
+  --promo-bg-green: #e7f6ee;
+
+  /* ── Selection ── */
+  --selection-bg: rgba(14, 138, 90, 0.16);
+  --selection-fg: #052e1e;
+}
+
+::selection {
+  background: var(--selection-bg);
+  color: var(--selection-fg);
+}
+
+[data-theme="dark"] {
+  --color-primary: #eef1f0;
+  --color-secondary: #12171a;
+  /* Emerald has to lift off charcoal, so dark mode runs two steps brighter and
+     pairs it with charcoal text rather than white. */
+  --color-accent: #2fb57f;
+  --color-accent-hover: #63cda3;
+  --color-accent-light: rgba(47, 181, 127, 0.16);
+  --color-accent-2: #74e4ac;
+  --color-accent-3: #f07a72;
+
+  --gradient-hero: linear-gradient(135deg, #12171a 0%, #16221d 45%, #0f1a16 78%, #12171a 100%);
+  --gradient-card-hover: linear-gradient(135deg, rgba(47, 181, 127, 0.1) 0%, rgba(116, 228, 172, 0.07) 100%);
+
+  --color-bg: #12171a;
+  --color-bg-secondary: #181d20;
+  --color-bg-tertiary: #212729;
+  --color-bg-warm: #14231c;
+  --color-surface-dark: #0a0d0e;
+
+  --color-text: #eef1f0;
+  --color-text-secondary: #9aa3a1;
+  --color-text-tertiary: #6b7472;
+
+  --color-border: #212729;
+  --color-border-hover: #333a3b;
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.35);
+  --shadow-xl: 0 24px 60px rgba(0, 0, 0, 0.4);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.2), 0 0 1px rgba(0, 0, 0, 0.25);
+  --shadow-card-hover: 0 12px 32px rgba(0, 0, 0, 0.35);
+  --shadow-accent: 0 8px 30px rgba(47, 181, 127, 0.28);
+
+  --promo-bg-blue: #14231c;
+  --promo-bg-warm: #241c14;
+  --promo-bg-green: #123024;
+
+  --selection-bg: rgba(47, 181, 127, 0.28);
+  --selection-fg: #eef1f0;
+}
