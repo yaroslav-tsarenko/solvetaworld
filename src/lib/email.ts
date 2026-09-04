@@ -1,24 +1,42 @@
-import { Resend } from "resend";
+import nodemailer, { type Transporter } from "nodemailer";
 import { COMPANY } from "@/lib/company";
 
-let resend: Resend | null = null;
+let transporter: Transporter | null = null;
 
-function getResend(): Resend | null {
-  if (!process.env.RESEND_API_KEY) return null;
-  if (!resend) resend = new Resend(process.env.RESEND_API_KEY);
-  return resend;
+// Builds (once) an SMTP transport from the environment. Returns null when SMTP
+// is not configured so callers can no-op instead of throwing in local dev.
+function getTransporter(): Transporter | null {
+  const host = process.env.SMTP_HOST;
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASSWORD;
+  if (!host || !user || !pass) return null;
+
+  if (!transporter) {
+    const port = Number(process.env.SMTP_PORT ?? 587);
+    transporter = nodemailer.createTransport({
+      host,
+      port,
+      // 465 is implicit TLS; 587 upgrades via STARTTLS (secure=false).
+      secure: process.env.SMTP_SECURE === "true" || port === 465,
+      auth: { user, pass },
+    });
+  }
+  return transporter;
 }
 
 function getFrom(): string {
+  // A From address must belong to the authenticated mailbox's domain or the
+  // provider will reject the message, so default to the SMTP user.
   return (
-    process.env.RESEND_FROM_EMAIL ||
-    process.env.RESEND_FROM ||
-    "Solvetaworld <noreply@solvetaworld.com>"
+    process.env.SMTP_FROM ||
+    (process.env.SMTP_USER
+      ? `Solvetaworld <${process.env.SMTP_USER}>`
+      : "Solvetaworld <noreply@solvetaworld.com>")
   );
 }
 
 function getReplyTo(): string | undefined {
-  return process.env.RESEND_REPLY_TO || undefined;
+  return process.env.SMTP_REPLY_TO || undefined;
 }
 
 function getSiteUrl(): string {
@@ -39,23 +57,19 @@ interface SendArgs {
 }
 
 async function send({ to, subject, html, replyTo }: SendArgs): Promise<boolean> {
-  const r = getResend();
-  if (!r) {
-    console.log(`[Email] Skipped (Resend not configured) → ${subject} to ${to}`);
+  const t = getTransporter();
+  if (!t) {
+    console.log(`[Email] Skipped (SMTP not configured) → ${subject} to ${to}`);
     return false;
   }
   try {
-    const { error } = await r.emails.send({
+    await t.sendMail({
       from: getFrom(),
       to,
       subject,
       html,
       replyTo: replyTo ?? getReplyTo(),
     });
-    if (error) {
-      console.error(`[Email] Send failed → ${subject} to ${to}:`, error);
-      return false;
-    }
     return true;
   } catch (err) {
     console.error(`[Email] Exception → ${subject} to ${to}:`, err);
@@ -569,7 +583,7 @@ interface ContactSubmission {
 
 // Internal notification to support inbox
 export async function sendContactFormEmail(submission: ContactSubmission): Promise<boolean> {
-  const supportInbox = getReplyTo() || process.env.RESEND_FROM_EMAIL || process.env.RESEND_FROM;
+  const supportInbox = getReplyTo() || process.env.SMTP_FROM || process.env.SMTP_USER;
   if (!supportInbox) {
     console.log("[Email] Contact form notification skipped (no inbox configured)");
     return false;
