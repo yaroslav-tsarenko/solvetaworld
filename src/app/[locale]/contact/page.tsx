@@ -58,7 +58,7 @@ const CONTACT_INFO = [
     title: "Our Office",
     detail: COMPANY.country,
     sub: COMPANY.name,
-    tooltip: `${COMPANY.registeredOffice}\nCompany No. ${COMPANY.companyNumber}\nDirector: ${COMPANY.director}`,
+    tooltip: `${COMPANY.registeredOffice}\nCompany No. ${COMPANY.companyNumber}`,
   },
   { icon: Clock, title: "Working Hours", detail: "Mon-Fri 9:00-18:00", sub: "Sat 10:00-14:00" },
 ];
@@ -391,8 +391,6 @@ export default function ContactPage() {
               <strong style={{ color: "var(--color-text)" }}>{COMPANY.name}</strong>
               <br />
               Company number: {COMPANY.companyNumber}
-              <br />
-              Director: {COMPANY.director}
               <br />
               {COMPANY.registeredOffice}
               {COMPANY.phone ? (

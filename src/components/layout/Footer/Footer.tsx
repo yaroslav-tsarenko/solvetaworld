@@ -91,7 +91,7 @@ export function Footer() {
             <div>
               <p className="font-semibold text-ink mb-1">{COMPANY.name}</p>
               <p>
-                Company number: {COMPANY.companyNumber} &middot; Director: {COMPANY.director}
+                Company number: {COMPANY.companyNumber}
                 <br />
                 {COMPANY.registeredOffice}
                 <br />

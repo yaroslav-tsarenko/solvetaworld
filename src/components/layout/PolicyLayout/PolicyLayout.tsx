@@ -50,8 +50,6 @@ export function ContactBlock() {
         <br />
         Company number: {COMPANY.companyNumber}
         <br />
-        Director: {COMPANY.director}
-        <br />
         Registered office: {COMPANY.registeredOffice}
         {COMPANY.phone ? (
           <>

@@ -10,7 +10,6 @@ export const COMPANY_REGISTERED = true;
 export const COMPANY: {
   name: string;
   companyNumber: string;
-  director: string;
   addressLine: string;
   country: string;
   registeredOffice: string;
@@ -20,7 +19,6 @@ export const COMPANY: {
 } = {
   name: "SOLVETA LTD",
   companyNumber: "17349586",
-  director: "Vladimirs PUHINS",
   addressLine: "Dept 6953, 196 High Road, Wood Green, London, N22 8HH",
   country: "United Kingdom",
   registeredOffice:
