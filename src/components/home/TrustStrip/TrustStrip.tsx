@@ -18,12 +18,12 @@ export function TrustStrip() {
   return (
     <section
       ref={ref}
-      className="mb-6 rounded-lg bg-surface border border-line px-6 py-5 grid grid-cols-1 max-md:grid-cols-1 md:grid-cols-4 [@media(max-width:768px)_and_(min-width:481px)]:grid-cols-2 gap-4"
+      className="grid grid-cols-1 sm:grid-cols-2 gap-3 h-full"
     >
       {items.map((item, i) => (
         <motion.div
           key={item.label}
-          className="flex items-center gap-3 py-2 max-sm:border-b max-sm:border-line max-sm:pb-3 max-sm:last:border-b-0 max-sm:last:pb-0 [@media(min-width:481px)]:[&:not(:last-child)]:border-r [@media(min-width:481px)]:[&:not(:last-child)]:border-line [@media(min-width:481px)]:[&:not(:last-child)]:pr-4 [@media(max-width:768px)_and_(min-width:481px)]:nth-2:!border-r-0"
+          className="flex items-center gap-3 bg-surface border border-line rounded-lg px-4 py-3"
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.4, delay: i * 0.1 }}

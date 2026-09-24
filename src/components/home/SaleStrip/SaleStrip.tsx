@@ -28,7 +28,7 @@ export function SaleStrip({ products }: Props) {
   if (!products.length) return null;
 
   return (
-    <section ref={sectionRef} className="mb-6 bg-surface border border-line rounded-lg px-5 py-4">
+    <section ref={sectionRef}>
       <motion.div
         className="flex items-center justify-between mb-3"
         initial={{ opacity: 0, x: -20 }}

@@ -29,10 +29,11 @@ interface Props {
   tabs?: string[];
   bg?: "white" | "gray";
   columns?: number;
+  layout?: "grid" | "featured";
 }
 
 export function ProductSection({
-  title, subtitle, products, viewAllHref, viewAllLabel, tabs, bg = "white", columns = 5,
+  title, subtitle, products, viewAllHref, viewAllLabel, tabs, bg = "white", columns = 5, layout = "grid",
 }: Props) {
   const [activeTab, setActiveTab] = useState(0);
   const ref = useRef(null);
@@ -93,16 +94,20 @@ export function ProductSection({
         className="grid gap-3 max-[1200px]:!grid-cols-4 max-[1024px]:!grid-cols-3 max-md:!grid-cols-2 max-[480px]:gap-2"
         style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
       >
-        {filtered.map((p, i) => (
-          <motion.div
-            key={p.id}
-            initial={{ opacity: 0, y: 30 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.4, delay: Math.min(i * 0.07, 0.5) }}
-          >
-            <MarketplaceProductCard product={p} />
-          </motion.div>
-        ))}
+        {filtered.map((p, i) => {
+          const isHero = layout === "featured" && i === 0;
+          return (
+            <motion.div
+              key={p.id}
+              className={isHero ? "md:col-span-2 md:row-span-2 [&>a]:h-full" : ""}
+              initial={{ opacity: 0, y: 30 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.4, delay: Math.min(i * 0.07, 0.5) }}
+            >
+              <MarketplaceProductCard product={p} />
+            </motion.div>
+          );
+        })}
       </div>
     </section>
   );

@@ -18,7 +18,7 @@ export function NewsletterBanner() {
   return (
     <motion.section
       ref={ref}
-      className="mb-6 rounded-lg bg-brand text-white p-8 max-md:p-6 max-md:text-center flex flex-col md:flex-row items-center max-md:items-stretch justify-between gap-8 relative overflow-hidden before:content-[''] before:absolute before:-top-[40%] before:-right-[10%] before:w-[300px] before:h-[300px] before:bg-white/10 before:rounded-full before:pointer-events-none after:content-[''] after:absolute after:-bottom-[50%] after:left-[10%] after:w-[200px] after:h-[200px] after:bg-white/5 after:rounded-full after:pointer-events-none"
+      className="h-full rounded-lg bg-brand text-white p-8 max-md:p-6 max-md:text-center flex flex-col md:flex-row items-center max-md:items-stretch justify-between gap-8 relative overflow-hidden before:content-[''] before:absolute before:-top-[40%] before:-right-[10%] before:w-[300px] before:h-[300px] before:bg-white/10 before:rounded-full before:pointer-events-none after:content-[''] after:absolute after:-bottom-[50%] after:left-[10%] after:w-[200px] after:h-[200px] after:bg-white/5 after:rounded-full after:pointer-events-none"
       initial={{ opacity: 0, y: 30 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.6 }}

@@ -2,7 +2,6 @@
 
 import { TopBar } from "../TopBar/TopBar";
 import { PromoStrip } from "../PromoStrip/PromoStrip";
-import { CategorySidebar } from "../CategorySidebar/CategorySidebar";
 import { HorizontalTabs } from "../HorizontalTabs/HorizontalTabs";
 import { HeroCarousel } from "../HeroCarousel/HeroCarousel";
 import { PromoBannerGrid } from "../PromoBannerGrid/PromoBannerGrid";
@@ -108,127 +107,193 @@ interface Props {
   };
 }
 
+const containerCls = "max-w-[1400px] mx-auto px-4 lg:px-6 max-sm:px-2";
+
 export function MarketplaceHome({ data }: Props) {
   const {
     heroSlides, dealCards, promoSmall, promoWide,
     brands, sections, tabs, utilityLinks, promoStripItems,
-    sectionProducts, featuredProducts, saleProducts, newProducts,
-    popularProducts, categorySections, brandSections, categoryShowcase,
+    sectionProducts, saleProducts, newProducts,
+    popularProducts, categorySections, categoryShowcase,
   } = data;
 
   return (
     <div className="bg-surface-1 min-h-screen">
-      <TopBar links={utilityLinks} />
-      <PromoStrip items={promoStripItems} />
+      {/* Full-bleed editorial hero + deal strip */}
+      <HeroCarousel slides={heroSlides} deals={dealCards} />
 
-      <div className="max-w-[1400px] mx-auto px-4 pt-4 pb-12 max-sm:px-2 max-sm:pt-3 max-sm:pb-8">
-        <div className="flex gap-4 items-start">
-          <div className="hidden lg:block sticky top-20">
-            <CategorySidebar />
-          </div>
+      {tabs.length > 0 && (
+        <div className={`${containerCls} pt-6`}>
+          <HorizontalTabs tabs={tabs} />
+        </div>
+      )}
 
-          <div className="flex-1 min-w-0">
-            <div className="hidden max-lg:block mb-3">
-              <CategorySidebar />
-            </div>
+      {/* Benefits divider band */}
+      <div className="mt-6">
+        <PromoStrip items={promoStripItems} />
+      </div>
 
-            {tabs.length > 0 && <HorizontalTabs tabs={tabs} />}
-            <HeroCarousel slides={heroSlides} deals={dealCards} />
-            <PromoBannerGrid smallBanners={promoSmall} wideBanners={promoWide} />
+      {/* Category quick access as a tile grid */}
+      {categoryShowcase.length > 0 && (
+        <div className={`${containerCls} pt-6`}>
+          <CategoryShowcase categories={categoryShowcase} />
+        </div>
+      )}
 
-            {/* Most Popular Products */}
-            {popularProducts.length > 0 && (
-              <ProductSection
-                title="Most Popular"
-                subtitle="Top products by availability"
-                products={popularProducts}
-                viewAllHref="/catalog?sort=popular"
-                viewAllLabel="View all popular"
-                bg="white"
-                columns={5}
-              />
-            )}
+      {/* Most Popular: featured item enlarged beside smaller cards */}
+      {popularProducts.length > 0 && (
+        <div className={containerCls}>
+          <ProductSection
+            title="Most Popular"
+            subtitle="Top products by availability"
+            products={popularProducts}
+            viewAllHref="/catalog?sort=popular"
+            viewAllLabel="View all popular"
+            bg="white"
+            columns={4}
+            layout="featured"
+          />
+        </div>
+      )}
 
-            {/* Top categories by product count */}
-            {categorySections.slice(0, 3).map((cs, i) => (
-              <ProductSection
-                key={cs.category.id}
-                title={cs.category.name}
-                subtitle={`${cs.products.length}+ products`}
-                products={cs.products}
-                tabs={cs.subcategoryTabs}
-                viewAllHref={`/catalog/${cs.category.slug}`}
-                viewAllLabel={`All ${cs.category.name}`}
-                bg={i % 2 === 1 ? "gray" : "white"}
-                columns={5}
-              />
-            ))}
+      {/* First top category, contained */}
+      {categorySections.slice(0, 1).map((cs) => (
+        <div key={cs.category.id} className={containerCls}>
+          <ProductSection
+            title={cs.category.name}
+            subtitle={`${cs.products.length}+ products`}
+            products={cs.products}
+            tabs={cs.subcategoryTabs}
+            viewAllHref={`/catalog/${cs.category.slug}`}
+            viewAllLabel={`All ${cs.category.name}`}
+            bg="white"
+            columns={5}
+          />
+        </div>
+      ))}
 
-            {/* Hot Deals - horizontal scrollable strip */}
+      {/* Deal of the Day pulled up, right after the first rail */}
+      {saleProducts.length > 0 && (
+        <div className={containerCls}>
+          <DealOfTheDay product={saleProducts[0]} />
+        </div>
+      )}
+
+      {/* Hot deals rail inside a full-bleed band */}
+      {saleProducts.length > 0 && (
+        <div className="bg-surface py-8 border-y border-line">
+          <div className={containerCls}>
             <SaleStrip products={saleProducts} />
-
-            {/* Trust / Guarantee Strip */}
-            <TrustStrip />
-
-            {/* Deal of the Day */}
-            {saleProducts.length > 0 && (
-              <DealOfTheDay product={saleProducts[0]} />
-            )}
-
-            {/* 3 more top categories after deal */}
-            {categorySections.slice(3, 6).map((cs, i) => (
-              <ProductSection
-                key={cs.category.id}
-                title={cs.category.name}
-                subtitle={`${cs.products.length}+ products`}
-                products={cs.products}
-                tabs={cs.subcategoryTabs}
-                viewAllHref={`/catalog/${cs.category.slug}`}
-                viewAllLabel={`All ${cs.category.name}`}
-                bg={i % 2 === 0 ? "gray" : "white"}
-                columns={5}
-              />
-            ))}
-
-            {/* Brand Strip */}
-            {brands.length > 0 && <BrandStrip brands={brands} />}
-
-            {/* Admin-configured sections */}
-            {sections.map((section) => {
-              const products = sectionProducts[section.slug] || [];
-              if (!products.length) return null;
-              return (
-                <ProductSection
-                  key={section.id}
-                  title={section.title}
-                  subtitle={section.subtitle || undefined}
-                  products={products}
-                  viewAllHref={section.viewAllUrl || "/catalog"}
-                  viewAllLabel={section.viewAllLabel}
-                  bg={section.bgStyle as "white" | "gray"}
-                  columns={section.columns}
-                />
-              );
-            })}
-
-            {/* Newsletter / Discount CTA */}
-            <NewsletterBanner />
-
-            {/* New Arrivals */}
-            {newProducts.length > 0 && (
-              <ProductSection
-                title="New Arrivals"
-                subtitle="Just landed in store"
-                products={newProducts}
-                viewAllHref="/catalog?sort=newest"
-                viewAllLabel="View all new"
-                bg="gray"
-                columns={5}
-              />
-            )}
           </div>
         </div>
+      )}
+
+      {/* Categories 2-3, contained */}
+      {categorySections.slice(1, 3).map((cs, i) => (
+        <div key={cs.category.id} className={i === 0 ? `${containerCls} pt-6` : containerCls}>
+          <ProductSection
+            title={cs.category.name}
+            subtitle={`${cs.products.length}+ products`}
+            products={cs.products}
+            tabs={cs.subcategoryTabs}
+            viewAllHref={`/catalog/${cs.category.slug}`}
+            viewAllLabel={`All ${cs.category.name}`}
+            bg="white"
+            columns={5}
+          />
+        </div>
+      ))}
+
+      {/* Promo composition: one dominant wide + stacked column */}
+      <div className={containerCls}>
+        <PromoBannerGrid smallBanners={promoSmall} wideBanners={promoWide} />
       </div>
+
+      {/* Category 4 as a full-bleed contrasting band */}
+      {categorySections.slice(3, 4).map((cs) => (
+        <div key={cs.category.id} className="bg-surface py-8 border-y border-line">
+          <div className={containerCls}>
+            <ProductSection
+              title={cs.category.name}
+              subtitle={`${cs.products.length}+ products`}
+              products={cs.products}
+              tabs={cs.subcategoryTabs}
+              viewAllHref={`/catalog/${cs.category.slug}`}
+              viewAllLabel={`All ${cs.category.name}`}
+              bg="white"
+              columns={5}
+            />
+          </div>
+        </div>
+      ))}
+
+      {/* Categories 5-6, contained */}
+      {categorySections.slice(4, 6).map((cs, i) => (
+        <div key={cs.category.id} className={i === 0 ? `${containerCls} pt-6` : containerCls}>
+          <ProductSection
+            title={cs.category.name}
+            subtitle={`${cs.products.length}+ products`}
+            products={cs.products}
+            tabs={cs.subcategoryTabs}
+            viewAllHref={`/catalog/${cs.category.slug}`}
+            viewAllLabel={`All ${cs.category.name}`}
+            bg="white"
+            columns={5}
+          />
+        </div>
+      ))}
+
+      {/* Admin-configured sections */}
+      {sections.map((section) => {
+        const products = sectionProducts[section.slug] || [];
+        if (!products.length) return null;
+        return (
+          <div key={section.id} className={containerCls}>
+            <ProductSection
+              title={section.title}
+              subtitle={section.subtitle || undefined}
+              products={products}
+              viewAllHref={section.viewAllUrl || "/catalog"}
+              viewAllLabel={section.viewAllLabel}
+              bg={section.bgStyle as "white" | "gray"}
+              columns={section.columns}
+            />
+          </div>
+        );
+      })}
+
+      {/* Brands rail */}
+      {brands.length > 0 && (
+        <div className={containerCls}>
+          <BrandStrip brands={brands} />
+        </div>
+      )}
+
+      {/* Newsletter paired with trust cards in one band */}
+      <div className="bg-surface py-8 border-y border-line">
+        <div className={`${containerCls} grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-4 items-stretch`}>
+          <NewsletterBanner />
+          <TrustStrip />
+        </div>
+      </div>
+
+      {/* New Arrivals, denser contained grid */}
+      {newProducts.length > 0 && (
+        <div className={`${containerCls} pt-6`}>
+          <ProductSection
+            title="New Arrivals"
+            subtitle="Just landed in store"
+            products={newProducts}
+            viewAllHref="/catalog?sort=newest"
+            viewAllLabel="View all new"
+            bg="white"
+            columns={5}
+          />
+        </div>
+      )}
+
+      {/* Utility links relocated to a pre-footer strip */}
+      <TopBar links={utilityLinks} />
     </div>
   );
 }

@@ -35,20 +35,20 @@ export function PromoStrip({ items }: Props) {
   const data = items.length > 0 ? items : defaultItems;
 
   return (
-    <div className="bg-surface border-b border-line">
-      <div className="max-w-[1400px] mx-auto px-4 py-2.5 flex items-center justify-between md:justify-between max-md:justify-start gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {data.map((b) => {
+    <div className="bg-surface border-y border-line">
+      <div className="max-w-[1400px] mx-auto px-4 py-3 flex items-center justify-center max-md:justify-start gap-0 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {data.map((b, i) => {
           const Icon = ICON_MAP[b.icon] || Package;
           return (
             <div
               key={b.id}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-md whitespace-nowrap shrink-0 cursor-default transition-colors hover:bg-surface-1"
+              className={`flex items-center gap-2 px-5 max-sm:px-3 whitespace-nowrap shrink-0 cursor-default ${
+                i > 0 ? "border-l border-line" : ""
+              }`}
             >
-              <Icon size={18} className="text-brand shrink-0" />
-              <div className="flex flex-col">
-                <span className="text-xs font-semibold text-ink">{b.title}</span>
-                {b.subtitle && <span className="text-[0.65rem] text-ink-subtle">{b.subtitle}</span>}
-              </div>
+              <Icon size={16} className="text-brand shrink-0" />
+              <span className="text-xs font-semibold text-ink">{b.title}</span>
+              {b.subtitle && <span className="text-[0.65rem] text-ink-subtle">· {b.subtitle}</span>}
             </div>
           );
         })}

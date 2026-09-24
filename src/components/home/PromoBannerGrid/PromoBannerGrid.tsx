@@ -35,51 +35,58 @@ export function PromoBannerGrid({ smallBanners, wideBanners }: Props) {
   const wide = wideBanners.length > 0 ? wideBanners : defaultWide;
 
   return (
-    <div className="flex flex-col gap-3 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-[3fr_2fr] gap-3 mb-6 md:items-stretch">
+      {/* One dominant wide banner on the left */}
+      <div className="flex flex-col gap-3">
+        {wide.map((b) => (
+          <Link
+            key={b.id}
+            href={b.linkUrl || "#"}
+            className="flex-1 flex flex-col justify-center items-start px-8 py-8 max-md:px-5 max-md:py-5 rounded-lg no-underline transition-opacity gap-3 hover:opacity-95"
+            style={{ background: b.bgColor, color: b.textColor }}
+          >
+            <div>
+              {b.badgeText && (
+                <span className="inline-block px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase tracking-[0.05em] text-white bg-brand mb-2">
+                  {b.badgeText}
+                </span>
+              )}
+              <h3 className="text-xl font-extrabold m-0 mb-1.5 text-inherit">{b.title}</h3>
+              {b.subtitle && <p className="text-[0.8125rem] opacity-70 m-0">{b.subtitle}</p>}
+            </div>
+            {b.ctaLabel && (
+              <span className="px-6 py-2.5 rounded-md bg-brand text-white text-sm font-semibold shrink-0">
+                {b.ctaLabel}
+              </span>
+            )}
+          </Link>
+        ))}
+      </div>
+
+      {/* Small banners stacked in a right-hand column */}
       {small.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="flex flex-col gap-3">
           {small.map((b) => (
             <Link
               key={b.id}
               href={b.linkUrl || "#"}
-              className="flex flex-col p-5 rounded-lg no-underline border border-line transition-all hover:shadow-[0_2px_10px_rgba(15,23,42,0.06)] hover:-translate-y-px"
+              className="flex-1 flex items-center justify-between gap-4 px-5 py-4 rounded-lg no-underline border border-line transition-all hover:shadow-[0_2px_10px_rgba(15,23,42,0.06)] hover:-translate-y-px"
               style={{ background: b.bgColor, color: b.textColor }}
             >
-              {b.badgeText && (
-                <span className="text-[0.7rem] font-bold uppercase tracking-[0.05em] mb-1.5">{b.badgeText}</span>
-              )}
-              <h3 className="text-base font-bold m-0 mb-1 leading-[1.25]">{b.title}</h3>
-              {b.subtitle && (
-                <span className="text-[0.8125rem] text-ink-muted mb-3">{b.subtitle}</span>
-              )}
-              <span className="text-[0.8125rem] font-semibold mt-auto">Shop now →</span>
+              <div className="flex flex-col min-w-0">
+                {b.badgeText && (
+                  <span className="text-[0.7rem] font-bold uppercase tracking-[0.05em] mb-1">{b.badgeText}</span>
+                )}
+                <h3 className="text-base font-bold m-0 mb-0.5 leading-[1.25]">{b.title}</h3>
+                {b.subtitle && (
+                  <span className="text-[0.8125rem] text-ink-muted">{b.subtitle}</span>
+                )}
+              </div>
+              <span className="text-[0.8125rem] font-semibold whitespace-nowrap shrink-0">Shop now →</span>
             </Link>
           ))}
         </div>
       )}
-      {wide.map((b) => (
-        <Link
-          key={b.id}
-          href={b.linkUrl || "#"}
-          className="flex flex-col md:flex-row items-center md:justify-between px-8 py-6 max-md:px-5 max-md:py-5 max-md:text-center rounded-lg no-underline transition-opacity gap-4 md:gap-8 hover:opacity-95"
-          style={{ background: b.bgColor, color: b.textColor }}
-        >
-          <div className="flex-1">
-            {b.badgeText && (
-              <span className="inline-block px-2 py-0.5 rounded text-[0.65rem] font-bold uppercase tracking-[0.05em] text-white bg-brand mb-2">
-                {b.badgeText}
-              </span>
-            )}
-            <h3 className="text-xl font-extrabold m-0 mb-1.5 text-inherit">{b.title}</h3>
-            {b.subtitle && <p className="text-[0.8125rem] opacity-70 m-0">{b.subtitle}</p>}
-          </div>
-          {b.ctaLabel && (
-            <span className="px-6 py-2.5 rounded-md bg-brand text-white text-sm font-semibold shrink-0">
-              {b.ctaLabel}
-            </span>
-          )}
-        </Link>
-      ))}
     </div>
   );
 }

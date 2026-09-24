@@ -90,8 +90,8 @@ interface Props {
   deals: DealData[];
 }
 
-const arrowCls =
-  "absolute top-1/2 -translate-y-1/2 bg-surface border border-line rounded-full w-9 h-9 flex items-center justify-center cursor-pointer text-ink z-[2] transition-colors hover:bg-white";
+const controlBtnCls =
+  "bg-white/10 border border-white/25 rounded-full w-9 h-9 flex items-center justify-center cursor-pointer text-white transition-colors hover:bg-white/25";
 
 export function HeroCarousel({ slides, deals }: Props) {
   const useDefaults = slides.length === 0;
@@ -118,36 +118,26 @@ export function HeroCarousel({ slides, deals }: Props) {
     : bgImageMap[slide.id] || null;
 
   return (
-    <div className="flex gap-3 mb-4">
-      <div className="flex-1 relative rounded-[10px] overflow-hidden min-h-[320px] max-sm:min-h-[240px]">
-        <div
-          className="absolute inset-0 flex items-center transition-opacity duration-400"
-          style={bgImage ? { color: "#fff" } : { background: slide.bgColor, color: slide.textColor }}
-        >
-          {bgImage && (
-            <>
-              <Image
-                src={bgImage}
-                alt=""
-                fill
-                sizes="(max-width: 1024px) 100vw, 75vw"
-                className="object-cover [object-position:center_right] z-0"
-                priority={current === 0}
-              />
-              <div className="absolute inset-0 z-[1] bg-[linear-gradient(to_right,rgba(15,23,42,0.65)_0%,rgba(15,23,42,0.35)_50%,rgba(15,23,42,0.05)_100%)]" />
-            </>
-          )}
-          <div className="relative z-[2] p-10 max-sm:p-6 max-w-[500px]">
+    <>
+      {/* Full-bleed editorial split band */}
+      <section
+        className="w-full"
+        style={{ background: slide.bgColor, color: slide.textColor }}
+        aria-roledescription="carousel"
+      >
+        <div className="max-w-[1400px] mx-auto px-4 lg:px-6 py-10 max-sm:py-6 grid grid-cols-1 lg:grid-cols-[2fr_3fr] gap-8 max-sm:gap-5 items-center">
+          {/* Text column leads */}
+          <div className="flex flex-col items-start min-w-0">
             {slide.badgeText && (
               <span className="inline-block px-3 py-1 rounded bg-brand text-white text-[0.7rem] font-bold uppercase tracking-[0.05em] mb-4">
                 {slide.badgeText}
               </span>
             )}
-            <h2 className="text-[1.75rem] max-sm:text-xl font-extrabold leading-[1.15] m-0 mb-3 tracking-[-0.02em]">
+            <h2 className="text-[2.25rem] max-lg:text-[1.75rem] max-sm:text-xl font-extrabold leading-[1.1] m-0 mb-3 tracking-[-0.02em]">
               {slide.title}
             </h2>
             {slide.subtitle && (
-              <p className="text-[0.9375rem] opacity-85 m-0 mb-6 leading-[1.5]">{slide.subtitle}</p>
+              <p className="text-[0.9375rem] opacity-85 m-0 mb-6 leading-[1.5] max-w-[460px]">{slide.subtitle}</p>
             )}
             {slide.linkUrl && (
               <Link
@@ -157,62 +147,85 @@ export function HeroCarousel({ slides, deals }: Props) {
                 {slide.ctaLabel || "Shop Now"}
               </Link>
             )}
+
+            {activeSlides.length > 1 && (
+              <div className="flex items-center gap-4 mt-8 max-sm:mt-5">
+                <div className="flex gap-2">
+                  <button className={controlBtnCls} onClick={prev} aria-label="Previous slide">
+                    <ChevronLeft size={20} />
+                  </button>
+                  <button className={controlBtnCls} onClick={next} aria-label="Next slide">
+                    <ChevronRight size={20} />
+                  </button>
+                </div>
+                <div className="flex gap-1.5" role="tablist" aria-label="Slides">
+                  {activeSlides.map((_, i) => (
+                    <button
+                      key={i}
+                      role="tab"
+                      aria-selected={i === current}
+                      className={`h-2 rounded-full border-0 cursor-pointer transition-all ${
+                        i === current ? "bg-white w-5 rounded" : "bg-white/40 w-2"
+                      }`}
+                      onClick={() => setCurrent(i)}
+                      aria-label={`Slide ${i + 1}`}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Imagery column */}
+          <div className="relative rounded-[10px] overflow-hidden min-h-[340px] max-lg:min-h-[260px] max-sm:min-h-[180px]">
+            {bgImage ? (
+              <Image
+                src={bgImage}
+                alt=""
+                fill
+                sizes="(max-width: 1024px) 100vw, 60vw"
+                className="object-cover [object-position:center_right]"
+                priority={current === 0}
+              />
+            ) : (
+              <div className="absolute inset-0" style={{ background: slide.bgColor }} />
+            )}
           </div>
         </div>
+      </section>
 
-        {activeSlides.length > 1 && (
-          <>
-            <button className={`${arrowCls} left-3`} onClick={prev} aria-label="Previous slide">
-              <ChevronLeft size={20} />
-            </button>
-            <button className={`${arrowCls} right-3`} onClick={next} aria-label="Next slide">
-              <ChevronRight size={20} />
-            </button>
-            <div className="absolute bottom-3.5 left-1/2 -translate-x-1/2 flex gap-1.5 z-[2]">
-              {activeSlides.map((_, i) => (
-                <button
-                  key={i}
-                  className={`h-2 rounded-full border-0 cursor-pointer transition-all ${
-                    i === current ? "bg-white w-5 rounded" : "bg-white/40 w-2"
-                  }`}
-                  onClick={() => setCurrent(i)}
-                  aria-label={`Slide ${i + 1}`}
-                />
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-
+      {/* Deal tiles: equal-width horizontal strip below the campaign band */}
       {deals.length > 0 && (
-        <div className="hidden lg:flex flex-col gap-3 w-[220px] shrink-0">
-          {deals.map((deal) => (
-            <Link
-              key={deal.id}
-              href={deal.linkUrl || "/catalog"}
-              className="flex-1 bg-surface border border-line rounded-lg p-4 no-underline text-ink flex flex-col relative transition-all hover:border-line-hover hover:shadow-[0_2px_8px_rgba(15,23,42,0.06)]"
-            >
-              {deal.discountText && (
-                <span className="absolute top-2 right-2 bg-sale text-white text-[0.7rem] font-bold px-1.5 py-0.5 rounded">
-                  {deal.discountText}
-                </span>
-              )}
-              <div className="flex justify-center mb-3">
-                {deal.imageUrl ? (
-                  <img src={deal.imageUrl} alt={deal.title} className="w-20 h-20 object-contain rounded-lg" />
-                ) : (
-                  <div className="w-20 h-20 bg-surface-2 rounded-lg" />
+        <div className="max-w-[1400px] mx-auto px-4 lg:px-6 -mt-5 max-sm:mt-3 relative z-[2]">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {deals.map((deal) => (
+              <Link
+                key={deal.id}
+                href={deal.linkUrl || "/catalog"}
+                className="bg-surface border border-line rounded-lg p-4 no-underline text-ink flex items-center gap-4 relative transition-all hover:border-line-hover hover:shadow-[0_2px_8px_rgba(15,23,42,0.06)]"
+              >
+                {deal.discountText && (
+                  <span className="absolute top-2 right-2 bg-sale text-white text-[0.7rem] font-bold px-1.5 py-0.5 rounded">
+                    {deal.discountText}
+                  </span>
                 )}
-              </div>
-              <h4 className="text-[0.8125rem] font-semibold m-0 mb-2 leading-[1.3]">{deal.title}</h4>
-              <div className="flex items-center gap-2 mt-auto">
-                {deal.oldPrice && <span className="text-xs text-ink-subtle line-through">{deal.oldPrice}</span>}
-                {deal.newPrice && <span className="text-[0.9375rem] font-bold text-sale">{deal.newPrice}</span>}
-              </div>
-            </Link>
-          ))}
+                {deal.imageUrl ? (
+                  <img src={deal.imageUrl} alt={deal.title} className="w-16 h-16 object-contain rounded-lg shrink-0" />
+                ) : (
+                  <div className="w-16 h-16 bg-surface-2 rounded-lg shrink-0" />
+                )}
+                <div className="flex flex-col min-w-0">
+                  <h4 className="text-[0.8125rem] font-semibold m-0 mb-1.5 leading-[1.3]">{deal.title}</h4>
+                  <div className="flex items-center gap-2">
+                    {deal.oldPrice && <span className="text-xs text-ink-subtle line-through">{deal.oldPrice}</span>}
+                    {deal.newPrice && <span className="text-[0.9375rem] font-bold text-sale">{deal.newPrice}</span>}
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

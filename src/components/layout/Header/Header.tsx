@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Link } from "@/i18n/routing";
@@ -62,8 +62,8 @@ function getIconForCategory(name: string) {
 
 const iconButtonCls =
   "relative flex items-center justify-center w-9 h-9 rounded-md bg-transparent border-0 cursor-pointer text-ink-muted transition-colors no-underline hover:bg-surface-1 hover:text-ink";
-const navLinkCls =
-  "text-[0.8125rem] font-medium text-ink-muted transition-colors px-2.5 py-1.5 rounded-md flex items-center gap-1 whitespace-nowrap bg-transparent border-0 cursor-pointer hover:text-ink hover:bg-surface-1";
+const navTabCls =
+  "text-[0.8125rem] font-medium text-ink-muted transition-colors py-2.5 border-b-2 border-transparent whitespace-nowrap no-underline bg-transparent cursor-pointer hover:text-ink hover:border-brand focus-visible:text-ink focus-visible:border-brand";
 const drawerNavLinkCls =
   "text-[0.9375rem] font-medium text-ink py-3 px-3 rounded-md flex items-center justify-between transition-colors no-underline hover:bg-surface-1";
 const drawerBtnCls =
@@ -79,9 +79,9 @@ export function Header() {
   const [megaOpen, setMegaOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [categories, setCategories] = useState<Category[]>(() => {
-    return readCached<Category[]>({ cacheKey: "header:categories", storage: "session" }) || [];
-  });
+  // Cache is read in an effect (not the useState initializer) so the first
+  // client render matches the server markup — category tabs are now SSR'd.
+  const [categories, setCategories] = useState<Category[]>([]);
   const megaRef = useRef<HTMLDivElement>(null);
   const megaTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -101,6 +101,8 @@ export function Header() {
   }, [mobileOpen]);
 
   useEffect(() => {
+    const cached = readCached<Category[]>({ cacheKey: "header:categories", storage: "session" });
+    if (cached) setCategories(cached);
     cachedFetchJSON<Category[]>("/api/categories", {
       cacheKey: "header:categories",
       storage: "session",
@@ -108,6 +110,11 @@ export function Header() {
       .then((data) => { if (Array.isArray(data)) setCategories(data); })
       .catch(() => {});
   }, []);
+
+  const topCategories = useMemo(
+    () => [...categories].sort((a, b) => subtreeCount(b) - subtreeCount(a)),
+    [categories]
+  );
 
   const openMega = useCallback(() => {
     clearTimeout(megaTimeout.current);
@@ -128,11 +135,20 @@ export function Header() {
   return (
     <>
       <header
-        className={`sticky top-0 z-50 h-[60px] border-b border-line bg-surface transition-shadow ${
+        className={`sticky top-0 z-50 border-b border-line bg-surface transition-shadow ${
           scrolled ? "shadow-[0_2px_8px_rgba(15,23,42,0.06)]" : ""
         }`}
       >
-        <div className="max-w-[1400px] mx-auto px-4 lg:px-6 h-full flex items-center gap-6">
+        {/* Tier 1: logo / catalog trigger / search / actions */}
+        <div className="max-w-[1400px] mx-auto px-4 lg:px-6 h-[64px] flex items-center gap-4">
+          <button
+            className={`${iconButtonCls} flex lg:hidden -ml-1`}
+            onClick={() => setMobileOpen(true)}
+            aria-label="Menu"
+          >
+            <Menu size={22} />
+          </button>
+
           <Link
             href="/"
             className="text-2xl font-extrabold tracking-[-0.04em] text-ink whitespace-nowrap flex items-center gap-[0.4rem] shrink-0 no-underline"
@@ -143,37 +159,107 @@ export function Header() {
             </span>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-0.5 shrink-0">
-            <Link href="/" className={navLinkCls}>
-              {t("home")}
-            </Link>
-
-            <div
-              className="relative"
-              ref={megaRef}
-              onMouseEnter={openMega}
-              onMouseLeave={closeMega}
+          <div
+            className="relative hidden lg:block shrink-0"
+            ref={megaRef}
+            onMouseEnter={openMega}
+            onMouseLeave={closeMega}
+          >
+            <button
+              className="flex items-center gap-2 h-[38px] px-4 rounded-md bg-brand text-white text-[0.8125rem] font-semibold border-0 cursor-pointer transition-colors hover:bg-brand-hover"
+              onClick={() => setMegaOpen(!megaOpen)}
+              aria-expanded={megaOpen}
+              aria-haspopup="true"
             >
-              <button className={navLinkCls} onClick={() => setMegaOpen(!megaOpen)}>
-                {t("catalog")}
-                <ChevronDown
-                  size={14}
-                  style={{
-                    transition: "transform 0.2s",
-                    transform: megaOpen ? "rotate(180deg)" : undefined,
-                  }}
-                />
-              </button>
-            </div>
+              <LayoutGrid size={16} />
+              {t("catalog")}
+              <ChevronDown
+                size={14}
+                style={{
+                  transition: "transform 0.2s",
+                  transform: megaOpen ? "rotate(180deg)" : undefined,
+                }}
+              />
+            </button>
 
-            <Link href="/contact" className={navLinkCls}>
-              {t("contact")}
-            </Link>
-          </nav>
+            <AnimatePresence>
+              {megaOpen && (
+                <motion.div
+                  className="absolute top-[calc(100%+8px)] left-0 z-[45] w-[560px] bg-surface border border-line rounded-lg shadow-[0_12px_40px_rgba(15,23,42,0.1)] overflow-hidden"
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.2 }}
+                  onMouseEnter={openMega}
+                  onMouseLeave={closeMega}
+                >
+                  <div className="p-3">
+                    {topCategories.length === 0 ? (
+                      <div className="grid grid-cols-2 gap-1">
+                        {Array.from({ length: 10 }).map((_, i) => (
+                          <div key={i} className="flex items-center gap-3 px-3 py-2.5 rounded-md">
+                            <div className="w-9 h-9 rounded-md bg-[linear-gradient(90deg,var(--color-bg-tertiary)_25%,var(--color-bg-secondary)_50%,var(--color-bg-tertiary)_75%)] bg-[length:200%_100%] animate-shimmer shrink-0" />
+                            <div className="flex flex-col gap-1.5 flex-1">
+                              <div
+                                className="h-2.5 rounded-[5px] bg-[linear-gradient(90deg,var(--color-bg-tertiary)_25%,var(--color-bg-secondary)_50%,var(--color-bg-tertiary)_75%)] bg-[length:200%_100%] animate-shimmer"
+                                style={{ width: `${55 + (i * 17) % 35}%` }}
+                              />
+                              <div className="h-2.5 rounded-[5px] bg-[linear-gradient(90deg,var(--color-bg-tertiary)_25%,var(--color-bg-secondary)_50%,var(--color-bg-tertiary)_75%)] bg-[length:200%_100%] animate-shimmer w-[40%]" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-1">
+                        {topCategories.slice(0, 10).map((cat) => {
+                          const Icon = getIconForCategory(cat.name);
+                          const count = subtreeCount(cat);
+                          return (
+                            <Link
+                              key={cat.id}
+                              href={`/catalog/${cat.slug}`}
+                              className="group flex items-center gap-3 px-3 py-2.5 rounded-md no-underline text-ink transition-colors hover:bg-surface-1"
+                              onClick={() => setMegaOpen(false)}
+                            >
+                              <div className="w-9 h-9 rounded-md bg-brand-soft flex items-center justify-center shrink-0 text-brand transition-colors group-hover:bg-brand group-hover:text-white">
+                                <Icon size={20} />
+                              </div>
+                              <div className="flex flex-col min-w-0">
+                                <span className="text-[0.8rem] font-semibold leading-[1.3] whitespace-nowrap overflow-hidden text-ellipsis">
+                                  {cat.name}
+                                </span>
+                                <span className="text-[0.675rem] text-ink-subtle">
+                                  {count} products
+                                </span>
+                              </div>
+                              <ChevronRight
+                                size={14}
+                                className="ml-auto shrink-0 text-line opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5"
+                              />
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                    <div className="mt-2 pt-2.5 border-t border-line flex items-center px-3 pb-1">
+                      <Link
+                        href="/catalog"
+                        className="text-[0.8125rem] font-semibold text-brand flex items-center gap-1 no-underline transition-all hover:gap-2"
+                        onClick={() => setMegaOpen(false)}
+                      >
+                        Browse all categories <ChevronRight size={14} />
+                      </Link>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
           <form
-            className="hidden md:flex flex-1 max-w-[500px] relative items-center h-[38px] border-2 border-brand rounded-lg overflow-hidden bg-surface"
+            className="hidden md:flex flex-1 relative items-center h-[38px] border-2 border-brand rounded-lg overflow-hidden bg-surface"
             onSubmit={handleSearch}
+            role="search"
           >
             <Search size={16} className="absolute left-2.5 text-ink-subtle pointer-events-none" />
             <input
@@ -244,103 +330,39 @@ export function Header() {
                 <User size={20} />
               </Link>
             )}
-
-            <button
-              className={`${iconButtonCls} flex lg:hidden`}
-              onClick={() => setMobileOpen(true)}
-              aria-label="Menu"
-            >
-              <Menu size={22} />
-            </button>
           </div>
         </div>
-      </header>
 
-      <AnimatePresence>
-        {megaOpen && (
-          <>
-            <motion.div
-              className="fixed inset-0 top-[60px] bg-black/45 z-40"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              onClick={() => setMegaOpen(false)}
-            />
-            <motion.div
-              className="fixed top-[60px] left-0 right-0 z-[45] max-h-[30vh] overflow-y-auto bg-surface border-b border-line shadow-[0_12px_40px_rgba(15,23,42,0.1)]"
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2 }}
-              onMouseEnter={openMega}
-              onMouseLeave={closeMega}
-            >
-              <div className="max-w-[1400px] mx-auto px-6 pt-5 pb-4">
-                {categories.length === 0 ? (
-                  <div className="grid grid-cols-5 max-[1200px]:grid-cols-3 gap-2">
-                    {Array.from({ length: 10 }).map((_, i) => (
-                      <div key={i} className="flex items-center gap-3 px-3 py-2.5 rounded-md">
-                        <div className="w-9 h-9 rounded-md bg-[linear-gradient(90deg,var(--color-bg-tertiary)_25%,var(--color-bg-secondary)_50%,var(--color-bg-tertiary)_75%)] bg-[length:200%_100%] animate-shimmer shrink-0" />
-                        <div className="flex flex-col gap-1.5 flex-1">
-                          <div
-                            className="h-2.5 rounded-[5px] bg-[linear-gradient(90deg,var(--color-bg-tertiary)_25%,var(--color-bg-secondary)_50%,var(--color-bg-tertiary)_75%)] bg-[length:200%_100%] animate-shimmer"
-                            style={{ width: `${55 + (i * 17) % 35}%` }}
-                          />
-                          <div className="h-2.5 rounded-[5px] bg-[linear-gradient(90deg,var(--color-bg-tertiary)_25%,var(--color-bg-secondary)_50%,var(--color-bg-tertiary)_75%)] bg-[length:200%_100%] animate-shimmer w-[40%]" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-5 max-[1200px]:grid-cols-3 gap-2">
-                    {[...categories]
-                      .sort((a, b) => subtreeCount(b) - subtreeCount(a))
-                      .slice(0, 10)
-                      .map((cat) => {
-                        const Icon = getIconForCategory(cat.name);
-                        const count = subtreeCount(cat);
-                        return (
-                          <Link
-                            key={cat.id}
-                            href={`/catalog/${cat.slug}`}
-                            className="group flex items-center gap-3 px-3 py-2.5 rounded-md no-underline text-ink transition-colors hover:bg-surface-1"
-                            onClick={() => setMegaOpen(false)}
-                          >
-                            <div className="w-9 h-9 rounded-md bg-brand-soft flex items-center justify-center shrink-0 text-brand transition-colors group-hover:bg-brand group-hover:text-white">
-                              <Icon size={20} />
-                            </div>
-                            <div className="flex flex-col min-w-0">
-                              <span className="text-[0.8rem] font-semibold leading-[1.3] whitespace-nowrap overflow-hidden text-ellipsis">
-                                {cat.name}
-                              </span>
-                              <span className="text-[0.675rem] text-ink-subtle">
-                                {count} products
-                              </span>
-                            </div>
-                            <ChevronRight
-                              size={14}
-                              className="ml-auto shrink-0 text-line opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5"
-                            />
-                          </Link>
-                        );
-                      })}
-                  </div>
-                )}
-                <div className="mt-3 pt-2.5 border-t border-line flex items-center">
-                  <Link
-                    href="/catalog"
-                    className="text-[0.8125rem] font-semibold text-brand flex items-center gap-1 no-underline transition-all hover:gap-2"
-                    onClick={() => setMegaOpen(false)}
-                  >
-                    Browse all categories <ChevronRight size={14} />
-                  </Link>
-                </div>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+        {/* Tier 2: category tabs row (desktop) */}
+        <nav
+          className="hidden lg:block border-t border-line"
+          aria-label="Primary"
+        >
+          <div className="max-w-[1400px] mx-auto px-6 flex items-center gap-6 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <Link href="/" className={navTabCls}>
+              {t("home")}
+            </Link>
+            {topCategories.slice(0, 6).map((cat) => (
+              <Link
+                key={cat.id}
+                href={`/catalog/${cat.slug}`}
+                className={navTabCls}
+              >
+                {cat.name}
+              </Link>
+            ))}
+            <Link href="/catalog?onSale=true" className={navTabCls}>
+              Deals
+            </Link>
+            <Link href="/catalog?sort=newest" className={navTabCls}>
+              New Arrivals
+            </Link>
+            <Link href="/contact" className={`${navTabCls} ml-auto`}>
+              {t("contact")}
+            </Link>
+          </div>
+        </nav>
+      </header>
 
       <AnimatePresence>
         {mobileOpen && (
@@ -353,10 +375,10 @@ export function Header() {
               onClick={() => setMobileOpen(false)}
             />
             <motion.div
-              className="fixed top-0 right-0 bottom-0 w-[min(85vw,380px)] bg-surface z-[100] flex flex-col shadow-[-4px_0_20px_rgba(15,23,42,0.08)]"
-              initial={{ x: "100%" }}
+              className="fixed top-0 left-0 bottom-0 w-[min(85vw,380px)] bg-surface z-[100] flex flex-col shadow-[4px_0_20px_rgba(15,23,42,0.08)]"
+              initial={{ x: "-100%" }}
               animate={{ x: 0 }}
-              exit={{ x: "100%" }}
+              exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
             >
               <div className="flex items-center justify-between px-5 py-4 border-b border-line">
@@ -383,6 +405,22 @@ export function Header() {
                   <Link href="/catalog?onSale=true" className={drawerNavLinkCls} onClick={() => setMobileOpen(false)}>
                     Deals <ChevronRight size={18} />
                   </Link>
+
+                  {topCategories.length > 0 && (
+                    <>
+                      <div className="h-px bg-line my-2" />
+                      {topCategories.slice(0, 8).map((cat) => (
+                        <Link
+                          key={cat.id}
+                          href={`/catalog/${cat.slug}`}
+                          className={drawerNavLinkCls}
+                          onClick={() => setMobileOpen(false)}
+                        >
+                          {cat.name} <ChevronRight size={18} />
+                        </Link>
+                      ))}
+                    </>
+                  )}
 
                   <div className="h-px bg-line my-2" />
 
