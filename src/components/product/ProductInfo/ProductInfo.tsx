@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
-import { Heart, ShoppingCart, Shield, Truck, RotateCcw, Lock } from "lucide-react";
+import { Heart, Basket, Shield, Truck, ArrowCounterClockwise, Lock } from "@phosphor-icons/react";
 import { PriceDisplay } from "@/components/shared/PriceDisplay/PriceDisplay";
 import { QuantitySelector } from "@/components/shared/QuantitySelector/QuantitySelector";
 import { useCart } from "@/providers/CartProvider";
@@ -207,7 +207,7 @@ export function ProductInfo({
           size="lg"
           onPress={handleAddToCart}
           isDisabled={outOfStock}
-          startContent={<ShoppingCart size={18} />}
+          startContent={<Basket size={18} />}
           style={{ flex: 1 }}
         >
           {selectedWarranty > 0 ? t("addToCartWithWarranty") : t("addToCart")}
@@ -262,7 +262,7 @@ export function ProductInfo({
           <span className="text-[0.625rem] text-ink-subtle">{t("freeShippingDesc")}</span>
         </div>
         <div className="flex flex-col items-center gap-1 text-center px-2 py-3 max-[380px]:px-1.5 max-[380px]:py-2.5 rounded-lg bg-surface-1">
-          <RotateCcw size={18} className="text-brand" />
+          <ArrowCounterClockwise size={18} className="text-brand" />
           <span className="text-[0.6875rem] font-bold text-ink">{t("easyReturns")}</span>
           <span className="text-[0.625rem] text-ink-subtle">{t("easyReturnsDesc")}</span>
         </div>

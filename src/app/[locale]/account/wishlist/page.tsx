@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Heart } from "lucide-react";
+import { Heart } from "@phosphor-icons/react";
 import { ProductGrid } from "@/components/product/ProductGrid/ProductGrid";
 import { EmptyState } from "@/components/shared/EmptyState/EmptyState";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner/LoadingSpinner";

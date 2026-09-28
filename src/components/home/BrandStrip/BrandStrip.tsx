@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { CaretLeft, CaretRight } from "@phosphor-icons/react";
 
 interface BrandData {
   id: string;
@@ -32,10 +32,10 @@ export function BrandStrip({ brands }: Props) {
         <h3 className="text-[0.9375rem] font-bold m-0 text-ink">Popular Brands</h3>
         <div className="flex gap-1">
           <button className={arrowCls} onClick={() => scroll(-1)} aria-label="Scroll left">
-            <ChevronLeft size={16} />
+            <CaretLeft size={16} />
           </button>
           <button className={arrowCls} onClick={() => scroll(1)} aria-label="Scroll right">
-            <ChevronRight size={16} />
+            <CaretRight size={16} />
           </button>
         </div>
       </div>

@@ -2,6 +2,9 @@
 @import "./variables.css";
 @import "./animations.css";
 
+/* Theme is driven by [data-theme] (toggle in header), not the OS preference. */
+@custom-variant dark ([data-theme="dark"] &);
+
 /*
  * Tailwind v4 design tokens.
  * These map the CSS custom properties (variables.css) into Tailwind's utility
@@ -43,8 +46,9 @@
   --color-promo-green: var(--promo-bg-green);
 
   /* Fonts */
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-karla), "Karla", system-ui, sans-serif;
+  --font-display: var(--font-bricolage), "Bricolage Grotesque", Georgia, serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
 
   /* Radii */
   --radius-sm: var(--radius-sm);
@@ -59,8 +63,9 @@
   --shadow-card-hover: var(--shadow-card-hover);
   --shadow-accent: var(--shadow-accent);
 
-  /* Layout */
+  /* Layout — `max-w-container` is the sitewide page width, matching the header */
   --container-narrow: 1120px;
+  --container-container: 1400px;
   --container-shop: 1320px;
   --container-wide: 1440px;
 
@@ -85,6 +90,13 @@ body {
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings speak in the display face — Bricolage Grotesque — with looser
+   tracking than body text. This is a brand-wide rule, not per-component. */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
 }
 
 a {
@@ -142,16 +154,17 @@ img {
 }
 
 .section-title {
-  font-size: 1.75rem;
-  font-weight: 800;
-  letter-spacing: -0.03em;
+  font-family: var(--font-display);
+  font-size: 1.625rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--color-text);
-  line-height: 1.15;
+  line-height: 1.2;
 }
 
 @media (min-width: 768px) {
   .section-title {
-    font-size: 2.25rem;
+    font-size: 2rem;
   }
 }
 
@@ -178,7 +191,7 @@ img {
 }
 
 [data-theme="dark"] .glass {
-  background: rgba(11, 15, 25, 0.75);
+  background: rgba(22, 27, 24, 0.75);
 }
 
 .glass-border {

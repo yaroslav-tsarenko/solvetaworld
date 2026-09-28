@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
-  Package, ShoppingCart, Users, DollarSign, AlertTriangle,
-  TrendingUp, TrendingDown, ArrowUpRight, Activity,
-} from "lucide-react";
+  Package, Basket, UsersThree, CurrencyDollar, Warning,
+  TrendUp, TrendDown, ArrowUpRight, Pulse,
+} from "@phosphor-icons/react";
 import { formatPrice } from "@/lib/utils/format-price";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner/LoadingSpinner";
 import dynamic from "next/dynamic";
@@ -149,10 +149,10 @@ export default function AdminDashboard() {
   const monthOrdChange = pct(data.thisMonthOrders, data.lastMonthOrders);
 
   const kpis = [
-    { label: "Today's Revenue", value: formatPrice(data.todayRevenue), icon: <DollarSign size={18} />, bg: "rgba(0,200,83,0.12)", fg: "#00C853", change: revChange, sub: `vs ${formatPrice(data.yesterdayRevenue)} yesterday` },
-    { label: "Today's Orders", value: String(data.todayOrders), icon: <ShoppingCart size={18} />, bg: "rgba(10,132,255,0.12)", fg: "#0A84FF", change: pct(data.todayOrders, data.yesterdayOrders), sub: `vs ${data.yesterdayOrders} yesterday` },
-    { label: "Total Products", value: String(data.totalProducts), icon: <Package size={18} />, bg: "rgba(139,92,246,0.12)", fg: "#8b5cf6", sub: `${data.stockDistribution.lowStock} low stock` },
-    { label: "Total Customers", value: String(data.totalCustomers), icon: <Users size={18} />, bg: "rgba(0,212,224,0.12)", fg: "#F59E0B", sub: `${data.totalOrders} total orders` },
+    { label: "Today's Revenue", value: formatPrice(data.todayRevenue), icon: <CurrencyDollar size={18} />, bg: "rgba(63,122,84,0.12)", fg: "#3F7A54", change: revChange, sub: `vs ${formatPrice(data.yesterdayRevenue)} yesterday` },
+    { label: "Today's Orders", value: String(data.todayOrders), icon: <Basket size={18} />, bg: "rgba(46,94,78,0.12)", fg: "#2E5E4E", change: pct(data.todayOrders, data.yesterdayOrders), sub: `vs ${data.yesterdayOrders} yesterday` },
+    { label: "Total Products", value: String(data.totalProducts), icon: <Package size={18} />, bg: "rgba(165,86,31,0.12)", fg: "#A5561F", sub: `${data.stockDistribution.lowStock} low stock` },
+    { label: "Total Customers", value: String(data.totalCustomers), icon: <UsersThree size={18} />, bg: "rgba(154,107,21,0.12)", fg: "#9A6B15", sub: `${data.totalOrders} total orders` },
   ];
 
   const topMax = data.topProducts.length > 0 ? Number(data.topProducts[0]._sum.total) : 1;
@@ -170,7 +170,7 @@ export default function AdminDashboard() {
           <p className="admin-page-subtitle">Overview of your store performance</p>
         </div>
         <span className="admin-badge admin-badge-success">
-          <Activity size={12} /> Live
+          <Pulse size={12} /> Live
         </span>
       </div>
 
@@ -191,7 +191,7 @@ export default function AdminDashboard() {
               </div>
               {kpi.change && (
                 <span className={`kpi-card-change ${kpi.change.up ? "kpi-card-change-up" : "kpi-card-change-down"}`}>
-                  {kpi.change.up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                  {kpi.change.up ? <TrendUp size={12} /> : <TrendDown size={12} />}
                   {kpi.change.value}
                 </span>
               )}
@@ -453,7 +453,7 @@ export default function AdminDashboard() {
           <div className="admin-card-body">
             <div className="admin-card-header">
               <span className="admin-card-title" style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
-                <AlertTriangle size={14} style={{ color: "var(--admin-warning)" }} />
+                <Warning size={14} style={{ color: "var(--admin-warning)" }} />
                 Low Stock Alert
               </span>
               <span className="admin-badge admin-badge-warning">{data.lowStockProducts.length}</span>

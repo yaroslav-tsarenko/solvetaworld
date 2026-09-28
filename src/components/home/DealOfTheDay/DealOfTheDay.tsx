@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight } from "@phosphor-icons/react";
 import { motion, useInView } from "framer-motion";
 import { formatPrice } from "@/lib/utils/format-price";
 import { getProductImage, getProductImageFallback } from "@/lib/utils/product-image";
@@ -44,7 +44,7 @@ export function DealOfTheDay({ product }: Props) {
   return (
     <motion.section
       ref={ref}
-      className="mb-6 rounded-lg overflow-hidden bg-[linear-gradient(135deg,#12171A_0%,#12171A_50%,#12171A_100%)] text-white flex flex-col md:flex-row items-stretch border border-white/5 relative before:content-[''] before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_80%_30%,rgba(79,112,255,0.25)_0%,transparent_60%),radial-gradient(circle_at_20%_80%,rgba(244,63,94,0.12)_0%,transparent_50%)] before:pointer-events-none"
+      className="mb-6 rounded-lg overflow-hidden bg-[linear-gradient(135deg,#1E2420_0%,#20302A_50%,#234A3D_100%)] text-white flex flex-col md:flex-row items-stretch border border-white/5 relative before:content-[''] before:absolute before:inset-0 before:bg-[radial-gradient(circle_at_80%_30%,rgba(111,162,141,0.22)_0%,transparent_60%),radial-gradient(circle_at_20%_80%,rgba(165,86,31,0.14)_0%,transparent_50%)] before:pointer-events-none"
       initial={{ opacity: 0, scale: 0.97 }}
       animate={isInView ? { opacity: 1, scale: 1 } : {}}
       transition={{ duration: 0.5 }}
@@ -76,14 +76,14 @@ export function DealOfTheDay({ product }: Props) {
           Limited time offer — grab it before the deal expires!
         </p>
         <div className="flex items-baseline gap-3 mb-5">
-          <span className="text-[1.75rem] max-md:text-[1.375rem] font-extrabold text-[#4FDCA3]">
+          <span className="text-[1.75rem] max-md:text-[1.375rem] font-extrabold text-[#8FB3A3]">
             {formatPrice(Number(product.price))}
           </span>
           {product.comparePrice && (
             <span className="text-base line-through opacity-50">{formatPrice(Number(product.comparePrice))}</span>
           )}
           {discount > 0 && (
-            <span className="bg-sale/20 text-[#fb7185] text-xs font-bold px-2 py-0.5 rounded">-{discount}%</span>
+            <span className="bg-sale/20 text-[#D08A55] text-xs font-bold px-2 py-0.5 rounded">-{discount}%</span>
           )}
         </div>
         <Link

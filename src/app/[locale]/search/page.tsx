@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import { Search } from "lucide-react";
+import { MagnifyingGlass } from "@phosphor-icons/react";
 import { ProductGrid } from "@/components/product/ProductGrid/ProductGrid";
 import { EmptyState } from "@/components/shared/EmptyState/EmptyState";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner/LoadingSpinner";
@@ -48,7 +48,7 @@ export default function SearchPage() {
         </h1>
         <div style={{ maxWidth: "32rem", margin: "0 auto", position: "relative" }}>
           <div style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: "var(--color-text-tertiary)" }}>
-            <Search size={20} />
+            <MagnifyingGlass size={20} />
           </div>
           <input
             placeholder={nav("search")}

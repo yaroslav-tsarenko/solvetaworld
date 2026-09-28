@@ -1,19 +1,19 @@
 /* Admin Panel — Premium Dashboard Theme (Light / Dark) */
 
 [data-admin-theme] {
-  --admin-accent: #0E8A5A;
-  --admin-accent-light: #2FB57F;
-  --admin-accent-dark: #0B7048;
-  --admin-accent-bg: rgba(27, 77, 255, 0.10);
-  --admin-accent-bg-hover: rgba(27, 77, 255, 0.18);
+  --admin-accent: #2E5E4E;
+  --admin-accent-light: #3E7A66;
+  --admin-accent-dark: #234A3D;
+  --admin-accent-bg: rgba(46, 94, 78, 0.10);
+  --admin-accent-bg-hover: rgba(46, 94, 78, 0.18);
   --admin-radius: 14px;
   --admin-radius-lg: 22px;
   --admin-radius-xl: 26px;
   --admin-sidebar-width: 260px;
   --admin-topbar-height: 72px;
-  --admin-success: #2FB57F;
-  --admin-warning: #3ED598;
-  --admin-danger: #ef4444;
+  --admin-success: #3F7A54;
+  --admin-warning: #9A6B15;
+  --admin-danger: #A8402F;
 }
 
 /* ─── Dark Theme (default) ─── */
@@ -47,13 +47,13 @@
   --color-text-tertiary: #71717a;
   --color-border: rgba(255, 255, 255, 0.08);
   --color-border-hover: rgba(255, 255, 255, 0.14);
-  --color-accent: #2FB57F;
-  --color-success: #2FB57F;
-  --color-warning: #3ED598;
-  --color-danger: #ef4444;
-  --color-accent-light: rgba(79, 112, 255, 0.16);
-  --gradient-primary: #2FB57F;
-  --shadow-accent: 0 8px 30px rgba(79, 112, 255, 0.3);
+  --color-accent: #6FA28D;
+  --color-success: #6FA28D;
+  --color-warning: #D08A55;
+  --color-danger: #E07A65;
+  --color-accent-light: rgba(111, 162, 141, 0.16);
+  --gradient-primary: #6FA28D;
+  --shadow-accent: 0 8px 30px rgba(46, 94, 78, 0.3);
 }
 
 /* ─── Light Theme ─── */
@@ -87,13 +87,13 @@
   --color-text-tertiary: #a1a1aa;
   --color-border: rgba(0, 0, 0, 0.08);
   --color-border-hover: rgba(0, 0, 0, 0.15);
-  --color-accent: #0E8A5A;
-  --color-success: #2FB57F;
-  --color-warning: #3ED598;
-  --color-danger: #ef4444;
-  --color-accent-light: rgba(27, 77, 255, 0.08);
-  --gradient-primary: #0E8A5A;
-  --shadow-accent: 0 8px 30px rgba(27, 77, 255, 0.22);
+  --color-accent: #2E5E4E;
+  --color-success: #3F7A54;
+  --color-warning: #9A6B15;
+  --color-danger: #A8402F;
+  --color-accent-light: rgba(46, 94, 78, 0.08);
+  --gradient-primary: #2E5E4E;
+  --shadow-accent: 0 8px 30px rgba(46, 94, 78, 0.22);
 }
 
 /* ─── Admin Layout ─── */
@@ -326,7 +326,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(27, 77, 255, 0.2), rgba(27, 77, 255, 0.1));
+  background: linear-gradient(135deg, rgba(46, 94, 78, 0.2), rgba(46, 94, 78, 0.1));
   color: var(--admin-accent);
   display: flex;
   align-items: center;
@@ -334,7 +334,7 @@
   font-size: 0.6875rem;
   font-weight: 700;
   flex-shrink: 0;
-  border: 1px solid rgba(27, 77, 255, 0.2);
+  border: 1px solid rgba(46, 94, 78, 0.2);
 }
 
 .admin-sidebar-footer-info {
@@ -441,12 +441,12 @@
 
 .kpi-card-change-up {
   color: var(--admin-success);
-  background: rgba(79, 112, 255, 0.1);
+  background: rgba(63, 122, 84, 0.12);
 }
 
 .kpi-card-change-down {
   color: var(--admin-danger);
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(168, 64, 47, 0.12);
 }
 
 .kpi-card-value {
@@ -520,22 +520,22 @@
 }
 
 .admin-badge-success {
-  background: rgba(79, 112, 255, 0.12);
+  background: rgba(63, 122, 84, 0.12);
   color: var(--admin-success);
 }
 
 .admin-badge-warning {
-  background: rgba(0, 212, 224, 0.12);
+  background: rgba(154, 107, 21, 0.12);
   color: var(--admin-warning);
 }
 
 .admin-badge-danger {
-  background: rgba(239, 68, 68, 0.12);
+  background: rgba(168, 64, 47, 0.12);
   color: var(--admin-danger);
 }
 
 .admin-badge-accent {
-  background: rgba(27, 77, 255, 0.12);
+  background: rgba(46, 94, 78, 0.12);
   color: var(--admin-accent);
 }
 
@@ -624,9 +624,9 @@
   font-weight: 700;
 }
 
-.rank-1 { background: rgba(16, 212, 218, 0.2); color: #4FDCA3; }
+.rank-1 { background: rgba(46, 94, 78, 0.18); color: #3F7A54; }
 .rank-2 { background: rgba(156, 163, 175, 0.2); color: #9ca3af; }
-.rank-3 { background: rgba(205, 127, 50, 0.2); color: #cd7f32; }
+.rank-3 { background: rgba(165, 86, 31, 0.18); color: #A5561F; }
 .rank-default { background: var(--admin-row-hover); color: var(--admin-text-muted); }
 
 /* ─── Chart Grids ─── */
@@ -736,8 +736,8 @@
 }
 
 .admin-input:focus {
-  border-color: rgba(27, 77, 255, 0.5);
-  box-shadow: 0 0 0 3px rgba(27, 77, 255, 0.12);
+  border-color: rgba(46, 94, 78, 0.5);
+  box-shadow: 0 0 0 3px rgba(46, 94, 78, 0.14);
 }
 
 .admin-input::placeholder {
@@ -760,8 +760,8 @@
 }
 
 .admin-textarea:focus {
-  border-color: rgba(27, 77, 255, 0.5);
-  box-shadow: 0 0 0 3px rgba(27, 77, 255, 0.12);
+  border-color: rgba(46, 94, 78, 0.5);
+  box-shadow: 0 0 0 3px rgba(46, 94, 78, 0.14);
 }
 
 .admin-select {
@@ -781,8 +781,8 @@
 }
 
 .admin-select:focus {
-  border-color: rgba(27, 77, 255, 0.5);
-  box-shadow: 0 0 0 3px rgba(27, 77, 255, 0.12);
+  border-color: rgba(46, 94, 78, 0.5);
+  box-shadow: 0 0 0 3px rgba(46, 94, 78, 0.14);
 }
 
 .admin-label {
@@ -859,12 +859,12 @@
 }
 
 .admin-btn-danger {
-  background: rgba(239, 68, 68, 0.12);
+  background: rgba(168, 64, 47, 0.12);
   color: var(--admin-danger);
 }
 
 .admin-btn-danger:hover {
-  background: rgba(239, 68, 68, 0.2);
+  background: rgba(168, 64, 47, 0.2);
 }
 
 .admin-btn-ghost {

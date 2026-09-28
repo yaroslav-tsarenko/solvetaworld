@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight } from "@phosphor-icons/react";
 import { ProductGrid } from "@/components/product/ProductGrid/ProductGrid";
 import { AnimatedSection } from "@/components/shared/AnimatedSection/AnimatedSection";
 

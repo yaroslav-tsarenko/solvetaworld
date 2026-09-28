@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Search } from "lucide-react";
+import { MagnifyingGlass } from "@phosphor-icons/react";
 import { format } from "date-fns";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner/LoadingSpinner";
 
@@ -33,7 +33,7 @@ export default function AdminCustomersPage() {
       <h1 className="admin-page-title" style={{ marginBottom: "1.5rem" }}>Customers</h1>
 
       <div style={{ position: "relative", maxWidth: "20rem", marginBottom: "1.25rem" }}>
-        <Search size={16} style={{ position: "absolute", left: "0.875rem", top: "50%", transform: "translateY(-50%)", color: "var(--admin-text-muted)" }} />
+        <MagnifyingGlass size={16} style={{ position: "absolute", left: "0.875rem", top: "50%", transform: "translateY(-50%)", color: "var(--admin-text-muted)" }} />
         <input
           className="admin-input"
           placeholder="Search customers..."

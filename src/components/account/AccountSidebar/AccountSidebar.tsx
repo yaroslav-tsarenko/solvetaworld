@@ -4,12 +4,12 @@ import { usePathname } from "next/navigation";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/providers/AuthProvider";
-import { LayoutDashboard, Package, User, MapPin, Heart, LogOut } from "lucide-react";
+import { SquaresFour, Package, UserCircle, MapPin, Heart, SignOut } from "@phosphor-icons/react";
 
 const navItems = [
-  { href: "/account", icon: <LayoutDashboard size={18} />, labelKey: "title" as const },
+  { href: "/account", icon: <SquaresFour size={18} />, labelKey: "title" as const },
   { href: "/account/orders", icon: <Package size={18} />, labelKey: "orders" as const },
-  { href: "/account/profile", icon: <User size={18} />, labelKey: "profile" as const },
+  { href: "/account/profile", icon: <UserCircle size={18} />, labelKey: "profile" as const },
   { href: "/account/addresses", icon: <MapPin size={18} />, labelKey: "addresses" as const },
   { href: "/account/wishlist", icon: <Heart size={18} />, labelKey: "wishlist" as const },
 ];
@@ -59,7 +59,7 @@ export function AccountSidebar() {
           className={`${linkBase} text-danger bg-transparent border-0 cursor-pointer w-full text-left mt-2 max-md:mt-0 hover:bg-surface-2`}
           onClick={signOut}
         >
-          <LogOut size={18} />
+          <SignOut size={18} />
           {t("logout")}
         </button>
       </nav>

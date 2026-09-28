@@ -49,13 +49,13 @@ export function Button({
   const resolvedVariant = resolveVariant(variant, color);
 
   const variantStyles: Record<string, React.CSSProperties> = {
-    primary: { background: "var(--color-accent)", color: "#fff", border: "none" },
+    primary: { background: "var(--color-accent)", color: "#fff", border: "1px solid var(--color-accent)" },
     secondary: { background: "var(--color-bg-secondary)", color: "var(--color-text)", border: "1px solid var(--color-border)" },
-    tertiary: { background: "transparent", color: "var(--color-text-secondary)", border: "none" },
+    tertiary: { background: "transparent", color: "var(--color-text-secondary)", border: "1px solid transparent" },
     outline: { background: "transparent", color: "var(--color-text)", border: "1px solid var(--color-border)" },
-    ghost: { background: "transparent", color: "var(--color-text)", border: "none" },
-    danger: { background: "var(--color-danger)", color: "#fff", border: "none" },
-    "danger-soft": { background: "var(--color-danger-bg, rgba(239,68,68,0.1))", color: "var(--color-danger)", border: "none" },
+    ghost: { background: "transparent", color: "var(--color-text)", border: "1px solid transparent" },
+    danger: { background: "var(--color-danger)", color: "#fff", border: "1px solid var(--color-danger)" },
+    "danger-soft": { background: "var(--color-danger-bg, rgba(168,64,47,0.12))", color: "var(--color-danger)", border: "1px solid transparent" },
   };
 
   const baseStyle: React.CSSProperties = {
@@ -63,8 +63,9 @@ export function Button({
     alignItems: "center",
     justifyContent: "center",
     gap: "0.5rem",
-    borderRadius: "var(--radius-lg)",
+    borderRadius: "var(--radius-md)",
     fontWeight: 600,
+    letterSpacing: "0.01em",
     cursor: isDisabled || isLoading ? "not-allowed" : "pointer",
     opacity: isDisabled || isLoading ? 0.6 : 1,
     transition: "all 0.2s ease",

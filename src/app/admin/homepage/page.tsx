@@ -3,9 +3,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import {
-  Plus, Trash2, Save, ChevronDown, ChevronUp, Eye, EyeOff,
-  LayoutDashboard, Image, Tag, Layers, Grid3X3, Type, Link2, Megaphone, Award
-} from "lucide-react";
+  Plus, Trash, FloppyDisk, CaretDown, CaretUp, Eye, EyeSlash,
+  SquaresFour, Image, Tag, Stack, GridNine, TextT, LinkSimple, Megaphone, Medal
+} from "@phosphor-icons/react";
 
 type Tab = "banners" | "brands" | "sections" | "tabs" | "utility" | "promo-strip";
 
@@ -85,10 +85,10 @@ interface PromoStripItemData {
 
 const TABS: { key: Tab; label: string; icon: React.ElementType }[] = [
   { key: "banners", label: "Banners & Slides", icon: Image },
-  { key: "brands", label: "Brands", icon: Award },
-  { key: "sections", label: "Product Sections", icon: Grid3X3 },
-  { key: "tabs", label: "Navigation Tabs", icon: Layers },
-  { key: "utility", label: "Utility Links", icon: Link2 },
+  { key: "brands", label: "Brands", icon: Medal },
+  { key: "sections", label: "Product Sections", icon: GridNine },
+  { key: "tabs", label: "Navigation Tabs", icon: Stack },
+  { key: "utility", label: "Utility Links", icon: LinkSimple },
   { key: "promo-strip", label: "Promo Strip", icon: Megaphone },
 ];
 
@@ -252,7 +252,7 @@ export default function HomepageAdminPage() {
 
   const openCreate = (tab: Tab) => {
     const defaults: Record<Tab, Record<string, unknown>> = {
-      banners: { type: "HERO", title: "", bgColor: "#1A1A2E", textColor: "#ffffff", isActive: true, sortOrder: 0 },
+      banners: { type: "HERO", title: "", bgColor: "#1E2420", textColor: "#ffffff", isActive: true, sortOrder: 0 },
       brands: { name: "", isActive: true, sortOrder: 0 },
       sections: { title: "", slug: "", filterType: "featured", maxProducts: 5, viewAllLabel: "View all", bgStyle: "white", columns: 5, isActive: true, sortOrder: 0 },
       tabs: { label: "", linkUrl: "", color: "#333333", isActive: true, sortOrder: 0 },
@@ -273,7 +273,7 @@ export default function HomepageAdminPage() {
           onClick={handleSeed}
           disabled={seeding}
           style={{
-            padding: "0.5rem 1rem", background: "#1A1A2E", color: "#fff",
+            padding: "0.5rem 1rem", background: "#1E2420", color: "#fff",
             border: "none", borderRadius: "6px", fontSize: "0.8125rem",
             fontWeight: 600, cursor: "pointer", opacity: seeding ? 0.6 : 1,
           }}
@@ -290,9 +290,9 @@ export default function HomepageAdminPage() {
             style={{
               display: "flex", alignItems: "center", gap: "0.375rem",
               padding: "0.5rem 1rem", borderRadius: "6px",
-              border: activeTab === t.key ? "2px solid #0E8A5A" : "1px solid #e0e0e0",
-              background: activeTab === t.key ? "#FFF5F5" : "#fff",
-              color: activeTab === t.key ? "#0E8A5A" : "#555",
+              border: activeTab === t.key ? "2px solid #2E5E4E" : "1px solid #e0e0e0",
+              background: activeTab === t.key ? "#E4EEE9" : "#fff",
+              color: activeTab === t.key ? "#2E5E4E" : "#555",
               fontSize: "0.8125rem", fontWeight: 600, cursor: "pointer",
             }}
           >
@@ -310,7 +310,7 @@ export default function HomepageAdminPage() {
           onClick={() => openCreate(activeTab)}
           style={{
             display: "flex", alignItems: "center", gap: "0.25rem",
-            padding: "0.4rem 0.75rem", background: "#0E8A5A", color: "#fff",
+            padding: "0.4rem 0.75rem", background: "#2E5E4E", color: "#fff",
             border: "none", borderRadius: "6px", fontSize: "0.8125rem",
             fontWeight: 600, cursor: "pointer",
           }}
@@ -367,14 +367,14 @@ function ItemRow({ title, subtitle, active, onEdit, onDelete, onToggle, badges }
         </div>
         {subtitle && <p style={{ fontSize: "0.75rem", color: "#888", margin: "0.125rem 0 0" }}>{subtitle}</p>}
       </div>
-      <button onClick={onToggle} style={{ background: "none", border: "none", cursor: "pointer", color: active ? "#4CAF50" : "#999", padding: "4px" }}>
-        {active ? <Eye size={16} /> : <EyeOff size={16} />}
+      <button onClick={onToggle} style={{ background: "none", border: "none", cursor: "pointer", color: active ? "#3F7A54" : "#999", padding: "4px" }}>
+        {active ? <Eye size={16} /> : <EyeSlash size={16} />}
       </button>
       <button onClick={onEdit} style={{ background: "none", border: "none", cursor: "pointer", color: "#555", padding: "4px" }}>
-        <Save size={16} />
+        <FloppyDisk size={16} />
       </button>
-      <button onClick={onDelete} style={{ background: "none", border: "none", cursor: "pointer", color: "#0E8A5A", padding: "4px" }}>
-        <Trash2 size={16} />
+      <button onClick={onDelete} style={{ background: "none", border: "none", cursor: "pointer", color: "#2E5E4E", padding: "4px" }}>
+        <Trash size={16} />
       </button>
     </div>
   );
@@ -385,7 +385,7 @@ function renderBannersList(items: BannerItem[], onEdit: (i: BannerItem) => void,
   return items.map((i) => (
     <ItemRow key={i.id} title={i.title} subtitle={i.subtitle || i.linkUrl || ""} active={i.isActive}
       onEdit={() => onEdit(i)} onDelete={() => onDelete(i.id)} onToggle={() => onToggle(i.id, i.isActive)}
-      badges={[{ label: BANNER_TYPES.find((t) => t.value === i.type)?.label || i.type, color: i.type === "HERO" ? "#2196F3" : i.type === "DEAL_CARD" ? "#FF9800" : "#4CAF50" }]}
+      badges={[{ label: BANNER_TYPES.find((t) => t.value === i.type)?.label || i.type, color: i.type === "HERO" ? "#4A6B7C" : i.type === "DEAL_CARD" ? "#9A6B15" : "#3F7A54" }]}
     />
   ));
 }
@@ -403,7 +403,7 @@ function renderSectionsList(items: SectionItem[], onEdit: (i: SectionItem) => vo
   return items.map((i) => (
     <ItemRow key={i.id} title={i.title} subtitle={`Filter: ${i.filterType} | Max: ${i.maxProducts} | Columns: ${i.columns}`} active={i.isActive}
       onEdit={() => onEdit(i)} onDelete={() => onDelete(i.id)} onToggle={() => onToggle(i.id, i.isActive)}
-      badges={[{ label: i.filterType, color: "#6C5CE7" }]}
+      badges={[{ label: i.filterType, color: "#A5561F" }]}
     />
   ));
 }
@@ -421,7 +421,7 @@ function renderUtilityList(items: UtilityLinkItem[], onEdit: (i: UtilityLinkItem
   return items.map((i) => (
     <ItemRow key={i.id} title={i.label} subtitle={`${i.position} | ${i.linkUrl}`} active={i.isActive}
       onEdit={() => onEdit(i)} onDelete={() => onDelete(i.id)} onToggle={() => onToggle(i.id, i.isActive)}
-      badges={[{ label: i.position, color: i.position === "left" ? "#2196F3" : "#FF9800" }]}
+      badges={[{ label: i.position, color: i.position === "left" ? "#4A6B7C" : "#9A6B15" }]}
     />
   ));
 }
@@ -431,7 +431,7 @@ function renderPromoStripList(items: PromoStripItemData[], onEdit: (i: PromoStri
   return items.map((i) => (
     <ItemRow key={i.id} title={i.title} subtitle={i.subtitle || ""} active={i.isActive}
       onEdit={() => onEdit(i)} onDelete={() => onDelete(i.id)} onToggle={() => onToggle(i.id, i.isActive)}
-      badges={[{ label: i.icon, color: "#0E8A5A" }]}
+      badges={[{ label: i.icon, color: "#2E5E4E" }]}
     />
   ));
 }
@@ -439,7 +439,7 @@ function renderPromoStripList(items: PromoStripItemData[], onEdit: (i: PromoStri
 function EmptyState() {
   return (
     <div style={{ textAlign: "center", padding: "3rem", color: "#999", background: "#fafafa", borderRadius: "8px", border: "1px dashed #e0e0e0" }}>
-      <LayoutDashboard size={32} style={{ marginBottom: "0.5rem", opacity: 0.4 }} />
+      <SquaresFour size={32} style={{ marginBottom: "0.5rem", opacity: 0.4 }} />
       <p style={{ margin: 0, fontWeight: 500 }}>No items yet</p>
       <p style={{ margin: "0.25rem 0 0", fontSize: "0.8125rem" }}>Click &ldquo;Add New&rdquo; to create one, or &ldquo;Seed Default Data&rdquo; to populate all sections.</p>
     </div>
@@ -581,7 +581,7 @@ function EditModal({ type, item, onClose, onSave }: {
           <button onClick={onClose} style={{ padding: "0.5rem 1rem", background: "#f5f5f5", border: "1px solid #e0e0e0", borderRadius: "6px", cursor: "pointer", fontSize: "0.8125rem" }}>
             Cancel
           </button>
-          <button onClick={() => onSave(form)} style={{ padding: "0.5rem 1rem", background: "#0E8A5A", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "0.8125rem", fontWeight: 600 }}>
+          <button onClick={() => onSave(form)} style={{ padding: "0.5rem 1rem", background: "#2E5E4E", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer", fontSize: "0.8125rem", fontWeight: 600 }}>
             {form.id ? "Save Changes" : "Create"}
           </button>
         </div>

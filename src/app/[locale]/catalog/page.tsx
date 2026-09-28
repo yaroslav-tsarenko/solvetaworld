@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { useSearchParams, useRouter } from "next/navigation";
-import { SlidersHorizontal, X } from "lucide-react";
+import { Sliders, X } from "@phosphor-icons/react";
 import { ProductGrid } from "@/components/product/ProductGrid/ProductGrid";
 import { ProductFilters } from "@/components/product/ProductFilters/ProductFilters";
 import { ProductSort } from "@/components/product/ProductSort/ProductSort";
@@ -140,7 +140,7 @@ export default function CatalogPage() {
             className="hidden max-lg:inline-flex items-center gap-1.5 px-4 py-2 rounded-pill border border-line bg-surface cursor-pointer text-[0.8125rem] font-semibold text-ink-muted hover:border-brand hover:text-brand"
             type="button"
           >
-            <SlidersHorizontal size={16} />
+            <Sliders size={16} />
             Filters
             {activeFilterCount > 0 && (
               <span className="bg-brand text-white rounded-pill px-1.5 py-px text-[0.6875rem] font-bold">{activeFilterCount}</span>

@@ -3,13 +3,13 @@
 import { useState } from "react";
 import { Link } from "@/i18n/routing";
 import {
-  Flame, Apple, Wind, Gift, Smartphone, Gamepad2,
-  Lightbulb, Sparkles, Tag, Package, Star, Zap,
-} from "lucide-react";
+  Fire, AppleLogo, Wind, Gift, DeviceMobile, GameController,
+  Lightbulb, Sparkle, Tag, Package, Star, Lightning,
+} from "@phosphor-icons/react";
 
 const ICON_MAP: Record<string, React.ElementType> = {
-  Flame, Apple, Wind, Gift, Smartphone, Gamepad2,
-  Lightbulb, Sparkles, Tag, Package, Star, Zap,
+  Flame: Fire, Apple: AppleLogo, Wind, Gift, Smartphone: DeviceMobile, Gamepad2: GameController,
+  Lightbulb, Sparkles: Sparkle, Tag, Package, Star, Zap: Lightning,
 };
 
 interface TabData {

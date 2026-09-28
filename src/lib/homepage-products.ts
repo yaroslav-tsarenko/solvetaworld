@@ -147,6 +147,10 @@ export function getHomepageCategorySections(
   maxPerCategory = 10,
   maxSections?: number,
 ): CategorySection[] {
+  // A product that belongs to two parent categories must not appear in two
+  // homepage rails — each section presents its own non-overlapping assortment
+  // (acquirer compliance requirement). First rail to claim an item keeps it.
+  const claimed = new Set<string>();
   const sections = categories
     .map((cat) => {
       const catProducts = getProductsByCategory(products, cat.slug);
@@ -157,15 +161,19 @@ export function getHomepageCategorySections(
           )
         : [];
       const merged = [...catProducts, ...fromChildren];
-      const unique = Array.from(new Map(merged.map((p) => [p.id, p])).values());
+      const unique = Array.from(new Map(merged.map((p) => [p.id, p])).values())
+        .filter((p) => !claimed.has(p.id));
 
       const subcategoryTabs = cat.children?.length
         ? ["All", ...cat.children.map((c) => c.name)]
         : [];
 
+      const picked = pickForShelf(unique, maxPerCategory, `category:${cat.slug}`);
+      picked.forEach((p) => claimed.add(p.id));
+
       return {
         category: cat,
-        products: pickForShelf(unique, maxPerCategory, `category:${cat.slug}`),
+        products: picked,
         subcategoryTabs,
         totalCount: unique.length,
       };

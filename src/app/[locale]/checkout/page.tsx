@@ -20,9 +20,9 @@ import { Breadcrumbs } from "@/components/layout/Breadcrumbs/Breadcrumbs";
 import { MerchantInfo } from "@/components/checkout/MerchantInfo";
 import { toast } from "sonner";
 import {
-  Mail, Phone, MapPin, Truck, CreditCard,
-  ChevronRight, ShieldCheck, Lock, Check, ImageOff, UserPlus, Tag, X as XIcon,
-} from "lucide-react";
+  EnvelopeSimple, Phone, MapPin, Truck, CreditCard,
+  CaretRight, ShieldCheck, Lock, Check, ImageBroken, UserPlus, Tag, X as XIcon,
+} from "@phosphor-icons/react";
 
 interface AppliedDiscount {
   type: "welcome" | "newsletter";
@@ -37,7 +37,7 @@ const SHIPPING_METHODS = [
   { key: "free", label: "Economy Shipping", time: "7-14 business days", price: 0, icon: Truck },
 ];
 
-const stepIcons = [Mail, MapPin, CreditCard];
+const stepIcons = [EnvelopeSimple, MapPin, CreditCard];
 const stepVariants = {
   enter: { opacity: 0, x: 30 },
   center: { opacity: 1, x: 0 },
@@ -65,7 +65,7 @@ const inputPlainStyle: React.CSSProperties = {
 const selectStyle: React.CSSProperties = {
   ...inputPlainStyle,
   appearance: "none" as const,
-  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239E9EB8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
+  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236F756D' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
   backgroundRepeat: "no-repeat",
   backgroundPosition: "right 0.75rem center",
   paddingRight: "2rem",
@@ -98,7 +98,7 @@ function InputWithIcon({ icon: Icon, error, ...props }: { icon: React.ElementTyp
           ...inputBaseStyle,
           borderColor: error ? "var(--color-danger)" : undefined,
         }}
-        onFocus={(e) => { e.currentTarget.style.borderColor = "var(--color-accent)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(108,92,231,0.1)"; }}
+        onFocus={(e) => { e.currentTarget.style.borderColor = "var(--color-accent)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(46,94,78,0.14)"; }}
         onBlur={(e) => { e.currentTarget.style.borderColor = error ? "var(--color-danger)" : "var(--color-border)"; e.currentTarget.style.boxShadow = "none"; }}
       />
       {error && <span style={errorStyle}>{error}</span>}
@@ -349,7 +349,7 @@ export default function CheckoutPage() {
             >
               {isDone ? (
                 <div style={{ width: "1.25rem", height: "1.25rem", borderRadius: "50%", background: "var(--color-accent)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Check size={12} strokeWidth={3} />
+                  <Check size={12} weight="bold" />
                 </div>
               ) : (
                 <Icon size={16} />
@@ -376,14 +376,14 @@ export default function CheckoutPage() {
               >
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
                   <div style={{ width: "2rem", height: "2rem", borderRadius: "10px", background: "var(--color-accent-light)", color: "var(--color-accent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Mail size={16} />
+                    <EnvelopeSimple size={16} />
                   </div>
                   <h2 style={{ fontSize: "1.125rem", fontWeight: 700 }}>{t("contact")}</h2>
                 </div>
                 <div>
                   <label style={labelStyle}>{t("email")} *</label>
                   <InputWithIcon
-                    icon={Mail}
+                    icon={EnvelopeSimple}
                     placeholder="your@email.com"
                     error={errors.contact?.email?.message}
                     {...register("contact.email")}
@@ -407,7 +407,7 @@ export default function CheckoutPage() {
                   </span>
                 </div>
                 <Button color="primary" size="lg" onPress={goNext} style={{ marginTop: "0.5rem" }}>
-                  Continue to Shipping <ChevronRight size={16} />
+                  Continue to Shipping <CaretRight size={16} />
                 </Button>
               </motion.div>
             )}
@@ -527,7 +527,7 @@ export default function CheckoutPage() {
                             <div style={{ fontSize: "0.875rem", fontWeight: 600 }}>{m.label}</div>
                             <div style={{ fontSize: "0.75rem", color: "var(--color-text-tertiary)" }}>{m.time}</div>
                           </div>
-                          <span style={{ fontSize: "0.875rem", fontWeight: 700, color: m.price === 0 ? "#2E7D32" : "var(--color-text)" }}>
+                          <span style={{ fontSize: "0.875rem", fontWeight: 700, color: m.price === 0 ? "#3F7A54" : "var(--color-text)" }}>
                             {m.price === 0 ? "Free" : formatPrice(convert(m.price), currency)}
                           </span>
                         </label>
@@ -541,7 +541,7 @@ export default function CheckoutPage() {
                     Back
                   </Button>
                   <Button color="primary" size="lg" onPress={goNext} style={{ flex: 1 }}>
-                    Review Order <ChevronRight size={16} />
+                    Review Order <CaretRight size={16} />
                   </Button>
                 </div>
               </motion.div>
@@ -594,7 +594,7 @@ export default function CheckoutPage() {
                           <Image src={item.imageUrl} alt={item.name} fill sizes="56px" style={{ objectFit: "contain", padding: "4px" }} />
                         ) : (
                           <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--color-text-tertiary)" }}>
-                            <ImageOff size={18} />
+                            <ImageBroken size={18} />
                           </div>
                         )}
                       </div>
@@ -710,7 +710,7 @@ export default function CheckoutPage() {
                     <Image src={item.imageUrl} alt={item.name} fill sizes="40px" style={{ objectFit: "contain", padding: "2px" }} />
                   ) : (
                     <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#ccc" }}>
-                      <ImageOff size={14} />
+                      <ImageBroken size={14} />
                     </div>
                   )}
                   <div style={{
@@ -750,16 +750,16 @@ export default function CheckoutPage() {
                 gap: "0.5rem",
                 padding: "0.625rem 0.75rem",
                 borderRadius: "10px",
-                background: "#ECFDF5",
-                border: "1px solid #A7F3D0",
+                background: "#E4EEE9",
+                border: "1px solid #BFD6CC",
                 fontSize: "0.8125rem",
               }}>
-                <Tag size={14} style={{ color: "#15803d", flexShrink: 0 }} />
+                <Tag size={14} style={{ color: "#2E5E4E", flexShrink: 0 }} />
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 700, color: "#166534" }}>
+                  <div style={{ fontWeight: 700, color: "#234A3D" }}>
                     {discount.percent}% OFF applied
                   </div>
-                  <div style={{ color: "#15803d", fontSize: "0.6875rem" }}>
+                  <div style={{ color: "#2E5E4E", fontSize: "0.6875rem" }}>
                     {discount.type === "welcome" ? "Welcome discount" : `Code: ${discount.code}`}
                   </div>
                 </div>
@@ -768,7 +768,7 @@ export default function CheckoutPage() {
                     type="button"
                     onClick={removeDiscount}
                     aria-label="Remove discount"
-                    style={{ background: "none", border: "none", cursor: "pointer", color: "#15803d", padding: 4, display: "flex" }}
+                    style={{ background: "none", border: "none", cursor: "pointer", color: "#2E5E4E", padding: 4, display: "flex" }}
                   >
                     <XIcon size={14} />
                   </button>
@@ -815,14 +815,14 @@ export default function CheckoutPage() {
               <span style={{ fontWeight: 500 }}>{formatPrice(convert(cart.subtotal), currency)}</span>
             </div>
             {discount && (
-              <div style={{ display: "flex", justifyContent: "space-between", color: "#15803d" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", color: "#2E5E4E" }}>
                 <span>Discount ({discount.percent}%)</span>
                 <span style={{ fontWeight: 600 }}>−{formatPrice(convert(discountAmount), currency)}</span>
               </div>
             )}
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span style={{ color: "var(--color-text-secondary)" }}>Shipping</span>
-              <span style={{ fontWeight: 500, color: finalShipping === 0 ? "#2E7D32" : undefined }}>
+              <span style={{ fontWeight: 500, color: finalShipping === 0 ? "#3F7A54" : undefined }}>
                 {finalShipping > 0 ? formatPrice(convert(finalShipping), currency) : "Free"}
               </span>
             </div>

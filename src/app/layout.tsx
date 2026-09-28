@@ -1,16 +1,20 @@
 import type { Metadata, Viewport } from "next";
 import { getLocale } from "next-intl/server";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Karla } from "next/font/google";
 import "@/styles/globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Brand type: Bricolage Grotesque for display/headings, Karla for body —
+// deliberately distinct from the sibling store's Geist stack.
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const karla = Karla({
+  variable: "--font-karla",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -41,8 +45,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#0E8A5A" },
-    { media: "(prefers-color-scheme: dark)", color: "#12171A" },
+    { media: "(prefers-color-scheme: light)", color: "#2E5E4E" },
+    { media: "(prefers-color-scheme: dark)", color: "#161B18" },
   ],
 };
 
@@ -59,7 +63,7 @@ export default async function RootLayout({
     <html
       lang={locale}
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${karla.variable} ${bricolage.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

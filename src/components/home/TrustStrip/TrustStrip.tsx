@@ -1,14 +1,14 @@
 "use client";
 
 import { useRef } from "react";
-import { Truck, ShieldCheck, RotateCcw, Headphones } from "lucide-react";
+import { Truck, ShieldCheck, ArrowCounterClockwise, Headset } from "@phosphor-icons/react";
 import { motion, useInView } from "framer-motion";
 
 const items = [
-  { icon: Truck, label: "Free Shipping", desc: "On orders over £100", color: "rgba(79, 112, 255, 0.12)", iconColor: "#0E8A5A" },
-  { icon: ShieldCheck, label: "Secure Payment", desc: "100% protected checkout", color: "rgba(27, 77, 255, 0.12)", iconColor: "#0E8A5A" },
-  { icon: RotateCcw, label: "Easy Returns", desc: "30-day return policy", color: "rgba(0, 212, 224, 0.14)", iconColor: "#d97706" },
-  { icon: Headphones, label: "24/7 Support", desc: "We're always here to help", color: "rgba(6, 182, 212, 0.14)", iconColor: "#0891b2" },
+  { icon: Truck, label: "Free Shipping", desc: "On orders over £100", color: "rgba(46, 94, 78, 0.12)", iconColor: "#2E5E4E" },
+  { icon: ShieldCheck, label: "Secure Payment", desc: "100% protected checkout", color: "rgba(63, 122, 84, 0.12)", iconColor: "#3F7A54" },
+  { icon: ArrowCounterClockwise, label: "Easy Returns", desc: "30-day return policy", color: "rgba(165, 86, 31, 0.12)", iconColor: "#A5561F" },
+  { icon: Headset, label: "24/7 Support", desc: "We're always here to help", color: "rgba(74, 107, 124, 0.14)", iconColor: "#4A6B7C" },
 ];
 
 export function TrustStrip() {

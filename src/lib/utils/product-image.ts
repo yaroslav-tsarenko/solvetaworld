@@ -1,12 +1,26 @@
 const PLACEHOLDER_BASE = "https://placehold.co";
 
-const CATEGORY_COLORS: Record<string, string> = {
-  electronics: "1A1A2E/FFFFFF",
-  clothing: "2D3436/FFFFFF",
-  "home-garden": "4A6741/FFFFFF",
-  sports: "1B4DFF/FFFFFF",
-  default: "6C6C6C/FFFFFF",
-};
+/* Placeholder art direction follows the Forest & Stone brand: a rotation of
+ * pine, sage, copper and stone grounds. The swatch is picked by hashing the
+ * product name, so two neighbouring cards almost never share the same image. */
+const PLACEHOLDER_SWATCHES = [
+  "2E5E4E/F4F2ED",
+  "1E2420/E4EEE9",
+  "A5561F/F6EADF",
+  "6F756D/FFFFFF",
+  "8FB3A3/1E2420",
+  "ECE8DF/2E5E4E",
+  "52290E/F2DDC8",
+  "234A3D/E4EEE9",
+];
+
+function swatchFor(name: string): string {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) {
+    h = (h * 31 + name.charCodeAt(i)) >>> 0;
+  }
+  return PLACEHOLDER_SWATCHES[h % PLACEHOLDER_SWATCHES.length];
+}
 
 export function getProductImage(
   imageUrl: string | null | undefined,
@@ -17,11 +31,11 @@ export function getProductImage(
     return imageUrl;
   }
 
-  const label = encodeURIComponent(productName?.slice(0, 20) || "Product");
-  const color = CATEGORY_COLORS.default;
-  return `${PLACEHOLDER_BASE}/${size}/${color}?text=${label}`;
+  const name = productName || "Product";
+  const label = encodeURIComponent(name.slice(0, 20));
+  return `${PLACEHOLDER_BASE}/${size}/${swatchFor(name)}?text=${label}`;
 }
 
 export function getProductImageFallback(size = "400x400"): string {
-  return `${PLACEHOLDER_BASE}/${size}/E0E0E0/999999?text=No+Image`;
+  return `${PLACEHOLDER_BASE}/${size}/ECE8DF/6F756D?text=No+Image`;
 }

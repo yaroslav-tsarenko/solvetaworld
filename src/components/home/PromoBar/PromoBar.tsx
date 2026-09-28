@@ -1,13 +1,13 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Truck, RotateCcw, Headphones, ShieldCheck } from "lucide-react";
+import { Truck, ArrowCounterClockwise, Headset, ShieldCheck } from "@phosphor-icons/react";
 import { motion } from "framer-motion";
 
 const promos = [
   { icon: <Truck size={22} />, titleKey: "promoFreeShipping" as const, descKey: "promoFreeShippingDesc" as const },
-  { icon: <RotateCcw size={22} />, titleKey: "promoReturns" as const, descKey: "promoReturnsDesc" as const },
-  { icon: <Headphones size={22} />, titleKey: "promoSupport" as const, descKey: "promoSupportDesc" as const },
+  { icon: <ArrowCounterClockwise size={22} />, titleKey: "promoReturns" as const, descKey: "promoReturnsDesc" as const },
+  { icon: <Headset size={22} />, titleKey: "promoSupport" as const, descKey: "promoSupportDesc" as const },
   { icon: <ShieldCheck size={22} />, titleKey: "promoSecure" as const, descKey: "promoSecureDesc" as const },
 ];
 

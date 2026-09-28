@@ -44,10 +44,11 @@ function getSiteUrl(): string {
   return raw.replace(/\/+$/, "");
 }
 
-const BRAND_COLOR = "#0E8A5A";
-const BG_COLOR = "#f7f7f7";
-const TEXT_COLOR = "#1A1A2E";
-const MUTED_COLOR = "#666";
+// Forest & Stone brand palette (matches src/styles/variables.css).
+const BRAND_COLOR = "#2E5E4E";
+const BG_COLOR = "#F4F2ED";
+const TEXT_COLOR = "#1E2420";
+const MUTED_COLOR = "#6F756D";
 
 interface SendArgs {
   to: string;
@@ -95,19 +96,19 @@ function emailWrapper(content: string, options: { preheader?: string } = {}): st
   <div style="max-width:600px;margin:0 auto;padding:32px 16px;">
     <div style="text-align:center;margin-bottom:24px;">
       <a href="${getSiteUrl()}" style="text-decoration:none;">
-        <span style="font-size:24px;font-weight:900;color:${BRAND_COLOR};letter-spacing:-0.03em;">Solvetaworld</span>
+        <span style="font-family:Georgia,serif;font-size:24px;font-weight:600;color:${BRAND_COLOR};letter-spacing:-0.01em;">Solvetaworld</span>
       </a>
     </div>
-    <div style="background:#fff;border-radius:12px;padding:32px;border:1px solid #e5e5e5;">
+    <div style="background:#fff;border-radius:8px;padding:32px;border:1px solid #E0DCD2;">
       ${content}
     </div>
-    <div style="text-align:center;margin-top:24px;font-size:12px;color:#999;line-height:1.6;">
+    <div style="text-align:center;margin-top:24px;font-size:12px;color:#6F756D;line-height:1.6;">
       <p style="margin:0 0 4px;">&copy; ${new Date().getFullYear()} Solvetaworld. All rights reserved.</p>
       <p style="margin:0;">${COMPANY.name} &middot; ${COMPANY.country} &middot; <a href="${getSiteUrl()}" style="color:${BRAND_COLOR};text-decoration:none;">solvetaworld.com</a></p>
       <p style="margin:8px 0 0;">
-        <a href="${getSiteUrl()}/en/policies/privacy" style="color:#999;text-decoration:underline;margin:0 6px;">Privacy</a>
-        <a href="${getSiteUrl()}/en/policies/terms" style="color:#999;text-decoration:underline;margin:0 6px;">Terms</a>
-        <a href="${getSiteUrl()}/en/contact" style="color:#999;text-decoration:underline;margin:0 6px;">Contact</a>
+        <a href="${getSiteUrl()}/en/policies/privacy" style="color:#6F756D;text-decoration:underline;margin:0 6px;">Privacy</a>
+        <a href="${getSiteUrl()}/en/policies/terms" style="color:#6F756D;text-decoration:underline;margin:0 6px;">Terms</a>
+        <a href="${getSiteUrl()}/en/contact" style="color:#6F756D;text-decoration:underline;margin:0 6px;">Contact</a>
       </p>
     </div>
   </div>
@@ -118,7 +119,7 @@ function emailWrapper(content: string, options: { preheader?: string } = {}): st
 function button(href: string, label: string): string {
   return `
     <div style="text-align:center;margin:24px 0;">
-      <a href="${href}" style="display:inline-block;padding:14px 32px;background:${BRAND_COLOR};color:#fff;text-decoration:none;border-radius:10px;font-weight:700;font-size:15px;">
+      <a href="${href}" style="display:inline-block;padding:14px 32px;background:${BRAND_COLOR};color:#fff;text-decoration:none;border-radius:6px;font-weight:700;font-size:15px;">
         ${label}
       </a>
     </div>`;
@@ -150,7 +151,7 @@ export async function sendWelcomeEmail(email: string, name?: string | null): Pro
       <p style="color:${MUTED_COLOR};line-height:1.6;margin:0 0 16px;">
         Your account has been created successfully. You now have access to thousands of electrical materials and supplies at competitive prices.
       </p>
-      <div style="background:#f9f9f9;border-radius:8px;padding:16px;margin:0 0 24px;">
+      <div style="background:#F4F2ED;border-radius:8px;padding:16px;margin:0 0 24px;">
         <p style="margin:0 0 8px;font-weight:600;color:${TEXT_COLOR};">What you can do now:</p>
         <ul style="margin:0;padding:0 0 0 20px;color:${MUTED_COLOR};line-height:1.8;">
           <li>Browse our full catalog of products</li>
@@ -160,7 +161,7 @@ export async function sendWelcomeEmail(email: string, name?: string | null): Pro
         </ul>
       </div>
       ${button(`${siteUrl}/en/catalog`, "Start Shopping")}
-      <p style="color:#999;font-size:13px;margin:24px 0 0;text-align:center;">
+      <p style="color:#6F756D;font-size:13px;margin:24px 0 0;text-align:center;">
         Standard 2-year EU warranty on all products
       </p>
     `,
@@ -257,14 +258,14 @@ function itemRowsTable(items: OrderItem[], options: { showUnitPrice?: boolean } 
       const total = formatEur(toNum(item.total));
       return `
         <tr>
-          <td style="padding:10px 0;border-bottom:1px solid #f0f0f0;vertical-align:top;">
+          <td style="padding:10px 0;border-bottom:1px solid #ECE8DF;vertical-align:top;">
             <div style="font-weight:600;font-size:14px;color:${TEXT_COLOR};">${escape(item.productName)}</div>
-            <div style="font-size:12px;color:#999;margin-top:2px;">SKU: ${escape(item.productSku)}</div>
+            <div style="font-size:12px;color:#6F756D;margin-top:2px;">SKU: ${escape(item.productSku)}</div>
           </td>
-          <td style="padding:10px 0;border-bottom:1px solid #f0f0f0;text-align:center;color:${MUTED_COLOR};font-size:14px;vertical-align:top;">
+          <td style="padding:10px 0;border-bottom:1px solid #ECE8DF;text-align:center;color:${MUTED_COLOR};font-size:14px;vertical-align:top;">
             ${qty}${options.showUnitPrice ? ` &times; ${unit}` : ""}
           </td>
-          <td style="padding:10px 0;border-bottom:1px solid #f0f0f0;text-align:right;font-weight:600;font-size:14px;color:${TEXT_COLOR};vertical-align:top;">
+          <td style="padding:10px 0;border-bottom:1px solid #ECE8DF;text-align:right;font-weight:600;font-size:14px;color:${TEXT_COLOR};vertical-align:top;">
             ${total}
           </td>
         </tr>`;
@@ -276,7 +277,7 @@ function totalsBlock(data: OrderEmailData): string {
   const discount = toNum(data.discountAmount);
   const shipping = toNum(data.shippingCost);
   return `
-    <div style="background:#f9f9f9;border-radius:8px;padding:16px;margin:16px 0;">
+    <div style="background:#F4F2ED;border-radius:8px;padding:16px;margin:16px 0;">
       <table style="width:100%;border-collapse:collapse;">
         <tr>
           <td style="color:${MUTED_COLOR};font-size:14px;padding:4px 0;">Subtotal</td>
@@ -284,7 +285,7 @@ function totalsBlock(data: OrderEmailData): string {
         </tr>
         <tr>
           <td style="color:${MUTED_COLOR};font-size:14px;padding:4px 0;">Shipping (${shippingLabelFor(data.shippingMethod)})</td>
-          <td style="text-align:right;font-weight:500;font-size:14px;padding:4px 0;${shipping === 0 ? "color:#2E7D32;" : ""}">${shipping === 0 ? "Free" : formatEur(shipping)}</td>
+          <td style="text-align:right;font-weight:500;font-size:14px;padding:4px 0;${shipping === 0 ? "color:#3F7A54;" : ""}">${shipping === 0 ? "Free" : formatEur(shipping)}</td>
         </tr>
         <tr>
           <td style="color:${MUTED_COLOR};font-size:14px;padding:4px 0;">Tax (21%)</td>
@@ -293,14 +294,14 @@ function totalsBlock(data: OrderEmailData): string {
         ${
           discount > 0
             ? `<tr>
-                <td style="color:#2E7D32;font-size:14px;padding:4px 0;">Discount</td>
-                <td style="text-align:right;font-weight:500;font-size:14px;padding:4px 0;color:#2E7D32;">&minus;${formatEur(discount)}</td>
+                <td style="color:#3F7A54;font-size:14px;padding:4px 0;">Discount</td>
+                <td style="text-align:right;font-weight:500;font-size:14px;padding:4px 0;color:#3F7A54;">&minus;${formatEur(discount)}</td>
               </tr>`
             : ""
         }
         <tr>
-          <td style="padding-top:12px;border-top:2px solid #e5e5e5;font-weight:800;font-size:16px;color:${TEXT_COLOR};">Total</td>
-          <td style="padding-top:12px;border-top:2px solid #e5e5e5;text-align:right;font-weight:800;font-size:16px;color:${TEXT_COLOR};">${formatEur(toNum(data.total))}</td>
+          <td style="padding-top:12px;border-top:2px solid #E0DCD2;font-weight:800;font-size:16px;color:${TEXT_COLOR};">Total</td>
+          <td style="padding-top:12px;border-top:2px solid #E0DCD2;text-align:right;font-weight:800;font-size:16px;color:${TEXT_COLOR};">${formatEur(toNum(data.total))}</td>
         </tr>
       </table>
     </div>`;
@@ -310,10 +311,10 @@ function itemsTable(items: OrderItem[], options: { showUnitPrice?: boolean } = {
   return `
     <table style="width:100%;border-collapse:collapse;margin:16px 0;">
       <thead>
-        <tr style="border-bottom:2px solid #e5e5e5;">
-          <th style="text-align:left;padding:8px 0;font-size:12px;color:#999;text-transform:uppercase;letter-spacing:0.05em;">Product</th>
-          <th style="text-align:center;padding:8px 0;font-size:12px;color:#999;text-transform:uppercase;letter-spacing:0.05em;">${options.showUnitPrice ? "Qty &times; Price" : "Qty"}</th>
-          <th style="text-align:right;padding:8px 0;font-size:12px;color:#999;text-transform:uppercase;letter-spacing:0.05em;">Total</th>
+        <tr style="border-bottom:2px solid #E0DCD2;">
+          <th style="text-align:left;padding:8px 0;font-size:12px;color:#6F756D;text-transform:uppercase;letter-spacing:0.05em;">Product</th>
+          <th style="text-align:center;padding:8px 0;font-size:12px;color:#6F756D;text-transform:uppercase;letter-spacing:0.05em;">${options.showUnitPrice ? "Qty &times; Price" : "Qty"}</th>
+          <th style="text-align:right;padding:8px 0;font-size:12px;color:#6F756D;text-transform:uppercase;letter-spacing:0.05em;">Total</th>
         </tr>
       </thead>
       <tbody>
@@ -333,9 +334,9 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData): Promise<
     html: emailWrapper(
       `
       <div style="text-align:center;margin-bottom:24px;">
-        <div style="width:56px;height:56px;border-radius:50%;background:#E8F5E9;display:inline-block;line-height:56px;font-size:28px;color:#2E7D32;">&#10003;</div>
+        <div style="width:56px;height:56px;border-radius:50%;background:#E4EEE9;display:inline-block;line-height:56px;font-size:28px;color:#3F7A54;">&#10003;</div>
         <h1 style="margin:12px 0 4px;font-size:22px;font-weight:800;color:${TEXT_COLOR};">Order Confirmed!</h1>
-        <p style="margin:0;color:#999;font-size:14px;">Order #${id}</p>
+        <p style="margin:0;color:#6F756D;font-size:14px;">Order #${id}</p>
       </div>
 
       <p style="color:${MUTED_COLOR};line-height:1.6;margin:0 0 16px;">
@@ -347,7 +348,7 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData): Promise<
 
       ${button(`${siteUrl}/en/account/orders/${data.orderId}`, "View Your Order")}
 
-      <p style="color:#999;font-size:13px;margin:24px 0 0;text-align:center;">
+      <p style="color:#6F756D;font-size:13px;margin:24px 0 0;text-align:center;">
         You&rsquo;ll receive a shipping confirmation when your order is on its way.
       </p>
     `,
@@ -366,24 +367,24 @@ export async function sendOrderInvoiceEmail(data: OrderEmailData): Promise<boole
     subject: `Invoice — Order #${id}`,
     html: emailWrapper(
       `
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;border-bottom:2px solid #e5e5e5;padding-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;border-bottom:2px solid #E0DCD2;padding-bottom:16px;">
         <div>
           <h1 style="margin:0;font-size:24px;font-weight:800;color:${TEXT_COLOR};">Invoice</h1>
-          <p style="margin:4px 0 0;color:#999;font-size:13px;">#${id} &middot; ${date}</p>
+          <p style="margin:4px 0 0;color:#6F756D;font-size:13px;">#${id} &middot; ${date}</p>
         </div>
       </div>
 
       <table style="width:100%;border-collapse:collapse;margin-bottom:16px;">
         <tr>
           <td style="width:50%;vertical-align:top;padding-right:12px;">
-            <p style="margin:0 0 4px;font-size:11px;color:#999;text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">Billed To</p>
+            <p style="margin:0 0 4px;font-size:11px;color:#6F756D;text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">Billed To</p>
             <p style="margin:0;font-size:13px;color:${TEXT_COLOR};line-height:1.55;">
               ${escape(data.customerName)}<br />
               ${escape(data.customerEmail)}
             </p>
           </td>
           <td style="width:50%;vertical-align:top;padding-left:12px;">
-            <p style="margin:0 0 4px;font-size:11px;color:#999;text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">Ship To</p>
+            <p style="margin:0 0 4px;font-size:11px;color:#6F756D;text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">Ship To</p>
             <p style="margin:0;font-size:13px;color:${TEXT_COLOR};line-height:1.55;">
               ${formatAddress(data.shippingAddress)}
             </p>
@@ -394,7 +395,7 @@ export async function sendOrderInvoiceEmail(data: OrderEmailData): Promise<boole
       <table style="width:100%;border-collapse:collapse;margin-bottom:16px;">
         <tr>
           <td style="width:50%;vertical-align:top;padding-right:12px;">
-            <p style="margin:0 0 4px;font-size:11px;color:#999;text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">From</p>
+            <p style="margin:0 0 4px;font-size:11px;color:#6F756D;text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">From</p>
             <p style="margin:0;font-size:13px;color:${TEXT_COLOR};line-height:1.55;">
               <strong>${COMPANY.name}</strong><br />
               Company number: ${COMPANY.companyNumber}<br />
@@ -403,7 +404,7 @@ export async function sendOrderInvoiceEmail(data: OrderEmailData): Promise<boole
             </p>
           </td>
           <td style="width:50%;vertical-align:top;padding-left:12px;">
-            <p style="margin:0 0 4px;font-size:11px;color:#999;text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">Shipping Method</p>
+            <p style="margin:0 0 4px;font-size:11px;color:#6F756D;text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">Shipping Method</p>
             <p style="margin:0;font-size:13px;color:${TEXT_COLOR};line-height:1.55;">
               ${shippingLabelFor(data.shippingMethod)}
             </p>
@@ -414,7 +415,7 @@ export async function sendOrderInvoiceEmail(data: OrderEmailData): Promise<boole
       ${itemsTable(data.items, { showUnitPrice: true })}
       ${totalsBlock(data)}
 
-      <p style="color:#999;font-size:12px;margin:24px 0 0;line-height:1.6;text-align:center;">
+      <p style="color:#6F756D;font-size:12px;margin:24px 0 0;line-height:1.6;text-align:center;">
         VAT is included in the prices shown where applicable. This invoice serves as proof of purchase.<br />
         For any questions, reply to this email or contact <a href="mailto:info@solvetaworld.com" style="color:${BRAND_COLOR};">info@solvetaworld.com</a>.
       </p>
@@ -438,7 +439,7 @@ export async function sendOrderShippedEmail(data: OrderEmailData): Promise<boole
       <div style="text-align:center;margin-bottom:24px;">
         <div style="display:inline-block;font-size:32px;">&#128666;</div>
         <h1 style="margin:8px 0 4px;font-size:22px;font-weight:800;color:${TEXT_COLOR};">Your order shipped!</h1>
-        <p style="margin:0;color:#999;font-size:14px;">Order #${id}</p>
+        <p style="margin:0;color:#6F756D;font-size:14px;">Order #${id}</p>
       </div>
 
       <p style="color:${MUTED_COLOR};line-height:1.6;margin:0 0 16px;">
@@ -447,15 +448,15 @@ export async function sendOrderShippedEmail(data: OrderEmailData): Promise<boole
 
       ${
         tracking
-          ? `<div style="background:#f9f9f9;border-radius:8px;padding:16px;margin:0 0 16px;">
-              <p style="margin:0 0 4px;font-size:11px;color:#999;text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">Tracking Number</p>
+          ? `<div style="background:#F4F2ED;border-radius:8px;padding:16px;margin:0 0 16px;">
+              <p style="margin:0 0 4px;font-size:11px;color:#6F756D;text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">Tracking Number</p>
               <p style="margin:0;font-size:18px;font-weight:700;color:${TEXT_COLOR};font-family:'Courier New',monospace;">${escape(tracking)}</p>
             </div>`
           : ""
       }
 
-      <div style="background:#f9f9f9;border-radius:8px;padding:16px;margin:0 0 16px;">
-        <p style="margin:0 0 4px;font-size:11px;color:#999;text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">Delivering To</p>
+      <div style="background:#F4F2ED;border-radius:8px;padding:16px;margin:0 0 16px;">
+        <p style="margin:0 0 4px;font-size:11px;color:#6F756D;text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">Delivering To</p>
         <p style="margin:0;font-size:13px;color:${TEXT_COLOR};line-height:1.55;">
           ${formatAddress(data.shippingAddress)}
         </p>
@@ -486,8 +487,8 @@ export async function sendOrderStatusEmail(
       subject: `Order #${id} delivered`,
       title: "Your order was delivered!",
       icon: "&#128230;",
-      iconBg: "#E8F5E9",
-      iconColor: "#2E7D32",
+      iconBg: "#E4EEE9",
+      iconColor: "#3F7A54",
       message: "Your order has been delivered. We hope you love it! If anything's wrong, just reply to this email.",
       cta: "Leave a review",
       ctaHref: `${siteUrl}/en/account/orders/${data.orderId}`,
@@ -496,8 +497,8 @@ export async function sendOrderStatusEmail(
       subject: `Order #${id} cancelled`,
       title: "Your order was cancelled",
       icon: "&#10005;",
-      iconBg: "#FFEBEE",
-      iconColor: "#C62828",
+      iconBg: "#F6EADF",
+      iconColor: "#A8402F",
       message: "This order has been cancelled. If you were charged, a refund will be processed back to your original payment method within 5–10 business days.",
       cta: "Continue shopping",
       ctaHref: `${siteUrl}/en/catalog`,
@@ -506,8 +507,8 @@ export async function sendOrderStatusEmail(
       subject: `Order #${id} refunded`,
       title: "Your refund has been processed",
       icon: "&#8634;",
-      iconBg: "#E3F2FD",
-      iconColor: "#1565C0",
+      iconBg: "#E4EEE9",
+      iconColor: "#4A6B7C",
       message: `Your refund of <strong>${formatEur(toNum(data.total))}</strong> has been issued to your original payment method. It may take 5–10 business days to appear on your statement.`,
       cta: "View order",
       ctaHref: `${siteUrl}/en/account/orders/${data.orderId}`,
@@ -524,7 +525,7 @@ export async function sendOrderStatusEmail(
       <div style="text-align:center;margin-bottom:24px;">
         <div style="width:56px;height:56px;border-radius:50%;background:${v.iconBg};display:inline-block;line-height:56px;font-size:24px;color:${v.iconColor};">${v.icon}</div>
         <h1 style="margin:12px 0 4px;font-size:22px;font-weight:800;color:${TEXT_COLOR};">${v.title}</h1>
-        <p style="margin:0;color:#999;font-size:14px;">Order #${id}</p>
+        <p style="margin:0;color:#6F756D;font-size:14px;">Order #${id}</p>
       </div>
 
       <p style="color:${MUTED_COLOR};line-height:1.6;margin:0 0 16px;">
@@ -560,7 +561,7 @@ export async function sendPasswordResetEmail(email: string, resetUrl: string, na
         <br />
         <a href="${resetUrl}" style="color:${BRAND_COLOR};word-break:break-all;">${resetUrl}</a>
       </p>
-      <p style="color:#999;font-size:13px;margin:24px 0 0;text-align:center;">
+      <p style="color:#6F756D;font-size:13px;margin:24px 0 0;text-align:center;">
         If you didn&rsquo;t request this, you can safely ignore this email — your password won&rsquo;t change.
       </p>
     `,
@@ -596,16 +597,16 @@ export async function sendContactFormEmail(submission: ContactSubmission): Promi
       <h1 style="margin:0 0 16px;font-size:20px;font-weight:800;color:${TEXT_COLOR};">New contact form submission</h1>
       <table style="width:100%;border-collapse:collapse;margin-bottom:16px;font-size:14px;">
         <tr>
-          <td style="padding:8px 0;color:#999;width:80px;">From</td>
+          <td style="padding:8px 0;color:#6F756D;width:80px;">From</td>
           <td style="padding:8px 0;color:${TEXT_COLOR};font-weight:600;">${escape(submission.name)} &lt;${escape(submission.email)}&gt;</td>
         </tr>
         <tr>
-          <td style="padding:8px 0;color:#999;">Subject</td>
+          <td style="padding:8px 0;color:#6F756D;">Subject</td>
           <td style="padding:8px 0;color:${TEXT_COLOR};font-weight:600;">${escape(submission.subject)}</td>
         </tr>
       </table>
-      <div style="background:#f9f9f9;border-radius:8px;padding:16px;color:${TEXT_COLOR};font-size:14px;line-height:1.6;white-space:pre-wrap;">${escape(submission.message)}</div>
-      <p style="color:#999;font-size:12px;margin:16px 0 0;">
+      <div style="background:#F4F2ED;border-radius:8px;padding:16px;color:${TEXT_COLOR};font-size:14px;line-height:1.6;white-space:pre-wrap;">${escape(submission.message)}</div>
+      <p style="color:#6F756D;font-size:12px;margin:16px 0 0;">
         Reply directly to this email to respond to ${escape(submission.email)}.
       </p>
     `),
@@ -623,12 +624,12 @@ export async function sendContactAutoReplyEmail(submission: ContactSubmission): 
       <p style="color:${MUTED_COLOR};line-height:1.6;margin:0 0 16px;">
         Hi ${escape(submission.name)}, we&rsquo;ve received your message and will reply within 24 hours.
       </p>
-      <div style="background:#f9f9f9;border-radius:8px;padding:16px;margin:0 0 16px;">
-        <p style="margin:0 0 4px;font-size:11px;color:#999;text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">Your message</p>
+      <div style="background:#F4F2ED;border-radius:8px;padding:16px;margin:0 0 16px;">
+        <p style="margin:0 0 4px;font-size:11px;color:#6F756D;text-transform:uppercase;letter-spacing:0.06em;font-weight:700;">Your message</p>
         <p style="margin:0 0 8px;font-size:14px;color:${TEXT_COLOR};font-weight:600;">${escape(submission.subject)}</p>
         <p style="margin:0;font-size:14px;color:${MUTED_COLOR};line-height:1.6;white-space:pre-wrap;">${escape(submission.message)}</p>
       </div>
-      <p style="color:#999;font-size:13px;margin:16px 0 0;">
+      <p style="color:#6F756D;font-size:13px;margin:16px 0 0;">
         In the meantime, you can check our <a href="${getSiteUrl()}/en/faq" style="color:${BRAND_COLOR};">FAQ</a> or browse our <a href="${getSiteUrl()}/en/catalog" style="color:${BRAND_COLOR};">catalog</a>.
       </p>
     `,

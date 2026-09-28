@@ -3,17 +3,17 @@
 import { useRef } from "react";
 import { Link } from "@/i18n/routing";
 import { motion, useInView } from "framer-motion";
-import { Package } from "lucide-react";
+import { Package } from "@phosphor-icons/react";
 
 const COLORS = [
-  "rgba(27,77,255,0.12)",
-  "rgba(6,182,212,0.12)",
-  "rgba(79,112,255,0.14)",
-  "rgba(0,212,224,0.14)",
-  "rgba(244,63,94,0.12)",
-  "rgba(124,58,237,0.14)",
-  "rgba(59,130,246,0.14)",
-  "rgba(236,72,153,0.12)",
+  "rgba(46,94,78,0.12)",
+  "rgba(165,86,31,0.10)",
+  "rgba(74,107,124,0.14)",
+  "rgba(63,122,84,0.12)",
+  "rgba(154,107,21,0.12)",
+  "rgba(35,74,61,0.14)",
+  "rgba(143,179,163,0.22)",
+  "rgba(168,64,47,0.10)",
 ];
 
 interface CategoryItem {

@@ -3,7 +3,7 @@
 import { useLocale } from "next-intl";
 import { useRouter, usePathname, routing, LOCALE_LABELS, type Locale } from "@/i18n/routing";
 import { LOCALE_STORAGE_KEY } from "@/providers/LocaleSync";
-import { Check, Globe } from "lucide-react";
+import { Check, Globe } from "@phosphor-icons/react";
 import { useState, useRef, useEffect } from "react";
 
 /**
@@ -64,7 +64,7 @@ export function LanguageSwitcher() {
         className="flex h-9 items-center gap-1 rounded-md px-2 text-ink-muted transition-colors hover:bg-surface-1 hover:text-ink"
       >
         <Globe size={19} />
-        <span className="text-xs font-semibold tracking-wide">{LOCALE_LABELS[locale].short}</span>
+        <span className="text-xs font-semibold tracking-wide max-sm:hidden">{LOCALE_LABELS[locale].short}</span>
       </button>
 
       {open && (

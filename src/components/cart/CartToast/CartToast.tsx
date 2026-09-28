@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Check, ShoppingCart } from "lucide-react";
+import { Check, Basket } from "@phosphor-icons/react";
 
 interface CartToastProps {
   name: string;
@@ -25,14 +25,14 @@ export function CartToast({ name, imageUrl, quantity }: CartToastProps) {
         animate={{ scale: 1 }}
         transition={{ delay: 0.1, type: "spring", damping: 15, stiffness: 400 }}
       >
-        <Check size={14} strokeWidth={3} />
+        <Check size={14} weight="bold" />
       </motion.div>
 
       <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-surface-1 shrink-0 flex items-center justify-center text-ink-subtle">
         {imageUrl ? (
           <Image src={imageUrl} alt={name} fill sizes="48px" style={{ objectFit: "contain" }} />
         ) : (
-          <ShoppingCart size={20} />
+          <Basket size={20} />
         )}
       </div>
 

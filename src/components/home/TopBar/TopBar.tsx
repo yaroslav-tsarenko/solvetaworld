@@ -1,10 +1,10 @@
 "use client";
 
 import { Link } from "@/i18n/routing";
-import { MapPin, Phone, Globe, Info, HelpCircle, Truck, RotateCcw, CreditCard, Package } from "lucide-react";
+import { MapPin, Phone, Globe, Info, Question, Truck, ArrowCounterClockwise, CreditCard, Package } from "@phosphor-icons/react";
 
 const ICON_MAP: Record<string, React.ElementType> = {
-  MapPin, Phone, Globe, Info, HelpCircle, Truck, RotateCcw, CreditCard, Package,
+  MapPin, Phone, Globe, Info, HelpCircle: Question, Truck, RotateCcw: ArrowCounterClockwise, CreditCard, Package,
 };
 
 interface UtilityLink {
@@ -37,7 +37,7 @@ export function TopBar({ links }: Props) {
   const rightLinks = items.filter((l) => l.position === "right");
 
   return (
-    <div className="hidden md:block bg-[#12171A] text-white/80 text-xs border-b border-white/10">
+    <div className="hidden md:block bg-[#1E2420] text-white/80 text-xs border-b border-white/10">
       <div className="max-w-[1400px] mx-auto px-4 flex justify-between items-center h-8">
         <nav className="flex items-center gap-4">
           {leftLinks.map((link) => {

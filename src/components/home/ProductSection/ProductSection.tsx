@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useRef } from "react";
 import { Link } from "@/i18n/routing";
-import { ChevronRight } from "lucide-react";
+import { CaretRight } from "@phosphor-icons/react";
 import { motion, useInView } from "framer-motion";
 import { MarketplaceProductCard } from "../MarketplaceProductCard/MarketplaceProductCard";
 
@@ -29,11 +29,10 @@ interface Props {
   tabs?: string[];
   bg?: "white" | "gray";
   columns?: number;
-  layout?: "grid" | "featured";
 }
 
 export function ProductSection({
-  title, subtitle, products, viewAllHref, viewAllLabel, tabs, bg = "white", columns = 5, layout = "grid",
+  title, subtitle, products, viewAllHref, viewAllLabel, tabs, bg = "white", columns = 5,
 }: Props) {
   const [activeTab, setActiveTab] = useState(0);
   const ref = useRef(null);
@@ -60,8 +59,8 @@ export function ProductSection({
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.5 }}
       >
-        <div className="flex items-baseline gap-2">
-          <h2 className="text-[1.125rem] font-extrabold m-0 text-ink whitespace-nowrap">{title}</h2>
+        <div className="flex items-baseline gap-2 flex-wrap min-w-0">
+          <h2 className="text-[1.125rem] font-extrabold m-0 text-ink">{title}</h2>
           {subtitle && <span className="text-xs text-ink-subtle whitespace-nowrap">{subtitle}</span>}
         </div>
         {tabs && tabs.length > 1 && (
@@ -86,28 +85,25 @@ export function ProductSection({
             href={viewAllHref}
             className="ml-auto max-[480px]:ml-0 text-[0.8125rem] font-semibold text-brand no-underline flex items-center gap-0.5 whitespace-nowrap transition-opacity hover:opacity-80"
           >
-            {viewAllLabel || "View all"} <ChevronRight size={14} />
+            {viewAllLabel || "View all"} <CaretRight size={14} />
           </Link>
         )}
       </motion.div>
       <div
         className="grid gap-3 max-[1200px]:!grid-cols-4 max-[1024px]:!grid-cols-3 max-md:!grid-cols-2 max-[480px]:gap-2"
-        style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
+        style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
       >
-        {filtered.map((p, i) => {
-          const isHero = layout === "featured" && i === 0;
-          return (
-            <motion.div
-              key={p.id}
-              className={isHero ? "md:col-span-2 md:row-span-2 [&>a]:h-full" : ""}
-              initial={{ opacity: 0, y: 30 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.4, delay: Math.min(i * 0.07, 0.5) }}
-            >
-              <MarketplaceProductCard product={p} />
-            </motion.div>
-          );
-        })}
+        {filtered.map((p, i) => (
+          <motion.div
+            key={p.id}
+            className="[&>a]:h-full"
+            initial={{ opacity: 0, y: 30 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.4, delay: Math.min(i * 0.07, 0.5) }}
+          >
+            <MarketplaceProductCard product={p} />
+          </motion.div>
+        ))}
       </div>
     </section>
   );

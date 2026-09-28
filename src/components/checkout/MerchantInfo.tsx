@@ -1,11 +1,11 @@
-import { Store } from "lucide-react";
+import { Storefront } from "@phosphor-icons/react/dist/ssr";
 import { COMPANY } from "@/lib/company";
 
 export function MerchantInfo({ title }: { title: string }) {
   return (
     <div className="mt-5 pt-5 border-t border-line text-xs leading-[1.7] text-ink-muted">
       <div className="flex items-center gap-1.5 mb-1.5 font-semibold text-ink">
-        <Store size={14} />
+        <Storefront size={14} />
         {title}
       </div>
       <p className="m-0">

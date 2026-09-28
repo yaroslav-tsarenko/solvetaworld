@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/Button";
-import { Plus, Pencil, Trash2, ChevronRight, FolderTree, Search } from "lucide-react";
+import { Plus, PencilSimple, Trash, CaretRight, TreeStructure, MagnifyingGlass } from "@phosphor-icons/react";
 import { toast } from "sonner";
 
 interface Category {
@@ -121,7 +121,7 @@ export default function AdminCategoriesPage() {
       </div>
 
       <div style={{ position: "relative", maxWidth: "20rem", marginBottom: "1.25rem" }}>
-        <Search size={16} style={{ position: "absolute", left: "0.875rem", top: "50%", transform: "translateY(-50%)", color: "var(--admin-text-muted)" }} />
+        <MagnifyingGlass size={16} style={{ position: "absolute", left: "0.875rem", top: "50%", transform: "translateY(-50%)", color: "var(--admin-text-muted)" }} />
         <input
           className="admin-input"
           placeholder="Search categories..."
@@ -133,7 +133,7 @@ export default function AdminCategoriesPage() {
 
       {filteredCategories.length === 0 ? (
         <div style={{ textAlign: "center", padding: "3rem", color: "var(--admin-text-muted)" }}>
-          <FolderTree size={48} style={{ margin: "0 auto 1rem", opacity: 0.3 }} />
+          <TreeStructure size={48} style={{ margin: "0 auto 1rem", opacity: 0.3 }} />
           <p>No categories yet. Import products or create categories manually.</p>
         </div>
       ) : (
@@ -252,7 +252,7 @@ function CategoryRow({
       >
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flex: 1, minWidth: 0 }}>
           {depth > 0 && (
-            <ChevronRight size={14} style={{ color: "var(--admin-text-muted)", flexShrink: 0 }} />
+            <CaretRight size={14} style={{ color: "var(--admin-text-muted)", flexShrink: 0 }} />
           )}
           <div style={{ minWidth: 0 }}>
             <span style={{
@@ -288,10 +288,10 @@ function CategoryRow({
             </Button>
           )}
           <Button isIconOnly size="sm" variant="flat" onPress={() => onEdit(cat)} aria-label="Edit category" style={{ color: "var(--admin-accent)" }}>
-            <Pencil size={14} />
+            <PencilSimple size={14} />
           </Button>
           <Button isIconOnly size="sm" variant="flat" color="danger" onPress={() => onDelete(cat.id)} aria-label="Delete category">
-            <Trash2 size={14} />
+            <Trash size={14} />
           </Button>
         </div>
       </motion.div>

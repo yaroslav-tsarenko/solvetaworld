@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image, { type StaticImageData } from "next/image";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { CaretLeft, CaretRight } from "@phosphor-icons/react";
 import { Link } from "@/i18n/routing";
 import banner1 from "@/assets/banner1.jpg";
 import banner2 from "@/assets/banner2.jpg";
@@ -51,7 +51,7 @@ const defaultSlides: DefaultSlide[] = [
     subtitle: "Certified panels, circuit breakers, and modular enclosures for residential and commercial installations",
     ctaLabel: "Shop Now",
     linkUrl: "/catalog",
-    bgColor: "#12171A",
+    bgColor: "#1E2420",
     textColor: "#ffffff",
     bgImage: banner1,
   },
@@ -62,7 +62,7 @@ const defaultSlides: DefaultSlide[] = [
     subtitle: "From compact enclosures to full-size distribution cabinets — everything for your next project",
     ctaLabel: "Browse Equipment",
     linkUrl: "/catalog",
-    bgColor: "#1e293b",
+    bgColor: "#20302A",
     textColor: "#ffffff",
     bgImage: banner2,
   },
@@ -73,7 +73,7 @@ const defaultSlides: DefaultSlide[] = [
     subtitle: "Premium copper cables, flexible wiring, terminal blocks and accessories at wholesale prices",
     ctaLabel: "View Cables",
     linkUrl: "/catalog",
-    bgColor: "#12171A",
+    bgColor: "#1E2420",
     textColor: "#ffffff",
     bgImage: banner3,
   },
@@ -152,10 +152,10 @@ export function HeroCarousel({ slides, deals }: Props) {
               <div className="flex items-center gap-4 mt-8 max-sm:mt-5">
                 <div className="flex gap-2">
                   <button className={controlBtnCls} onClick={prev} aria-label="Previous slide">
-                    <ChevronLeft size={20} />
+                    <CaretLeft size={20} />
                   </button>
                   <button className={controlBtnCls} onClick={next} aria-label="Next slide">
-                    <ChevronRight size={20} />
+                    <CaretRight size={20} />
                   </button>
                 </div>
                 <div className="flex gap-1.5" role="tablist" aria-label="Slides">

@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
-import { CheckCircle, AlertTriangle, Package, MapPin, Truck, Mail, ChevronRight } from "lucide-react";
+import { CheckCircle, Warning, Package, MapPin, Truck, EnvelopeSimple, CaretRight } from "@phosphor-icons/react";
 import { motion } from "framer-motion";
 import { useCurrency } from "@/providers/CurrencyProvider";
 import { formatPrice } from "@/lib/utils/format-price";
@@ -108,17 +108,17 @@ function ConfirmedContent() {
             width: 72,
             height: 72,
             borderRadius: "50%",
-            background: isFailed 
-              ? "rgba(239, 68, 68, 0.12)"
-              : "var(--color-success-light, rgba(34,197,94,0.12))",
-            color: isFailed ? "var(--color-danger, #ef4444)" : "var(--color-success)",
+            background: isFailed
+              ? "rgba(168, 64, 47, 0.12)"
+              : "var(--color-success-light, rgba(63,122,84,0.12))",
+            color: isFailed ? "var(--color-danger, #A8402F)" : "var(--color-success)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             margin: "0 auto 1rem",
           }}
         >
-          {isFailed ? <AlertTriangle size={40} /> : <CheckCircle size={40} />}
+          {isFailed ? <Warning size={40} /> : <CheckCircle size={40} />}
         </motion.div>
         <h1 style={{ fontSize: "1.75rem", fontWeight: 800, letterSpacing: "-0.02em", marginBottom: "0.5rem" }}>
           {isFailed ? "Payment Failed" : t("orderPlaced")}
@@ -261,7 +261,7 @@ function ConfirmedContent() {
             fontSize: "0.8125rem",
           }}
         >
-          <Mail size={16} color="var(--color-accent)" style={{ flexShrink: 0 }} />
+          <EnvelopeSimple size={16} color="var(--color-accent)" style={{ flexShrink: 0 }} />
           <span>
             A confirmation email has been sent to{" "}
             <strong>{order.customerEmail}</strong>
@@ -280,7 +280,7 @@ function ConfirmedContent() {
         }}
       >
         <Button as={Link} href="/account/orders" variant="bordered" style={{ flex: "1 1 200px" }}>
-          View Orders <ChevronRight size={16} />
+          View Orders <CaretRight size={16} />
         </Button>
         <Button as={Link} href="/catalog" color="primary" style={{ flex: "1 1 200px" }}>
           Continue Shopping

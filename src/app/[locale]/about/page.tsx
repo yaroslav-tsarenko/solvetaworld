@@ -1,11 +1,11 @@
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs/Breadcrumbs";
-import { Heart, Truck, Shield, Award } from "lucide-react";
+import { Heart, Truck, Shield, Medal } from "@phosphor-icons/react/dist/ssr";
 
 const values = [
   { icon: <Heart size={28} />, title: "Customer First", desc: "Whether you're a professional electrician or a DIY installer, your satisfaction drives every decision we make." },
   { icon: <Truck size={28} />, title: "Fast & Reliable", desc: "We partner with trusted carriers to deliver your electrical supplies quickly and safely, every time." },
   { icon: <Shield size={28} />, title: "Certified Quality", desc: "Every product meets professional installation standards and is sourced from certified manufacturers." },
-  { icon: <Award size={28} />, title: "Trade Pricing", desc: "We work directly with manufacturers to offer competitive trade prices on cables, switchgear, and more." },
+  { icon: <Medal size={28} />, title: "Trade Pricing", desc: "We work directly with manufacturers to offer competitive trade prices on cables, switchgear, and more." },
 ];
 
 export default function AboutPage() {

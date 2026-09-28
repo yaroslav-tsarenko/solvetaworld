@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { productSchema, type ProductFormData } from "@/lib/validators/product";
 import { toast } from "sonner";
-import { Plus, Trash2, Search } from "lucide-react";
+import { Plus, Trash, MagnifyingGlass } from "@phosphor-icons/react";
 
 interface CategoryTree {
   id: string;
@@ -160,7 +160,7 @@ export default function NewProductPage() {
             <div>
               <label className="admin-label">Categories</label>
               <div style={{ position: "relative", marginBottom: "0.5rem" }}>
-                <Search size={14} style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "var(--admin-text-muted)" }} />
+                <MagnifyingGlass size={14} style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "var(--admin-text-muted)" }} />
                 <input
                   className="admin-input"
                   placeholder="Search categories..."
@@ -312,7 +312,7 @@ export default function NewProductPage() {
                   }}
                   style={{ background: "none", border: "none", cursor: "pointer", color: "var(--admin-text-tertiary)", padding: "0.5rem" }}
                 >
-                  <Trash2 size={16} />
+                  <Trash size={16} />
                 </button>
               </div>
             ))}

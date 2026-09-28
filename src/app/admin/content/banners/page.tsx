@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/Button";
-import { Plus } from "lucide-react";
+import { Plus } from "@phosphor-icons/react";
 import { toast } from "sonner";
 
 interface Banner {

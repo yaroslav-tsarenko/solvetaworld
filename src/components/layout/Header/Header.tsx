@@ -5,11 +5,11 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Link } from "@/i18n/routing";
 import {
-  ShoppingCart, Search, Menu, X, User, Shield,
-  ChevronRight, Heart, ChevronDown,
-  Cable, LayoutGrid, Zap, Lightbulb, CircuitBoard, Plug,
-  Box, Wrench, Shield as ShieldIcon, SquareStack,
-} from "lucide-react";
+  Basket, MagnifyingGlass, List, X, UserCircle, Shield,
+  CaretRight, Heart, CaretDown,
+  Plugs, SquaresFour, Lightning, Lightbulb, Cpu, Plug,
+  Cube, Wrench, Shield as ShieldIcon, Stack,
+} from "@phosphor-icons/react";
 import { useCart } from "@/providers/CartProvider";
 import { useAuth } from "@/providers/AuthProvider";
 import { ThemeToggle } from "./ThemeToggle";
@@ -32,23 +32,23 @@ function subtreeCount(cat: Category): number {
 }
 
 const ICON_MAP: Record<string, React.ElementType> = {
-  "wiring": Cable,
-  "cable": Cable,
-  "automation": CircuitBoard,
-  "control": CircuitBoard,
-  "distribution": LayoutGrid,
-  "energy": Zap,
+  "wiring": Plugs,
+  "cable": Plugs,
+  "automation": Cpu,
+  "control": Cpu,
+  "distribution": SquaresFour,
+  "energy": Lightning,
   "protection": ShieldIcon,
   "protective": ShieldIcon,
-  "fuse": Zap,
+  "fuse": Lightning,
   "lighting": Lightbulb,
   "light": Lightbulb,
-  "terminal": SquareStack,
-  "mounting": Box,
-  "box": Box,
+  "terminal": Stack,
+  "mounting": Cube,
+  "box": Cube,
   "conduit": Wrench,
   "connector": Plug,
-  "power": Zap,
+  "power": Lightning,
   "plug": Plug,
 };
 
@@ -57,7 +57,7 @@ function getIconForCategory(name: string) {
   for (const [keyword, Icon] of Object.entries(ICON_MAP)) {
     if (lower.includes(keyword)) return Icon;
   }
-  return LayoutGrid;
+  return SquaresFour;
 }
 
 const iconButtonCls =
@@ -140,18 +140,18 @@ export function Header() {
         }`}
       >
         {/* Tier 1: logo / catalog trigger / search / actions */}
-        <div className="max-w-[1400px] mx-auto px-4 lg:px-6 h-[64px] flex items-center gap-4">
+        <div className="max-w-[1400px] mx-auto px-4 max-sm:px-3 lg:px-6 h-[64px] flex items-center gap-4 max-sm:gap-2">
           <button
             className={`${iconButtonCls} flex lg:hidden -ml-1`}
             onClick={() => setMobileOpen(true)}
             aria-label="Menu"
           >
-            <Menu size={22} />
+            <List size={22} />
           </button>
 
           <Link
             href="/"
-            className="text-2xl font-extrabold tracking-[-0.04em] text-ink whitespace-nowrap flex items-center gap-[0.4rem] shrink-0 no-underline"
+            className="text-2xl max-sm:text-lg font-extrabold tracking-[-0.04em] text-ink whitespace-nowrap flex items-center gap-[0.4rem] max-sm:gap-1 shrink-0 no-underline"
           >
             <SolvetaMark size={24} gradientId="solvetaMarkHeader" />
             <span className="font-black">
@@ -171,9 +171,9 @@ export function Header() {
               aria-expanded={megaOpen}
               aria-haspopup="true"
             >
-              <LayoutGrid size={16} />
+              <SquaresFour size={16} />
               {t("catalog")}
-              <ChevronDown
+              <CaretDown
                 size={14}
                 style={{
                   transition: "transform 0.2s",
@@ -232,7 +232,7 @@ export function Header() {
                                   {count} products
                                 </span>
                               </div>
-                              <ChevronRight
+                              <CaretRight
                                 size={14}
                                 className="ml-auto shrink-0 text-line opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5"
                               />
@@ -247,7 +247,7 @@ export function Header() {
                         className="text-[0.8125rem] font-semibold text-brand flex items-center gap-1 no-underline transition-all hover:gap-2"
                         onClick={() => setMegaOpen(false)}
                       >
-                        Browse all categories <ChevronRight size={14} />
+                        Browse all categories <CaretRight size={14} />
                       </Link>
                     </div>
                   </div>
@@ -261,7 +261,7 @@ export function Header() {
             onSubmit={handleSearch}
             role="search"
           >
-            <Search size={16} className="absolute left-2.5 text-ink-subtle pointer-events-none" />
+            <MagnifyingGlass size={16} className="absolute left-2.5 text-ink-subtle pointer-events-none" />
             <input
               type="text"
               className="flex-1 h-full pl-8 pr-3 border-0 outline-none text-[0.8125rem] bg-transparent text-ink placeholder:text-ink-subtle"
@@ -283,7 +283,7 @@ export function Header() {
               className={`${iconButtonCls} flex md:hidden`}
               aria-label={t("search")}
             >
-              <Search size={20} />
+              <MagnifyingGlass size={20} />
             </Link>
 
             <LanguageSwitcher />
@@ -301,7 +301,7 @@ export function Header() {
               className={`${iconButtonCls} relative`}
               aria-label={t("cart")}
             >
-              <ShoppingCart size={20} />
+              <Basket size={20} />
               {itemCount > 0 && (
                 <motion.span
                   key={cartBounce}
@@ -323,11 +323,11 @@ export function Header() {
 
             {user ? (
               <Link href="/account" className={iconButtonCls} aria-label={t("account")}>
-                <User size={20} />
+                <UserCircle size={20} />
               </Link>
             ) : (
               <Link href="/auth/login" className={iconButtonCls} aria-label={t("login")}>
-                <User size={20} />
+                <UserCircle size={20} />
               </Link>
             )}
           </div>
@@ -394,16 +394,16 @@ export function Header() {
               <div className="flex-1 overflow-y-auto px-5 py-4">
                 <nav className="flex flex-col gap-1">
                   <Link href="/" className={drawerNavLinkCls} onClick={() => setMobileOpen(false)}>
-                    {t("home")} <ChevronRight size={18} />
+                    {t("home")} <CaretRight size={18} />
                   </Link>
                   <Link href="/catalog" className={drawerNavLinkCls} onClick={() => setMobileOpen(false)}>
-                    {t("catalog")} <ChevronRight size={18} />
+                    {t("catalog")} <CaretRight size={18} />
                   </Link>
                   <Link href="/catalog?sort=newest" className={drawerNavLinkCls} onClick={() => setMobileOpen(false)}>
-                    New Arrivals <ChevronRight size={18} />
+                    New Arrivals <CaretRight size={18} />
                   </Link>
                   <Link href="/catalog?onSale=true" className={drawerNavLinkCls} onClick={() => setMobileOpen(false)}>
-                    Deals <ChevronRight size={18} />
+                    Deals <CaretRight size={18} />
                   </Link>
 
                   {topCategories.length > 0 && (
@@ -416,7 +416,7 @@ export function Header() {
                           className={drawerNavLinkCls}
                           onClick={() => setMobileOpen(false)}
                         >
-                          {cat.name} <ChevronRight size={18} />
+                          {cat.name} <CaretRight size={18} />
                         </Link>
                       ))}
                     </>
@@ -425,11 +425,11 @@ export function Header() {
                   <div className="h-px bg-line my-2" />
 
                   <Link href="/contact" className={drawerNavLinkCls} onClick={() => setMobileOpen(false)}>
-                    {t("contact")} <ChevronRight size={18} />
+                    {t("contact")} <CaretRight size={18} />
                   </Link>
                   {user && (role === "ADMIN" || role === "SUPER_ADMIN") && (
                     <a href="/admin" className={drawerNavLinkCls} onClick={() => setMobileOpen(false)}>
-                      Admin Panel <ChevronRight size={18} />
+                      Admin Panel <CaretRight size={18} />
                     </a>
                   )}
                 </nav>

@@ -1,13 +1,13 @@
 "use client";
 
 import {
-  Truck, RotateCcw, Shield, Gift, Award, Headphones,
-  Zap, Heart, Star, Package, Clock, CheckCircle,
-} from "lucide-react";
+  Truck, ArrowCounterClockwise, Shield, Gift, Medal, Headset,
+  Lightning, Heart, Star, Package, Clock, CheckCircle,
+} from "@phosphor-icons/react";
 
 const ICON_MAP: Record<string, React.ElementType> = {
-  Truck, RotateCcw, Shield, Gift, Award, Headphones,
-  Zap, Heart, Star, Package, Clock, CheckCircle,
+  Truck, RotateCcw: ArrowCounterClockwise, Shield, Gift, Award: Medal, Headphones: Headset,
+  Zap: Lightning, Heart, Star, Package, Clock, CheckCircle,
 };
 
 interface PromoItem {

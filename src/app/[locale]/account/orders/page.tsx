@@ -10,7 +10,7 @@ import { LoadingSpinner } from "@/components/shared/LoadingSpinner/LoadingSpinne
 import { EmptyState } from "@/components/shared/EmptyState/EmptyState";
 import { formatPrice } from "@/lib/utils/format-price";
 import { format } from "date-fns";
-import { Package } from "lucide-react";
+import { Package } from "@phosphor-icons/react";
 
 interface Order {
   id: string;

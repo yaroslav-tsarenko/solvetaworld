@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
-import { ShoppingCart, Heart, ImageOff } from "lucide-react";
+import { Basket, Heart, ImageBroken } from "@phosphor-icons/react";
 import { PriceDisplay } from "@/components/shared/PriceDisplay/PriceDisplay";
 import { useCart } from "@/providers/CartProvider";
 
@@ -79,7 +79,7 @@ export function ProductCard({
           </div>
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-ink-subtle text-[0.8125rem]">
-            <ImageOff size={32} />
+            <ImageBroken size={32} />
             No Image
           </div>
         )}
@@ -123,7 +123,7 @@ export function ProductCard({
             disabled={outOfStock}
             aria-label={t("addToCart")}
           >
-            <ShoppingCart size={16} />
+            <Basket size={16} />
           </button>
         </div>
       </div>

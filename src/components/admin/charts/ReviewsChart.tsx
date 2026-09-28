@@ -2,7 +2,7 @@
 
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
-const STAR_COLORS = ["#EF4444", "#f97316", "#F59E0B", "#84cc16", "#00C853"];
+const STAR_COLORS = ["#A8402F", "#C07830", "#9A6B15", "#6F9A62", "#3F7A54"];
 
 interface ReviewsChartProps {
   data: { rating: number; _count: number }[];

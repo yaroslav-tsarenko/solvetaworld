@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, ArrowRight, ShieldCheck, Trash2, Package, Truck, ImageOff } from "lucide-react";
+import { Basket, ArrowRight, ShieldCheck, Trash, Package, Truck, ImageBroken } from "@phosphor-icons/react";
 import { useCart } from "@/providers/CartProvider";
 import { useCurrency } from "@/providers/CurrencyProvider";
 import { QuantitySelector } from "@/components/shared/QuantitySelector/QuantitySelector";
@@ -46,7 +46,7 @@ export default function CartPage() {
             subtitle={t("emptySubtitle")}
             actionLabel={t("continueShopping")}
             actionHref="/catalog"
-            icon={<ShoppingCart size={48} />}
+            icon={<Basket size={48} />}
           />
         </motion.div>
       ) : (
@@ -61,7 +61,7 @@ export default function CartPage() {
                 </span>
               </div>
               {subtotalConverted >= freeShippingThreshold && (
-                <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", fontSize: "0.75rem", fontWeight: 600, color: "#2E7D32" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", fontSize: "0.75rem", fontWeight: 600, color: "#3F7A54" }}>
                   <Truck size={14} />
                   Free shipping
                 </div>
@@ -90,7 +90,7 @@ export default function CartPage() {
                       />
                     ) : (
                       <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--color-text-tertiary)" }}>
-                        <ImageOff size={24} />
+                        <ImageBroken size={24} />
                       </div>
                     )}
                   </div>
@@ -137,7 +137,7 @@ export default function CartPage() {
                           onMouseLeave={(e) => { e.currentTarget.style.color = "var(--color-text-tertiary)"; e.currentTarget.style.background = "transparent"; }}
                           aria-label="Remove"
                         >
-                          <Trash2 size={16} />
+                          <Trash size={16} />
                         </motion.button>
                       </div>
                     </div>
@@ -165,7 +165,7 @@ export default function CartPage() {
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem" }}>
                 <span style={{ color: "var(--color-text-secondary)" }}>{t("shipping")}</span>
-                <span style={{ fontWeight: 600, color: cart.shippingCost === 0 ? "#2E7D32" : undefined }}>
+                <span style={{ fontWeight: 600, color: cart.shippingCost === 0 ? "#3F7A54" : undefined }}>
                   {cart.shippingCost > 0 ? formatPrice(convert(cart.shippingCost), currency) : "Free"}
                 </span>
               </div>
@@ -209,7 +209,7 @@ export default function CartPage() {
             </div>
 
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Link href="/checkout" className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-brand text-white font-bold text-base no-underline shadow-[0_4px_14px_rgba(27,77,255,0.3)] transition-all hover:-translate-y-px hover:shadow-[0_6px_18px_rgba(27,77,255,0.4)]">
+              <Link href="/checkout" className="flex items-center justify-center gap-2 w-full py-4 rounded-xl bg-brand text-white font-bold text-base no-underline shadow-[0_4px_14px_rgba(46,94,78,0.3)] transition-all hover:-translate-y-px hover:shadow-[0_6px_18px_rgba(46,94,78,0.4)]">
                 {t("checkout")} <ArrowRight size={18} />
               </Link>
             </motion.div>

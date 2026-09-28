@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { Chip } from "@heroui/react";
-import { Package, MapPin, Heart, User as UserIcon, ChevronRight } from "lucide-react";
+import { Package, MapPin, Heart, UserCircle as UserIcon, CaretRight } from "@phosphor-icons/react";
 import { useAuth } from "@/providers/AuthProvider";
 import { useCurrency } from "@/providers/CurrencyProvider";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner/LoadingSpinner";
@@ -82,7 +82,7 @@ export default function AccountPage() {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
             <h2 style={{ fontSize: "1.0625rem", fontWeight: 700 }}>Recent Orders</h2>
             <Link href="/account/orders" style={{ fontSize: "0.8125rem", color: "var(--color-accent)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "0.25rem" }}>
-              View all <ChevronRight size={14} />
+              View all <CaretRight size={14} />
             </Link>
           </div>
           {ordersLoading ? (
@@ -116,22 +116,22 @@ export default function AccountPage() {
           <Link href="/account/orders" className="flex items-center gap-3 px-2 py-3 rounded-md no-underline text-ink transition-colors text-sm hover:bg-surface-1">
             <span className="w-8 h-8 rounded-lg bg-brand-soft text-brand flex items-center justify-center shrink-0"><Package size={16} /></span>
             <span style={{ flex: 1 }}>{t("orders")}</span>
-            <ChevronRight size={16} color="var(--color-text-tertiary)" />
+            <CaretRight size={16} color="var(--color-text-tertiary)" />
           </Link>
           <Link href="/account/profile" className="flex items-center gap-3 px-2 py-3 rounded-md no-underline text-ink transition-colors text-sm hover:bg-surface-1">
             <span className="w-8 h-8 rounded-lg bg-brand-soft text-brand flex items-center justify-center shrink-0"><UserIcon size={16} /></span>
             <span style={{ flex: 1 }}>{t("profile")}</span>
-            <ChevronRight size={16} color="var(--color-text-tertiary)" />
+            <CaretRight size={16} color="var(--color-text-tertiary)" />
           </Link>
           <Link href="/account/addresses" className="flex items-center gap-3 px-2 py-3 rounded-md no-underline text-ink transition-colors text-sm hover:bg-surface-1">
             <span className="w-8 h-8 rounded-lg bg-brand-soft text-brand flex items-center justify-center shrink-0"><MapPin size={16} /></span>
             <span style={{ flex: 1 }}>{t("addresses")}</span>
-            <ChevronRight size={16} color="var(--color-text-tertiary)" />
+            <CaretRight size={16} color="var(--color-text-tertiary)" />
           </Link>
           <Link href="/account/wishlist" className="flex items-center gap-3 px-2 py-3 rounded-md no-underline text-ink transition-colors text-sm hover:bg-surface-1">
             <span className="w-8 h-8 rounded-lg bg-brand-soft text-brand flex items-center justify-center shrink-0"><Heart size={16} /></span>
             <span style={{ flex: 1 }}>{t("wishlist")}</span>
-            <ChevronRight size={16} color="var(--color-text-tertiary)" />
+            <CaretRight size={16} color="var(--color-text-tertiary)" />
           </Link>
         </div>
       </div>

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Button } from "@/components/ui/Button";
-import { Trash2 } from "lucide-react";
+import { Trash } from "@phosphor-icons/react";
 import { QuantitySelector } from "@/components/shared/QuantitySelector/QuantitySelector";
 import { PriceDisplay } from "@/components/shared/PriceDisplay/PriceDisplay";
 import { useCart } from "@/providers/CartProvider";
@@ -53,7 +53,7 @@ export function CartItem({ item }: CartItemProps) {
               onPress={() => removeItem(item.productId, item.variantId)}
               aria-label="Remove"
             >
-              <Trash2 size={16} />
+              <Trash size={16} />
             </Button>
           </div>
         </div>

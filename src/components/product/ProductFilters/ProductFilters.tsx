@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { CaretDown, CaretUp } from "@phosphor-icons/react";
 
 interface Category {
   id: string;
@@ -35,7 +35,7 @@ function FilterSection({ title, defaultOpen = true, children }: { title: string;
     <div className="border-b border-line last:border-b-0">
       <button className="flex items-center justify-between w-full px-5 py-4 bg-transparent border-0 cursor-pointer text-ink-muted transition-colors hover:bg-surface-2" onClick={() => setOpen(!open)}>
         <h3 className="text-[0.8125rem] font-bold uppercase tracking-[0.05em] text-ink">{title}</h3>
-        {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        {open ? <CaretUp size={16} /> : <CaretDown size={16} />}
       </button>
       {open && <div className="px-5 pb-4">{children}</div>}
     </div>
@@ -83,7 +83,7 @@ function CategoryItem({
               color: "var(--color-text-tertiary)", padding: "0.125rem", display: "flex",
             }}
           >
-            {expanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+            {expanded ? <CaretUp size={12} /> : <CaretDown size={12} />}
           </button>
         )}
       </li>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Shield, Zap, Heart, RefreshCw, Award, Headphones } from "lucide-react";
+import { Shield, Lightning, Heart, ArrowsClockwise, Medal, Headset } from "@phosphor-icons/react";
 import { motion } from "framer-motion";
 
 const reasons = [
@@ -8,37 +8,37 @@ const reasons = [
     icon: <Shield size={24} />,
     title: "Secure Shopping",
     desc: "Your data is protected with enterprise-grade encryption and secure payments.",
-    gradient: "linear-gradient(135deg, #0E8A5A 0%, #2FB57F 100%)",
+    gradient: "linear-gradient(135deg, #2E5E4E 0%, #3F7A54 100%)",
   },
   {
-    icon: <Zap size={24} />,
+    icon: <Lightning size={24} />,
     title: "Fast Delivery",
     desc: "Free shipping on orders over £100 with express options available.",
-    gradient: "linear-gradient(135deg, #3ED598 0%, #0E8A5A 100%)",
+    gradient: "linear-gradient(135deg, #A5561F 0%, #8A4517 100%)",
   },
   {
     icon: <Heart size={24} />,
     title: "Certified Products",
     desc: "Every electrical material is sourced from certified manufacturers and meets professional standards.",
-    gradient: "linear-gradient(135deg, #f43f5e 0%, #3ED598 100%)",
+    gradient: "linear-gradient(135deg, #234A3D 0%, #2E5E4E 100%)",
   },
   {
-    icon: <RefreshCw size={24} />,
+    icon: <ArrowsClockwise size={24} />,
     title: "Easy Returns",
     desc: "Changed your mind? Return within 30 days — no questions asked.",
-    gradient: "linear-gradient(135deg, #2FB57F 0%, #3ED598 100%)",
+    gradient: "linear-gradient(135deg, #4A6B7C 0%, #3A5866 100%)",
   },
   {
-    icon: <Award size={24} />,
+    icon: <Medal size={24} />,
     title: "Best Prices",
     desc: "We guarantee competitive pricing. Found it cheaper? We'll match it.",
-    gradient: "linear-gradient(135deg, #3ED598 0%, #f43f5e 100%)",
+    gradient: "linear-gradient(135deg, #9A6B15 0%, #7D5610 100%)",
   },
   {
-    icon: <Headphones size={24} />,
+    icon: <Headset size={24} />,
     title: "24/7 Support",
     desc: "Our team is available around the clock to help with anything.",
-    gradient: "linear-gradient(135deg, #2FB57F 0%, #ec4899 100%)",
+    gradient: "linear-gradient(135deg, #3F7A54 0%, #2E5E4E 100%)",
   },
 ];
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Minus, Plus } from "lucide-react";
+import { Minus, Plus } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/Button";
 
 interface QuantitySelectorProps {

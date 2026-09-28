@@ -11,9 +11,9 @@ import { COMPANY } from "@/lib/company";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Mail, Phone, MapPin, Clock, Send,
-  CheckCircle, MessageSquare, HelpCircle, ShieldCheck,
-} from "lucide-react";
+  EnvelopeSimple, Phone, MapPin, Clock, PaperPlaneTilt,
+  CheckCircle, ChatCircle, Question, ShieldCheck,
+} from "@phosphor-icons/react";
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
@@ -48,7 +48,7 @@ const errorStyle: React.CSSProperties = {
 };
 
 const CONTACT_INFO = [
-  { icon: Mail, title: "Email Us", detail: COMPANY.email, sub: "We reply within 24 hours" },
+  { icon: EnvelopeSimple, title: "Email Us", detail: COMPANY.email, sub: "We reply within 24 hours" },
   // The phone card only exists once there is a number to call.
   ...(COMPANY.phone
     ? [{ icon: Phone, title: "Call Us", detail: COMPANY.phone, sub: "Mon-Fri 9:00-18:00 GMT" }]
@@ -64,10 +64,10 @@ const CONTACT_INFO = [
 ];
 
 const TOPICS = [
-  { icon: MessageSquare, label: "General Inquiry", value: "general" },
-  { icon: HelpCircle, label: "Product Support", value: "support" },
+  { icon: ChatCircle, label: "General Inquiry", value: "general" },
+  { icon: Question, label: "Product Support", value: "support" },
   { icon: ShieldCheck, label: "Warranty & Returns", value: "warranty" },
-  { icon: Send, label: "Business / Wholesale", value: "business" },
+  { icon: PaperPlaneTilt, label: "Business / Wholesale", value: "business" },
 ];
 
 export default function ContactPage() {
@@ -104,7 +104,7 @@ export default function ContactPage() {
       <style>{`
         .contact-input:focus {
           border-color: var(--color-accent) !important;
-          box-shadow: 0 0 0 3px rgba(27,77,255,0.1) !important;
+          box-shadow: 0 0 0 3px rgba(46,94,78,0.14) !important;
         }
       `}</style>
       <Breadcrumbs items={[{ label: nav("home"), href: "/" }, { label: t("title") }]} />
@@ -182,7 +182,7 @@ export default function ContactPage() {
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.1, type: "spring", damping: 12, stiffness: 300 }}
                 >
-                  <CheckCircle size={64} style={{ color: "#2E7D32", margin: "0 auto 1.5rem" }} />
+                  <CheckCircle size={64} style={{ color: "#3F7A54", margin: "0 auto 1.5rem" }} />
                 </motion.div>
                 <h2 style={{ fontSize: "1.5rem", fontWeight: 800, marginBottom: "0.75rem" }}>Message Sent!</h2>
                 <p style={{ color: "var(--color-text-secondary)", maxWidth: "320px", margin: "0 auto 1.5rem", lineHeight: 1.6 }}>
@@ -202,7 +202,7 @@ export default function ContactPage() {
               >
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
                   <div style={{ width: "2rem", height: "2rem", borderRadius: "10px", background: "var(--color-accent-light)", color: "var(--color-accent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <Send size={16} />
+                    <PaperPlaneTilt size={16} />
                   </div>
                   <h2 style={{ fontSize: "1.125rem", fontWeight: 700 }}>Send us a message</h2>
                 </div>
@@ -258,7 +258,7 @@ export default function ContactPage() {
                   <div>
                     <label style={labelStyle}>{t("email")}</label>
                     <div style={{ position: "relative" }}>
-                      <Mail size={16} style={{ position: "absolute", left: "0.875rem", top: "50%", transform: "translateY(-50%)", color: "var(--color-text-tertiary)", pointerEvents: "none" }} />
+                      <EnvelopeSimple size={16} style={{ position: "absolute", left: "0.875rem", top: "50%", transform: "translateY(-50%)", color: "var(--color-text-tertiary)", pointerEvents: "none" }} />
                       <input
                         className="contact-input"
                         type="email"
@@ -301,7 +301,7 @@ export default function ContactPage() {
                     size="lg"
                     isLoading={loading}
                     style={{ width: "100%" }}
-                    startContent={!loading ? <Send size={16} /> : undefined}
+                    startContent={!loading ? <PaperPlaneTilt size={16} /> : undefined}
                   >
                     {t("send")}
                   </Button>
@@ -326,7 +326,7 @@ export default function ContactPage() {
             background: "var(--color-bg)",
           }}>
             <h3 style={{ fontSize: "1rem", fontWeight: 700, marginBottom: "1rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <HelpCircle size={18} style={{ color: "var(--color-accent)" }} />
+              <Question size={18} style={{ color: "var(--color-accent)" }} />
               Frequently Asked
             </h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
@@ -353,11 +353,11 @@ export default function ContactPage() {
           <div style={{
             padding: "1.5rem",
             borderRadius: "var(--radius-xl)",
-            background: "linear-gradient(135deg, #1A1A2E 0%, #2d2d4e 100%)",
+            background: "linear-gradient(135deg, #1E2420 0%, #234A3D 100%)",
             color: "#fff",
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.875rem" }}>
-              <Clock size={18} style={{ color: "#0E8A5A" }} />
+              <Clock size={18} style={{ color: "#8FB3A3" }} />
               <h3 style={{ fontSize: "0.9375rem", fontWeight: 700 }}>Response Times</h3>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
@@ -414,7 +414,7 @@ export default function ContactPage() {
             alignItems: "center",
             gap: "0.75rem",
           }}>
-            <ShieldCheck size={20} style={{ color: "#2E7D32", flexShrink: 0 }} />
+            <ShieldCheck size={20} style={{ color: "#3F7A54", flexShrink: 0 }} />
             <p style={{ fontSize: "0.75rem", color: "var(--color-text-secondary)", lineHeight: 1.5 }}>
               Your information is secure and will only be used to respond to your inquiry. We never share your data.
             </p>

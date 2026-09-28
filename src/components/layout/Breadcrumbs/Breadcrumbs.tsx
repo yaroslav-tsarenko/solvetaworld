@@ -1,7 +1,7 @@
 "use client";
 
 import { Link } from "@/i18n/routing";
-import { ChevronRight } from "lucide-react";
+import { CaretRight } from "@phosphor-icons/react";
 
 interface BreadcrumbItem {
   label: string;
@@ -19,7 +19,7 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
         {items.map((item, index) => (
           <li key={index} className="flex items-center gap-2">
             {index > 0 && (
-              <ChevronRight size={14} className="text-ink-subtle text-xs" />
+              <CaretRight size={14} className="text-ink-subtle text-xs" />
             )}
             {item.href ? (
               <Link href={item.href} className="text-ink-muted transition-colors hover:text-brand">

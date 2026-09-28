@@ -16,8 +16,9 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-geist-sans)"],
-        mono: ["var(--font-geist-mono)"],
+        sans: ["var(--font-karla)", "Karla", "system-ui", "sans-serif"],
+        display: ["var(--font-bricolage)", "Bricolage Grotesque", "Georgia", "serif"],
+        mono: ["ui-monospace", "SF Mono", "Menlo", "monospace"],
       },
       maxWidth: {
         container: "1320px",

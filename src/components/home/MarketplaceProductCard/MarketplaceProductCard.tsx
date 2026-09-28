@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
-import { Heart, ShoppingCart, Star, Eye } from "lucide-react";
+import { Heart, Basket, Star, Eye } from "@phosphor-icons/react";
 import { useCart } from "@/providers/CartProvider";
 import { formatPrice } from "@/lib/utils/format-price";
 import { getProductImage, getProductImageFallback } from "@/lib/utils/product-image";
@@ -58,15 +58,15 @@ export function MarketplaceProductCard({ product }: Props) {
   return (
     <Link
       href={`/product/${product.slug}`}
-      className="group bg-surface border border-line rounded-lg overflow-hidden no-underline text-ink flex flex-col transition-all hover:border-line-hover hover:shadow-[0_8px_24px_rgba(15,23,42,0.1)] hover:-translate-y-1"
+      className="group bg-surface border border-line rounded-lg overflow-hidden no-underline text-ink flex flex-col h-full transition-all hover:border-brand hover:shadow-[0_8px_24px_rgba(30,36,32,0.1)]"
     >
-      <div className="relative p-3 flex items-center justify-center bg-white aspect-square overflow-hidden">
+      <div className="relative p-4 flex items-center justify-center bg-white aspect-square overflow-hidden border-b border-line">
         <Image
           src={imgSrc}
           alt={product.images?.[0]?.alt || product.name}
           width={200}
           height={200}
-          className="object-contain max-w-full max-h-full transition-transform duration-200 group-hover:scale-[1.03]"
+          className="object-contain max-w-full max-h-full transition-transform duration-200 group-hover:scale-[1.04]"
           onError={(e) => {
             (e.target as HTMLImageElement).src = getProductImageFallback();
           }}
@@ -99,43 +99,41 @@ export function MarketplaceProductCard({ product }: Props) {
         </div>
       </div>
       <div className="px-3 pt-2.5 pb-3 flex flex-col flex-1">
-        {category && (
-          <span className="text-[0.65rem] text-ink-subtle uppercase tracking-[0.03em] mb-1">
-            {category.name}
+        <div className="flex items-center justify-between gap-2 mb-1">
+          <span className="text-[0.65rem] text-ink-subtle uppercase tracking-[0.04em] truncate">
+            {category?.name ?? " "}
           </span>
-        )}
-        <h4 className="text-[0.8125rem] max-sm:text-xs font-semibold m-0 mb-1.5 leading-[1.35] line-clamp-2">
+          <span className="flex items-center gap-0.5 shrink-0">
+            <Star size={11} weight="fill" color="#9A6B15" />
+            <span className="text-[0.65rem] text-ink-subtle">4.0 (12)</span>
+          </span>
+        </div>
+        <h4 className="text-[0.8125rem] max-sm:text-xs font-semibold m-0 mb-2 leading-[1.35] line-clamp-2 min-h-[2.7em] break-words">
           {product.name}
         </h4>
-        <div className="flex items-center gap-px mb-2">
-          {[1, 2, 3, 4, 5].map((s) => (
-            <Star key={s} size={11} fill={s <= 4 ? "#3ED598" : "none"} stroke={s <= 4 ? "#3ED598" : "#cbd5e1"} />
-          ))}
-          <span className="text-[0.65rem] text-ink-subtle ml-1">(12)</span>
-        </div>
-        <div className="flex items-center justify-between mb-1.5 mt-auto">
-          <div className="flex items-baseline gap-1.5">
+        <div className="flex items-baseline justify-between gap-1.5 mt-auto mb-2.5">
+          <div className="flex items-baseline gap-1.5 min-w-0">
             <span className="text-base max-sm:text-sm font-extrabold text-ink">{formatPrice(price)}</span>
             {hasDiscount && (
               <span className="text-xs text-ink-subtle line-through">{formatPrice(comparePrice)}</span>
             )}
           </div>
-          <button
-            className={`w-8 h-8 flex items-center justify-center text-white border-0 rounded-md cursor-pointer transition-colors shrink-0 ${
-              inStock ? "bg-brand hover:bg-brand-hover" : "bg-ink-subtle cursor-not-allowed"
-            }`}
-            onClick={handleAddToCart}
-            disabled={!inStock}
-            aria-label="Add to cart"
-          >
-            <ShoppingCart size={15} />
-          </button>
+          {inStock ? (
+            <span className="text-[0.65rem] text-success font-medium whitespace-nowrap">In stock</span>
+          ) : (
+            <span className="text-[0.65rem] text-sale font-medium whitespace-nowrap">Out</span>
+          )}
         </div>
-        {inStock ? (
-          <span className="text-[0.65rem] text-success font-medium">In stock</span>
-        ) : (
-          <span className="text-[0.65rem] text-sale font-medium">Out of stock</span>
-        )}
+        <button
+          className={`w-full h-8 flex items-center justify-center gap-1.5 text-xs font-bold text-white border-0 rounded-md transition-colors ${
+            inStock ? "bg-brand hover:bg-brand-hover cursor-pointer" : "bg-ink-subtle cursor-not-allowed"
+          }`}
+          onClick={handleAddToCart}
+          disabled={!inStock}
+          aria-label="Add to cart"
+        >
+          <Basket size={15} /> Add to Cart
+        </button>
       </div>
     </Link>
   );

@@ -8,9 +8,9 @@ interface StockDonutChartProps {
 
 export function StockDonutChart({ data }: StockDonutChartProps) {
   const chartData = [
-    { name: "In Stock", value: data.inStock, color: "#00C853" },
-    { name: "Low Stock", value: data.lowStock, color: "#F59E0B" },
-    { name: "Out of Stock", value: data.outOfStock, color: "#EF4444" },
+    { name: "In Stock", value: data.inStock, color: "#3F7A54" },
+    { name: "Low Stock", value: data.lowStock, color: "#9A6B15" },
+    { name: "Out of Stock", value: data.outOfStock, color: "#A8402F" },
   ].filter((d) => d.value > 0);
 
   const total = data.inStock + data.lowStock + data.outOfStock;

@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
-import { FaLinkedinIn, FaInstagram } from "react-icons/fa6";
+import { LinkedinLogo, InstagramLogo } from "@phosphor-icons/react";
 import { SolvetaMark } from "../SolvetaMark";
 import { COMPANY } from "@/lib/company";
 import visaLogo from "@/assets/visa-logo.svg";
@@ -108,12 +108,12 @@ export function Footer() {
           <div className="flex items-center gap-2">
             {process.env.NEXT_PUBLIC_LINKEDIN_URL && (
               <a href={process.env.NEXT_PUBLIC_LINKEDIN_URL} className={socialIconCls} aria-label="LinkedIn" target="_blank" rel="noopener noreferrer">
-                <FaLinkedinIn size={16} />
+                <LinkedinLogo size={16} />
               </a>
             )}
             {process.env.NEXT_PUBLIC_INSTAGRAM_URL && (
               <a href={process.env.NEXT_PUBLIC_INSTAGRAM_URL} className={socialIconCls} aria-label="Instagram" target="_blank" rel="noopener noreferrer">
-                <FaInstagram size={16} />
+                <InstagramLogo size={16} />
               </a>
             )}
           </div>

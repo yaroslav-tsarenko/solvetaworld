@@ -69,56 +69,25 @@ async function getHomeData() {
       }),
     ]);
 
-    const sectionProducts: Record<string, typeof allActiveProducts> = {};
-    for (const section of sections) {
-      let products = allActiveProducts;
-      switch (section.filterType) {
-        case "featured":
-          products = allActiveProducts.filter((p) => p.isFeatured);
-          break;
-        case "newest":
-          products = [...allActiveProducts].sort(
-            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          );
-          break;
-        case "onSale":
-          products = allActiveProducts.filter((p) => p.comparePrice !== null);
-          break;
-        case "category":
-          if (section.categorySlug) {
-            products = allActiveProducts.filter((p) =>
-              p.categories.some((c) => c.category.slug === section.categorySlug)
-            );
-          }
-          break;
-        case "popular":
-          products = [...allActiveProducts].sort(
-            (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-          );
-          break;
-        case "all":
-        default:
-          break;
-      }
-      // Same shelf picker the helper sections use, so an admin-defined section
-      // is drawn from this store's slice of the shared catalogue too.
-      sectionProducts[section.slug] = pickForShelf(
-        products,
-        section.maxProducts,
-        `section:${section.slug}`,
-      );
-    }
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const products = allActiveProducts as any[];
 
-    const featuredProducts = getFeaturedProducts(products, 10);
-    const saleProducts = getSaleProducts(products, 15);
-    const newProducts = getNewProducts(products, 10);
-    const popularProducts = getPopularProducts(products, 10);
+    // Acquirer compliance: every homepage section must show its own distinct
+    // assortment — no product may appear in two sections. Sections claim their
+    // picks in the order they render on the page; later sections draw only
+    // from what is left.
+    const claimed = new Set<string>();
+    const unclaimed = () => products.filter((p) => !claimed.has(p.id));
+    const claim = <T extends { id: string }>(picked: T[]): T[] => {
+      picked.forEach((p) => claimed.add(p.id));
+      return picked;
+    };
+
+    const popularProducts = claim(getPopularProducts(unclaimed(), 10));
+    const saleProducts = claim(getSaleProducts(unclaimed(), 15));
 
     const categorySections = getHomepageCategorySections(
-      products,
+      unclaimed(),
       categoriesWithChildren.map((c) => ({
         id: c.id,
         name: c.name,
@@ -129,8 +98,51 @@ async function getHomeData() {
       10,
       6,
     );
+    categorySections.forEach((cs) => claim(cs.products));
 
-    const brandSections = getBrandSections(products, TOP_BRANDS, 8);
+    const sectionProducts: Record<string, typeof allActiveProducts> = {};
+    for (const section of sections) {
+      let pool = unclaimed();
+      switch (section.filterType) {
+        case "featured":
+          pool = pool.filter((p) => p.isFeatured);
+          break;
+        case "newest":
+          pool = [...pool].sort(
+            (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+          break;
+        case "onSale":
+          pool = pool.filter((p) => p.comparePrice !== null);
+          break;
+        case "category":
+          if (section.categorySlug) {
+            pool = pool.filter((p) =>
+              p.categories.some((c: { category: { slug: string } }) => c.category.slug === section.categorySlug)
+            );
+          }
+          break;
+        case "popular":
+          pool = [...pool].sort(
+            (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+          break;
+        case "all":
+        default:
+          break;
+      }
+      // Same shelf picker the helper sections use, so an admin-defined section
+      // is drawn from this store's slice of the shared catalogue too.
+      sectionProducts[section.slug] = claim(pickForShelf(
+        pool,
+        section.maxProducts,
+        `section:${section.slug}`,
+      ));
+    }
+
+    const newProducts = claim(getNewProducts(unclaimed(), 10));
+    const featuredProducts = getFeaturedProducts(unclaimed(), 10);
+    const brandSections = getBrandSections(unclaimed(), TOP_BRANDS, 8);
 
     const categoryShowcase = categoriesWithChildren.map((c) => {
       const directCount = c._count.products;

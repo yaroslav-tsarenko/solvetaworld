@@ -28,7 +28,7 @@ export function ConfirmDialog({
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)" }} onClick={onClose} />
-      <div style={{ position: "relative", background: "var(--color-bg)", borderRadius: "var(--radius-lg)", padding: "1.5rem", maxWidth: "28rem", width: "100%", zIndex: 51 }}>
+      <div style={{ position: "relative", background: "var(--color-bg)", borderRadius: "var(--radius-lg)", border: "1px solid var(--color-border)", padding: "1.5rem", maxWidth: "28rem", width: "100%", zIndex: 51 }}>
         <h2 style={{ fontSize: "1.125rem", fontWeight: 600, marginBottom: "0.75rem" }}>{title}</h2>
         <p style={{ marginBottom: "1.5rem" }}>{message}</p>
         <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem" }}>

@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/Button";
-import { Plus } from "lucide-react";
+import { Plus } from "@phosphor-icons/react";
 
 export default function AdminPagesPage() {
   return (

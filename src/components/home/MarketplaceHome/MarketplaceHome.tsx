@@ -140,7 +140,7 @@ export function MarketplaceHome({ data }: Props) {
         </div>
       )}
 
-      {/* Most Popular: featured item enlarged beside smaller cards */}
+      {/* Most Popular */}
       {popularProducts.length > 0 && (
         <div className={containerCls}>
           <ProductSection
@@ -150,8 +150,7 @@ export function MarketplaceHome({ data }: Props) {
             viewAllHref="/catalog?sort=popular"
             viewAllLabel="View all popular"
             bg="white"
-            columns={4}
-            layout="featured"
+            columns={5}
           />
         </div>
       )}

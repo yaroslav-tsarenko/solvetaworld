@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
-import { Flame, ChevronLeft, ChevronRight } from "lucide-react";
+import { Fire, CaretLeft, CaretRight } from "@phosphor-icons/react";
 import { motion, useInView } from "framer-motion";
 import { formatPrice } from "@/lib/utils/format-price";
 import { getProductImage, getProductImageFallback } from "@/lib/utils/product-image";
@@ -40,7 +40,7 @@ export function SaleStrip({ products }: Props) {
             animate={isInView ? { scale: [1, 1.2, 1] } : {}}
             transition={{ duration: 0.6, delay: 0.3, repeat: Infinity, repeatDelay: 3 }}
           >
-            <Flame size={18} className="text-sale" />
+            <Fire size={18} className="text-sale" />
           </motion.div>
           <h2 className="text-base font-extrabold m-0 text-ink">Hot Deals</h2>
           <span className="bg-sale text-white text-[0.65rem] font-bold px-2 py-0.5 rounded uppercase">Sale</span>
@@ -50,14 +50,14 @@ export function SaleStrip({ products }: Props) {
             href="/catalog?sort=price-asc&onSale=true"
             className="text-[0.8125rem] font-semibold text-sale no-underline flex items-center gap-0.5 whitespace-nowrap hover:opacity-80"
           >
-            View all <ChevronRight size={14} />
+            View all <CaretRight size={14} />
           </Link>
           <div className="flex gap-1">
             <button className={arrowCls} onClick={() => scroll(-1)} aria-label="Scroll left">
-              <ChevronLeft size={16} />
+              <CaretLeft size={16} />
             </button>
             <button className={arrowCls} onClick={() => scroll(1)} aria-label="Scroll right">
-              <ChevronRight size={16} />
+              <CaretRight size={16} />
             </button>
           </div>
         </div>

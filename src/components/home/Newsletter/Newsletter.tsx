@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Send } from "lucide-react";
+import { PaperPlaneTilt } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 
@@ -50,7 +50,7 @@ export function Newsletter() {
             type="submit"
             className="px-6 py-3 rounded-pill bg-white text-brand font-bold text-sm border-0 cursor-pointer flex items-center gap-1.5 whitespace-nowrap transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(0,0,0,0.15)] active:translate-y-0"
           >
-            <Send size={16} />
+            <PaperPlaneTilt size={16} />
             {t("newsletterCta")}
           </button>
         </form>

@@ -2,7 +2,7 @@
 
 import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/Button";
-import { PackageOpen } from "lucide-react";
+import { Package } from "@phosphor-icons/react";
 
 interface EmptyStateProps {
   title: string;
@@ -32,7 +32,7 @@ export function EmptyState({
       }}
     >
       <div style={{ color: "var(--color-text-tertiary)" }}>
-        {icon || <PackageOpen size={48} />}
+        {icon || <Package size={48} />}
       </div>
       <h3 style={{ fontSize: "1.25rem", fontWeight: 600, color: "var(--color-text)" }}>
         {title}
