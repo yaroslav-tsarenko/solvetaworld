@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { mentionsSupplier } from "@/lib/utils/supplier";
 import { productSchema } from "@/lib/validators/product";
 import { PRODUCTS_PER_PAGE } from "@/lib/utils/constants";
 import { slugify } from "@/lib/utils/slugify";
@@ -27,6 +28,10 @@ export async function GET(request: NextRequest) {
       where.status = status as Prisma.EnumProductStatusFilter;
     } else if (!status) {
       where.status = "ACTIVE";
+    }
+
+    if (mentionsSupplier(search) || mentionsSupplier(brand)) {
+      where.id = { in: [] };
     }
 
     if (search) {

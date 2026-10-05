@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { mentionsSupplier } from "@/lib/utils/supplier";
 
 export async function GET(request: NextRequest) {
   try {
@@ -7,7 +8,7 @@ export async function GET(request: NextRequest) {
     const query = searchParams.get("q") || "";
     const limit = parseInt(searchParams.get("limit") || "10");
 
-    if (!query || query.length < 2) {
+    if (!query || query.length < 2 || mentionsSupplier(query)) {
       return NextResponse.json([]);
     }
 

@@ -3,6 +3,7 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import pg from "pg";
+import { publicBrand, publicText, stripSupplierMentions } from "../src/lib/utils/supplier";
 
 const BIGBUY_URL = "https://api.bigbuy.eu";
 const BIGBUY_TOKEN = process.env.BIGBUY_API_PRODUCTION;
@@ -278,18 +279,20 @@ async function main() {
   const skuToBbId = new Map<string, number>();
   for (const p of scoped) {
     const info = infoById.get(p.id);
-    const name = info?.name?.trim() || `BigBuy ${p.sku}`;
+    const name = stripSupplierMentions(info?.name?.trim() || "") || p.sku;
     const sku = p.sku;
     if (!sku) continue;
     const price = Number(p.retailPrice) || 0;
     const cost = Number(p.wholesalePrice) || null;
     if (price <= 0) continue;
-    const description = info?.description || null;
-    const shortDescription = info?.shortDescription || (description ? stripHtml(description, 300) : null);
+    const description = info?.description ? stripSupplierMentions(info.description) : null;
+    const shortDescription = info?.shortDescription
+      ? stripSupplierMentions(info.shortDescription)
+      : description ? stripHtml(description, 300) : null;
     const weight = p.weight && p.weight > 0 ? p.weight : null;
     const ean = p.ean13 && /^\d{13}$/.test(p.ean13) ? p.ean13 : null;
     const quantity = p.active === 1 || p.active === true ? 999 : 0;
-    const brand = p.manufacturer ? mfgById.get(p.manufacturer) || null : null;
+    const brand = p.manufacturer ? publicBrand(mfgById.get(p.manufacturer)) : null;
     const dbId = cuid();
     skuToDbId.set(sku, dbId);
     skuToBbId.set(sku, p.id);
@@ -379,7 +382,7 @@ async function main() {
     const sorted = [...imgs].sort((a, b) => (b.isCover ? 1 : 0) - (a.isCover ? 1 : 0) || a.position - b.position);
     for (let idx = 0; idx < Math.min(sorted.length, 8); idx++) {
       const img = sorted[idx];
-      imageRows.push({ id: cuid(), url: img.url, alt: img.name || sku, sort: idx, productDbId: dbId });
+      imageRows.push({ id: cuid(), url: img.url, alt: publicText(img.name) || sku, sort: idx, productDbId: dbId });
     }
   }
   for (let i = 0; i < imageRows.length; i += 500) {
