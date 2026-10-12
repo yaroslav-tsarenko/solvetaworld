@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { SHIPPING_METHOD_KEYS, type ShippingMethodKey } from "@/lib/shipping";
 
 export const checkoutContactSchema = z.object({
   email: z.string().email("Valid email is required"),
@@ -32,7 +33,9 @@ export const cardSchema = z.object({
 export const checkoutSchema = z.object({
   contact: checkoutContactSchema,
   shipping: checkoutShippingSchema,
-  shippingMethod: z.string().min(1, "Shipping method is required"),
+  shippingMethod: z.enum(SHIPPING_METHOD_KEYS as [ShippingMethodKey, ...ShippingMethodKey[]], {
+    message: "Choose a delivery service",
+  }),
   notes: z.string().optional(),
   discountCode: z.string().optional(),
   acceptedPolicies: z

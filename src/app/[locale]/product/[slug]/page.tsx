@@ -2,8 +2,10 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ProductGallery } from "@/components/product/ProductGallery/ProductGallery";
-import { ProductInfo } from "@/components/product/ProductInfo/ProductInfo";
-import { ProductTabs } from "@/components/product/ProductTabs/ProductTabs";
+import { ProductBuyBox } from "@/components/product/ProductBuyBox/ProductBuyBox";
+import { ProductSpecSheet } from "@/components/product/ProductSpecSheet/ProductSpecSheet";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/routing";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs/Breadcrumbs";
 import { JsonLd } from "@/components/shared/SEO/JsonLd";
 
@@ -51,7 +53,10 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
-  const { slug } = await params;
+  const { slug, locale } = await params;
+  const t = await getTranslations("product");
+  const nav = await getTranslations("nav");
+  const listing = await getTranslations("listing");
 
   const product = await prisma.product.findUnique({
     where: { slug },
@@ -95,11 +100,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
     offers: {
       "@type": "Offer",
       price: Number(product.price),
-      priceCurrency: "EUR",
+      priceCurrency: "GBP",
       availability: product.quantity > 0
         ? "https://schema.org/InStock"
         : "https://schema.org/OutOfStock",
-      url: `${siteUrl}/en/product/${product.slug}`,
+      url: `${siteUrl}/${locale}/product/${product.slug}`,
     },
     ...(reviewCount > 0 && {
       aggregateRating: {
@@ -111,8 +116,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
   };
 
   const breadcrumbItems = [
-    { label: "Home", href: "/" },
-    { label: "Catalog", href: "/catalog" },
+    { label: nav("home"), href: "/" },
+    { label: listing("catalogueTitle"), href: "/catalog" },
     ...categoryChain.map((cat) => ({
       label: cat.name,
       href: `/catalog/${cat.slug}`,
@@ -120,45 +125,73 @@ export default async function ProductPage({ params }: ProductPageProps) {
     { label: product.name },
   ];
 
+  const keyData = [
+    ...(product.brand ? [{ label: t("brand"), value: product.brand }] : []),
+    { label: t("sku"), value: product.sku },
+    ...(product.ean ? [{ label: t("ean"), value: product.ean }] : []),
+    { label: t("condition"), value: product.condition },
+    ...(primaryCategory ? [{ label: t("category"), value: categoryChain.map((c) => c.name).join(" › ") }] : []),
+  ];
+
   return (
-    <div className="max-w-container mx-auto px-4 pb-16">
+    <div className="max-w-container mx-auto px-4 lg:px-6 pb-20">
       <JsonLd data={jsonLd} />
 
       <Breadcrumbs items={breadcrumbItems} />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 lg:gap-12 mt-2 items-start">
-        <div className="static md:sticky md:top-[calc(var(--header-height)+1rem)]">
-          <ProductGallery images={product.images} productName={product.name} />
-        </div>
-        <ProductInfo
-          id={product.id}
-          name={product.name}
-          slug={product.slug}
-          sku={product.sku}
-          price={Number(product.price)}
-          comparePrice={product.comparePrice ? Number(product.comparePrice) : null}
-          quantity={product.quantity}
-          shortDescription={product.shortDescription}
-          description={product.description}
-          brand={product.brand}
-          condition={product.condition}
-          lowStockAlert={product.lowStockAlert}
-          imageUrl={product.images[0]?.url}
-          ean={product.ean}
-          reviewCount={reviewCount}
-          avgRating={avgRating}
-          categoryPath={categoryChain}
-        />
-      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-8 xl:gap-12 items-start">
+        <div className="min-w-0">
+          <header className="mb-5 pb-4 border-b-4 border-line-strong">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mb-2 text-sm">
+              {product.brand && (
+                <Link
+                  href={`/catalog?brand=${encodeURIComponent(product.brand)}`}
+                  className="bg-coal text-white font-display font-bold uppercase tracking-wide px-2 py-0.5 hover:bg-hivis hover:text-coal"
+                >
+                  {product.brand}
+                </Link>
+              )}
+              <span className="font-mono text-ink-muted">{t("sku")} {product.sku}</span>
+              {product.ean && <span className="font-mono text-ink-muted">{t("ean")} {product.ean}</span>}
+              {reviewCount > 0 && (
+                <a href="#rev-title" className="font-mono text-ink-muted underline underline-offset-2">
+                  {avgRating.toFixed(1)}/5 · {t("reviewCount", { count: reviewCount })}
+                </a>
+              )}
+            </div>
+            <h1 className="m-0 text-[2.5rem] max-md:text-[1.9rem] leading-[1.02] text-ink [overflow-wrap:anywhere]">{product.name}</h1>
+            {product.shortDescription && (
+              <p className="m-0 mt-3 text-[1rem] text-ink-muted leading-relaxed max-w-[70ch]">{product.shortDescription}</p>
+            )}
+          </header>
 
-      <ProductTabs
-        description={product.description}
-        characteristics={characteristics}
-        reviews={product.reviews.map((r) => ({
-          ...r,
-          createdAt: r.createdAt.toISOString(),
-        }))}
-      />
+          <ProductGallery images={product.images} productName={product.name} />
+
+          <ProductSpecSheet
+            keyData={keyData}
+            description={product.description}
+            characteristics={characteristics}
+            reviews={product.reviews.map((r) => ({
+              ...r,
+              createdAt: r.createdAt.toISOString(),
+            }))}
+          />
+        </div>
+
+        <aside className="lg:sticky lg:top-[calc(var(--header-height)+var(--deptbar-height)+1rem)]">
+          <ProductBuyBox
+            id={product.id}
+            name={product.name}
+            slug={product.slug}
+            sku={product.sku}
+            price={Number(product.price)}
+            comparePrice={product.comparePrice ? Number(product.comparePrice) : null}
+            quantity={product.quantity}
+            lowStockAlert={product.lowStockAlert}
+            imageUrl={product.images[0]?.url}
+          />
+        </aside>
+      </div>
     </div>
   );
 }

@@ -1,119 +1,163 @@
-"use client";
-
-import { useState } from "react";
-import { CaretDown } from "@phosphor-icons/react";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs/Breadcrumbs";
-import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "@/i18n/routing";
+import { COMPANY } from "@/lib/company";
+import { DELIVERY_ZONES, EXPRESS_PRICE, FREE_STANDARD_MIN, STANDARD_PRICE, formatGbp } from "@/lib/shipping";
+import { Plus } from "@phosphor-icons/react/dist/ssr";
 
-const faqs = [
+export const metadata = {
+  title: "Help desk — common questions",
+  description: "Answers on delivery times, returns, payment, order changes and how to reach the Solvetaworld team.",
+};
+
+const UK_TIMES = DELIVERY_ZONES.find((z) => z.key === "uk")!.days;
+const INTL = DELIVERY_ZONES.filter((z) => z.key !== "uk");
+
+const groups: { id: string; title: string; items: { q: string; a: React.ReactNode }[] }[] = [
   {
-    q: "How long does shipping take?",
-    a: "Standard shipping takes 3-5 business days. Express shipping is available for 1-2 business day delivery. Free shipping is offered on orders over £100.",
+    id: "delivery",
+    title: "Delivery",
+    items: [
+      {
+        q: "When will my order arrive?",
+        a: (
+          <>
+            Orders are usually prepared within 1–2 business days of payment. Within the UK, standard delivery then
+            takes {UK_TIMES.standard} business days and costs {formatGbp(STANDARD_PRICE)}, or is free when your order
+            comes to {formatGbp(FREE_STANDARD_MIN)} or more after discounts. Express delivery takes{" "}
+            {UK_TIMES.express} business days and costs {formatGbp(EXPRESS_PRICE)} on every order. If you shop in EUR or
+            USD, checkout shows the converted equivalent. Times for other destinations are in the{" "}
+            <Link href="/policies/shipping" className="text-link underline underline-offset-2">delivery document</Link>.
+          </>
+        ),
+      },
+      {
+        q: "Can you deliver outside the UK?",
+        a: (
+          <>
+            Yes — we send orders to most countries worldwide, at the same delivery prices. After dispatch, allow
+            roughly:{" "}
+            {INTL.map((z, i) => (
+              <span key={z.key}>
+                {z.name} {z.days.standard} business days standard / {z.days.express} express
+                {i < INTL.length - 1 ? "; " : "."}
+              </span>
+            ))}
+          </>
+        ),
+      },
+      {
+        q: "How do I follow my parcel?",
+        a: (
+          <>
+            When your order leaves us you get a confirmation email containing a tracking number. The same
+            information is available under <Link href="/account/orders" className="text-link underline underline-offset-2">your orders</Link> once you are signed in.
+          </>
+        ),
+      },
+    ],
   },
   {
-    q: "What is your return policy?",
-    a: "We offer a 30-day return policy on all items. Products must be unused and in their original packaging. Contact our support team to initiate a return.",
+    id: "returns",
+    title: "Returns",
+    items: [
+      {
+        q: "How long do I have to send something back?",
+        a: (
+          <>
+            You have 14 days from delivery to tell us you want to return an item, and a further 14 days to send it
+            back. It needs to be unused and in its original packaging — get in touch with our team to start the
+            return. Full conditions are in the{" "}
+            <Link href="/policies/returns" className="text-link underline underline-offset-2">returns document</Link>.
+          </>
+        ),
+      },
+    ],
   },
   {
-    q: "Do you ship internationally?",
-    a: "Yes! We ship to most countries worldwide. International shipping typically takes 7-14 business days depending on the destination.",
+    id: "orders",
+    title: "Orders & payment",
+    items: [
+      {
+        q: "Which payment methods can I use?",
+        a: "We accept Visa and Mastercard cards. Every payment travels over an SSL-encrypted connection.",
+      },
+      {
+        q: "I need to change or cancel an order — is that possible?",
+        a: "Within 1 hour of placing it, an order can still be amended or cancelled. After that, contact our team and we will do what we can.",
+      },
+    ],
   },
   {
-    q: "How can I track my order?",
-    a: "Once your order ships, you'll receive a confirmation email with a tracking number. You can also track your order from your account dashboard.",
-  },
-  {
-    q: "What payment methods do you accept?",
-    a: "We accept Visa, Mastercard, American Express, PayPal, and bank transfers. All payments are processed securely with SSL encryption.",
-  },
-  {
-    q: "Can I change or cancel my order?",
-    a: "Orders can be modified or cancelled within 1 hour of placement. After that, please contact our support team and we'll do our best to help.",
-  },
-  {
-    q: "Do you offer gift wrapping?",
-    a: "Yes! Gift wrapping is available at checkout for a small additional fee. You can also include a personalized message with your gift.",
-  },
-  {
-    q: "How do I contact customer support?",
-    a: "You can reach us via our contact form, email at info@solvetaworld.com. We're here to help Mon-Fri 9:00-18:00 GMT.",
+    id: "contact",
+    title: "Reaching us",
+    items: [
+      {
+        q: "What is the best way to contact the team?",
+        a: (
+          <>
+            Use the <Link href="/contact" className="text-link underline underline-offset-2">enquiry form</Link> or email{" "}
+            <a href={`mailto:${COMPANY.email}`} className="text-link underline underline-offset-2">{COMPANY.email}</a>. The team is
+            available Monday to Friday, 9:00–18:00 GMT.
+          </>
+        ),
+      },
+    ],
   },
 ];
 
-function FaqItem({ q, a }: { q: string; a: string }) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <div style={{
-      borderRadius: "var(--radius-xl)",
-      border: "1px solid var(--color-border)",
-      overflow: "hidden",
-      background: open ? "var(--color-bg-secondary)" : "var(--color-bg)",
-      transition: "background-color 0.2s",
-    }}>
-      <button
-        onClick={() => setOpen(!open)}
-        style={{
-          width: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "1.125rem 1.25rem",
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          textAlign: "left",
-          gap: "1rem",
-        }}
-      >
-        <span style={{ fontWeight: 600, fontSize: "0.9375rem", color: "var(--color-text)" }}>{q}</span>
-        <CaretDown
-          size={18}
-          style={{
-            color: "var(--color-text-tertiary)",
-            flexShrink: 0,
-            transition: "transform 0.2s",
-            transform: open ? "rotate(180deg)" : "none",
-          }}
-        />
-      </button>
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            style={{ overflow: "hidden" }}
-          >
-            <div style={{ padding: "0 1.25rem 1.125rem", fontSize: "0.875rem", color: "var(--color-text-secondary)", lineHeight: 1.7 }}>
-              {a}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
+// Running question numbers across all groups (Q01, Q02, …).
+const offsets = groups.map((_, i) => groups.slice(0, i).reduce((s, g) => s + g.items.length, 0));
 
 export default function FaqPage() {
   return (
-    <div style={{ maxWidth: "var(--max-width)", margin: "0 auto", padding: "0 1rem 4rem" }}>
-      <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "FAQ" }]} />
+    <div className="max-w-container mx-auto px-4 lg:px-6 pb-20">
+      <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Help desk" }]} />
 
-      <div style={{ maxWidth: "720px", margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-          <h1 style={{ fontSize: "clamp(1.5rem, 5.5vw, 2.25rem)", fontWeight: 800, letterSpacing: "-0.04em", marginBottom: "0.75rem", wordBreak: "break-word" }}>
-            Frequently Asked <span className="gradient-text">Questions</span>
-          </h1>
-          <p style={{ fontSize: "clamp(0.875rem, 2.4vw, 1rem)", color: "var(--color-text-secondary)", lineHeight: 1.6 }}>
-            Everything you need to know about shopping with us
-          </p>
-        </div>
+      <header className="pb-5 mb-8 border-b-4 border-line-strong">
+        <h1 className="m-0 text-[3.25rem] max-sm:text-[2.25rem] leading-none text-ink">Help desk</h1>
+        <p className="m-0 mt-3 text-[1.0625rem] text-ink-muted max-w-[60ch]">
+          Short answers to what customers ask us most. For anything else, the{" "}
+          <Link href="/contact" className="text-link underline underline-offset-2">contact page</Link> is the quickest route.
+        </p>
+      </header>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-          {faqs.map((faq) => (
-            <FaqItem key={faq.q} q={faq.q} a={faq.a} />
+      <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-8 lg:gap-12 items-start">
+        <nav aria-label="Topics" className="lg:sticky lg:top-[calc(var(--header-height)+var(--deptbar-height)+1rem)] border-2 border-line-strong">
+          <p className="m-0 px-4 py-2.5 bg-coal text-hivis font-display font-bold uppercase tracking-wider">Topics</p>
+          <ul className="list-none m-0 p-0">
+            {groups.map((g) => (
+              <li key={g.id} className="border-t border-line first:border-t-0">
+                <a href={`#${g.id}`} className="flex justify-between px-4 py-2.5 font-semibold hover:bg-hivis hover:text-coal">
+                  {g.title}
+                  <span className="font-mono text-xs text-ink-subtle">{g.items.length}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        <div className="flex flex-col gap-10 min-w-0">
+          {groups.map((g, gi) => (
+            <section key={g.id} id={g.id} aria-labelledby={`${g.id}-h`} className="scroll-mt-40">
+              <h2 id={`${g.id}-h`} className="sec-head !mb-0 m-0 text-[1.9rem] text-ink">{g.title}</h2>
+              <div className="border-x-2 border-b-2 border-line-strong">
+                {g.items.map((item, ii) => {
+                  const n = offsets[gi] + ii + 1;
+                  return (
+                    <details key={item.q} className="group border-t border-line first:border-t-0">
+                      <summary className="flex items-center gap-4 px-4 py-4 cursor-pointer list-none [&::-webkit-details-marker]:hidden hover:bg-surface-1">
+                        <span className="font-mono text-xs text-ink-subtle w-8 shrink-0">Q{String(n).padStart(2, "0")}</span>
+                        <span className="flex-1 font-semibold text-[1rem] text-ink">{item.q}</span>
+                        <Plus size={18} weight="bold" className="shrink-0 transition-transform group-open:rotate-45" />
+                      </summary>
+                      <div className="px-4 pb-5 pl-16 text-[0.9375rem] leading-relaxed text-ink-muted border-l-4 border-hivis ml-4">
+                        {item.a}
+                      </div>
+                    </details>
+                  );
+                })}
+              </div>
+            </section>
           ))}
         </div>
       </div>

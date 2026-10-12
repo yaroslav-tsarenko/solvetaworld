@@ -61,17 +61,17 @@ export function LanguageSwitcher() {
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label="Change language"
-        className="flex h-9 items-center gap-1 rounded-md px-2 text-ink-muted transition-colors hover:bg-surface-1 hover:text-ink"
+        className="flex h-11 items-center gap-1 px-2 text-coal border-2 border-transparent transition-colors hover:border-coal cursor-pointer bg-transparent"
       >
         <Globe size={19} />
-        <span className="text-xs font-semibold tracking-wide max-sm:hidden">{LOCALE_LABELS[locale].short}</span>
+        <span className="font-display text-[0.95rem] font-bold uppercase tracking-wide max-sm:hidden">{LOCALE_LABELS[locale].short}</span>
       </button>
 
       {open && (
         <ul
           role="listbox"
           aria-label="Language"
-          className="absolute right-0 top-full z-50 mt-2 min-w-[11rem] overflow-hidden rounded-md border border-line bg-surface py-1 shadow-md"
+          className="absolute right-0 top-full z-50 mt-1 min-w-[11rem] overflow-hidden border-2 border-line-strong bg-surface text-ink py-1 shadow-hard"
         >
           {routing.locales.map((code) => {
             const active = code === locale;
@@ -82,7 +82,7 @@ export function LanguageSwitcher() {
                   role="option"
                   aria-selected={active}
                   onClick={() => switchTo(code)}
-                  className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors hover:bg-surface-1 ${
+                  className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors hover:bg-hivis hover:text-coal ${
                     active ? "font-semibold text-ink" : "text-ink-muted"
                   }`}
                 >
@@ -90,7 +90,7 @@ export function LanguageSwitcher() {
                     {LOCALE_LABELS[code].short}
                   </span>
                   <span className="flex-1">{LOCALE_LABELS[code].native}</span>
-                  {active ? <Check size={15} className="shrink-0 text-brand" /> : null}
+                  {active ? <Check size={15} className="shrink-0" /> : null}
                 </button>
               </li>
             );

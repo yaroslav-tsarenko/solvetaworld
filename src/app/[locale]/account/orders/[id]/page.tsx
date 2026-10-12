@@ -2,22 +2,17 @@
 
 import { useEffect, useState, use } from "react";
 import { useTranslations } from "next-intl";
-import { Chip } from "@heroui/react";
+import { Link } from "@/i18n/routing";
+import { ArrowLeft } from "@phosphor-icons/react";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner/LoadingSpinner";
+import { EmptyState } from "@/components/shared/EmptyState/EmptyState";
+import { OrderStatusBadge } from "@/components/account/OrderStatusBadge/OrderStatusBadge";
 import { useCurrency } from "@/providers/CurrencyProvider";
 import { formatPrice } from "@/lib/utils/format-price";
 import { format } from "date-fns";
 import type { OrderDetail } from "@/types/order";
 
-const statusColors: Record<string, "default" | "accent" | "success" | "warning" | "danger"> = {
-  PENDING: "warning",
-  CONFIRMED: "accent",
-  PROCESSING: "accent",
-  SHIPPED: "default",
-  DELIVERED: "success",
-  CANCELLED: "danger",
-  REFUNDED: "danger",
-};
+const TH = "u-cond font-bold text-xs px-3 py-2.5 whitespace-nowrap";
 
 export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -29,114 +24,135 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
   useEffect(() => {
     fetch(`/api/orders/${id}`)
       .then((res) => res.json())
-      .then(setOrder)
+      .then((data) => setOrder(data?.id ? data : null))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [id]);
 
   if (loading) return <LoadingSpinner />;
-  if (!order) return <div style={{ padding: "2rem", textAlign: "center" }}>Order not found</div>;
+  if (!order) {
+    return <EmptyState title={t("orderNotFound")} actionLabel={t("allOrders")} actionHref="/account/orders" />;
+  }
+
+  const money = (n: number) => formatPrice(convert(Number(n)), currency);
+  const addr = order.shippingAddress;
+
+  const spec: { label: string; value: React.ReactNode; mono?: boolean }[] = [
+    { label: t("colDate"), value: format(new Date(order.createdAt), "dd MMM yyyy, HH:mm") },
+    { label: t("orderStatus"), value: <OrderStatusBadge status={order.status} /> },
+    { label: t("specPayment"), value: order.paymentStatus },
+  ];
+  if (order.paymentMethod) spec.push({ label: t("specMethod"), value: order.paymentMethod });
+  if (order.shippingMethod) spec.push({ label: t("specDelivery"), value: order.shippingMethod });
+  if (order.trackingNumber) spec.push({ label: t("specTracking"), value: order.trackingNumber, mono: true });
+
+  const totals: { label: string; value: string; tone?: string }[] = [
+    { label: t("subtotal"), value: money(order.subtotal) },
+    { label: t("delivery"), value: Number(order.shippingCost) === 0 ? t("free") : money(order.shippingCost) },
+    { label: t("tax"), value: money(order.taxAmount) },
+  ];
+  if (Number(order.discountAmount) > 0) {
+    totals.push({ label: t("discount"), value: `−${money(order.discountAmount)}`, tone: "text-success" });
+  }
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6 gap-4 flex-wrap">
-        <div>
-          <h1 style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: "0.25rem" }}>
-            {t("orderNumber", { number: order.orderNumber.slice(-8) })}
+    <div className="flex flex-col gap-8">
+      <div>
+        <Link
+          href="/account/orders"
+          className="u-cond inline-flex items-center gap-1.5 mb-3 text-sm font-bold text-ink-muted hover:text-ink"
+        >
+          <ArrowLeft size={14} /> {t("allOrders")}
+        </Link>
+        <div className="sec-head flex-wrap">
+          <h1 className="m-0 text-[2rem] text-ink">
+            {t.rich("orderNumber", {
+              number: order.orderNumber,
+              num: (chunks) => (
+                <span className="font-mono font-semibold normal-case text-[1.5rem] break-all">{chunks}</span>
+              ),
+            })}
           </h1>
-          <p style={{ fontSize: "0.875rem", color: "var(--color-text-tertiary)" }}>
-            Placed on {format(new Date(order.createdAt), "MMM d, yyyy 'at' HH:mm")}
-          </p>
-        </div>
-        <Chip size="lg" color={statusColors[order.status] || "default"}>{order.status}</Chip>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-        <div className="px-5 py-4 border border-line rounded-lg bg-surface">
-          <div className="font-bold text-[0.8125rem] uppercase tracking-[0.04em] text-ink-subtle mb-2">Shipping Address</div>
-          <div className="text-sm text-ink-muted leading-[1.5]">
-            {order.shippingAddress.firstName} {order.shippingAddress.lastName}<br />
-            {order.shippingAddress.address1}<br />
-            {order.shippingAddress.address2 && <>{order.shippingAddress.address2}<br /></>}
-            {order.shippingAddress.city}, {order.shippingAddress.postalCode}<br />
-            {order.shippingAddress.country}
-          </div>
-        </div>
-        <div className="px-5 py-4 border border-line rounded-lg bg-surface">
-          <div className="font-bold text-[0.8125rem] uppercase tracking-[0.04em] text-ink-subtle mb-2">Order Info</div>
-          <div className="text-sm text-ink-muted leading-[1.5]">
-            Payment: <strong>{order.paymentStatus}</strong>
-            {order.paymentMethod && <><br />Method: {order.paymentMethod}</>}
-            {order.shippingMethod && <><br />Shipping: {order.shippingMethod}</>}
-            {order.trackingNumber && <><br />Tracking: <strong>{order.trackingNumber}</strong></>}
-          </div>
+          <OrderStatusBadge status={order.status} size="lg" />
         </div>
       </div>
 
-      <div className="border border-line rounded-lg overflow-hidden bg-surface">
-        <table className="w-full border-collapse max-sm:hidden [&_th]:px-4 [&_th]:py-3 [&_th]:text-left [&_th]:text-xs [&_th]:font-semibold [&_th]:uppercase [&_th]:tracking-[0.04em] [&_th]:text-ink-subtle [&_th]:bg-surface-1 [&_th]:border-b [&_th]:border-line [&_td]:px-4 [&_td]:py-3.5 [&_td]:text-sm [&_td]:border-b [&_td]:border-line [&_tr:last-child_td]:border-b-0">
-          <thead>
-            <tr>
-              <th>Product</th>
-              <th style={{ textAlign: "right" }}>Qty</th>
-              <th style={{ textAlign: "right" }}>Price</th>
-              <th style={{ textAlign: "right" }}>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {order.items.map((item) => (
-              <tr key={item.id}>
-                <td>
-                  <div style={{ fontWeight: 600 }}>{item.productName}</div>
-                  {item.variantName && <div style={{ fontSize: "0.75rem", color: "var(--color-text-tertiary)" }}>{item.variantName}</div>}
-                  <div style={{ fontSize: "0.75rem", color: "var(--color-text-tertiary)" }}>SKU: {item.productSku}</div>
-                </td>
-                <td style={{ textAlign: "right" }}>{item.quantity}</td>
-                <td style={{ textAlign: "right" }}>{formatPrice(convert(Number(item.price)), currency)}</td>
-                <td style={{ textAlign: "right", fontWeight: 600 }}>{formatPrice(convert(Number(item.total)), currency)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        <div className="hidden max-sm:flex flex-col">
-          {order.items.map((item) => (
-            <div key={item.id} className="px-4 py-3.5 border-b border-line last:border-b-0 flex flex-col gap-1">
-              <div className="font-semibold text-sm">{item.productName}</div>
-              {item.variantName && <div style={{ fontSize: "0.75rem", color: "var(--color-text-tertiary)" }}>{item.variantName}</div>}
-              <div className="flex justify-between text-xs text-ink-subtle">
-                <span>Qty {item.quantity} × {formatPrice(convert(Number(item.price)), currency)}</span>
-                <span className="font-bold text-ink">{formatPrice(convert(Number(item.total)), currency)}</span>
+      <div className="grid grid-cols-1 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-6 items-start">
+        {/* Spec table */}
+        <section className="border-2 border-line-strong">
+          <h2 className="m-0 px-4 py-2.5 bg-coal text-white text-lg">{t("orderSpec")}</h2>
+          <dl className="m-0 divide-y divide-line">
+            {spec.map((row) => (
+              <div key={row.label} className="grid grid-cols-[9rem_minmax(0,1fr)] max-sm:grid-cols-[7rem_minmax(0,1fr)] gap-3 px-4 py-2.5 items-center">
+                <dt className="u-cond text-xs font-bold text-ink-muted">{row.label}</dt>
+                <dd className={`m-0 text-sm text-ink break-words ${row.mono ? "font-mono font-semibold" : ""}`}>{row.value}</dd>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </dl>
+        </section>
 
-        <div className="px-5 py-4 flex flex-col items-end gap-1 text-sm border-t border-line bg-surface-1">
-          <div className="flex gap-4">
-            <span style={{ color: "var(--color-text-secondary)" }}>Subtotal</span>
-            <span>{formatPrice(convert(Number(order.subtotal)), currency)}</span>
-          </div>
-          <div className="flex gap-4">
-            <span style={{ color: "var(--color-text-secondary)" }}>Shipping</span>
-            <span>{Number(order.shippingCost) === 0 ? "Free" : formatPrice(convert(Number(order.shippingCost)), currency)}</span>
-          </div>
-          <div className="flex gap-4">
-            <span style={{ color: "var(--color-text-secondary)" }}>Tax</span>
-            <span>{formatPrice(convert(Number(order.taxAmount)), currency)}</span>
-          </div>
-          {Number(order.discountAmount) > 0 && (
-            <div className="flex gap-4">
-              <span style={{ color: "var(--color-success)" }}>Discount</span>
-              <span style={{ color: "var(--color-success)" }}>−{formatPrice(convert(Number(order.discountAmount)), currency)}</span>
-            </div>
-          )}
-          <div className="flex gap-4 font-extrabold text-lg pt-2 mt-1 border-t border-line w-full justify-between">
-            <span>Total</span>
-            <span>{formatPrice(convert(Number(order.total)), currency)}</span>
-          </div>
-        </div>
+        {/* Delivery address */}
+        <section className="border-2 border-line-strong">
+          <h2 className="m-0 px-4 py-2.5 bg-surface-1 border-b-2 border-line-strong text-lg text-ink">{t("deliverTo")}</h2>
+          <address className="not-italic px-4 py-3 text-sm leading-relaxed text-ink">
+            <strong className="font-semibold">{addr.firstName} {addr.lastName}</strong><br />
+            {addr.address1}<br />
+            {addr.address2 && <>{addr.address2}<br /></>}
+            {addr.city}, {addr.postalCode}<br />
+            {addr.country}
+          </address>
+        </section>
       </div>
+
+      {/* Line items */}
+      <section>
+        <div className="sec-head">
+          <h2 className="m-0 text-2xl text-ink">{t("lineItems")}</h2>
+        </div>
+        <div className="border-2 border-line-strong overflow-x-auto">
+          <table className="w-full min-w-[600px] border-collapse text-sm">
+            <thead>
+              <tr className="bg-surface-1 border-b-2 border-line-strong">
+                <th className={`${TH} text-left`}>{t("colProduct")}</th>
+                <th className={`${TH} text-left`}>{t("colSku")}</th>
+                <th className={`${TH} text-right`}>{t("colQty")}</th>
+                <th className={`${TH} text-right`}>{t("colUnit")}</th>
+                <th className={`${TH} text-right`}>{t("colLine")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {order.items.map((item) => (
+                <tr key={item.id} className="border-b border-line">
+                  <td className="px-3 py-3">
+                    <div className="font-semibold text-ink">{item.productName}</div>
+                    {item.variantName && <div className="text-xs text-ink-muted">{item.variantName}</div>}
+                  </td>
+                  <td className="px-3 py-3 font-mono text-xs text-ink-muted whitespace-nowrap">{item.productSku}</td>
+                  <td className="px-3 py-3 text-right tabular-nums">{item.quantity}</td>
+                  <td className="px-3 py-3 text-right whitespace-nowrap">{money(item.price)}</td>
+                  <td className="px-3 py-3 text-right font-bold whitespace-nowrap">{money(item.total)}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot className="border-t-2 border-line-strong">
+              {totals.map((row) => (
+                <tr key={row.label}>
+                  <th scope="row" colSpan={4} className={`px-3 py-1.5 text-right font-normal text-ink-muted ${row.tone ?? ""}`}>
+                    {row.label}
+                  </th>
+                  <td className={`px-3 py-1.5 text-right whitespace-nowrap ${row.tone ?? ""}`}>{row.value}</td>
+                </tr>
+              ))}
+              <tr className="bg-hivis text-coal">
+                <th scope="row" colSpan={4} className="u-cond px-3 py-3 text-right font-extrabold text-lg">
+                  {t("total")}
+                </th>
+                <td className="px-3 py-3 text-right font-display font-extrabold text-xl whitespace-nowrap">{money(order.total)}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </section>
     </div>
   );
 }

@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
     if (isSuccess) {
       // Get exact amount and currency paid from Oppwa
       const paidAmount = Number(paymentData.amount || order.total);
-      const paidCurrency = paymentData.currency || "EUR";
+      const paidCurrency = paymentData.currency || "GBP";
       const conversionRate = Number(order.total) > 0 ? (paidAmount / Number(order.total)) : 1;
 
       const updatedOrder = await prisma.order.update({

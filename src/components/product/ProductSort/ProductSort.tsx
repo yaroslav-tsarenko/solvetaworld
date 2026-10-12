@@ -7,30 +7,29 @@ interface ProductSortProps {
   onChange: (value: string) => void;
 }
 
+/** Inline "Order by" selector. */
 export function ProductSort({ value, onChange }: ProductSortProps) {
-  const t = useTranslations("product");
+  const t = useTranslations("listing");
 
   const options = [
-    { key: "newest", label: t("newest") },
-    { key: "price-asc", label: t("priceLowHigh") },
-    { key: "price-desc", label: t("priceHighLow") },
-    { key: "name-asc", label: t("nameAZ") },
+    { key: "newest", label: t("sortNewest") },
+    { key: "price-asc", label: t("sortPriceUp") },
+    { key: "price-desc", label: t("sortPriceDown") },
+    { key: "name-asc", label: t("sortName") },
   ];
 
   return (
-    <div style={{ maxWidth: "200px" }}>
-      <label style={{ display: "block", fontSize: "0.875rem", fontWeight: 500, marginBottom: "0.25rem" }}>
-        {t("sortBy")}
-      </label>
+    <label className="flex items-center gap-2">
+      <span className="u-cond font-bold text-sm whitespace-nowrap">{t("orderBy")}</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "var(--radius-md)", border: "1px solid var(--color-border)", background: "var(--color-bg)", color: "var(--color-text)", fontSize: "0.875rem" }}
+        className="field !w-auto !min-h-10 !py-1.5 pr-8 cursor-pointer"
       >
-        {options.map((option) => (
-          <option key={option.key} value={option.key}>{option.label}</option>
+        {options.map((o) => (
+          <option key={o.key} value={o.key}>{o.label}</option>
         ))}
       </select>
-    </div>
+    </label>
   );
 }

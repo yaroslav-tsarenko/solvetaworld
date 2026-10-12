@@ -10,39 +10,23 @@ interface PriceDisplayProps {
 }
 
 const sizes = {
-  sm: { price: "0.9375rem", compare: "0.75rem" },
-  md: { price: "1.25rem", compare: "0.875rem" },
-  lg: { price: "1.75rem", compare: "1.0625rem" },
+  sm: { price: "text-[1.25rem]", compare: "text-xs" },
+  md: { price: "text-[1.75rem]", compare: "text-sm" },
+  lg: { price: "text-[2.75rem]", compare: "text-base" },
 };
 
-export function PriceDisplay({
-  price,
-  comparePrice,
-  size = "md",
-}: PriceDisplayProps) {
+/** Condensed heavy price; a marked-down price shows in signal orange with the was-price struck through. */
+export function PriceDisplay({ price, comparePrice, size = "md" }: PriceDisplayProps) {
   const { currency, convert } = useCurrency();
-  const isOnSale = comparePrice && comparePrice > price;
+  const isOnSale = comparePrice != null && comparePrice > price;
 
   return (
-    <div style={{ display: "flex", alignItems: "baseline", gap: "0.5rem" }}>
-      <span
-        style={{
-          fontSize: sizes[size].price,
-          fontWeight: 800,
-          letterSpacing: "-0.02em",
-          color: isOnSale ? "var(--color-danger)" : "var(--color-text)",
-        }}
-      >
+    <div className="flex items-baseline gap-2 flex-wrap">
+      <span className={`font-display font-extrabold leading-none tabular-nums tracking-tight ${sizes[size].price} ${isOnSale ? "text-sale" : "text-ink"}`}>
         {formatPrice(convert(price), currency)}
       </span>
       {isOnSale && (
-        <span
-          style={{
-            fontSize: sizes[size].compare,
-            color: "var(--color-text-tertiary)",
-            textDecoration: "line-through",
-          }}
-        >
+        <span className={`${sizes[size].compare} text-ink-subtle line-through tabular-nums`}>
           {formatPrice(convert(comparePrice), currency)}
         </span>
       )}

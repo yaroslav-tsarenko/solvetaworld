@@ -4,65 +4,72 @@ import { usePathname } from "next/navigation";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/providers/AuthProvider";
-import { SquaresFour, Package, UserCircle, MapPin, Heart, SignOut } from "@phosphor-icons/react";
+import { SignOut } from "@phosphor-icons/react";
 
 const navItems = [
-  { href: "/account", icon: <SquaresFour size={18} />, labelKey: "title" as const },
-  { href: "/account/orders", icon: <Package size={18} />, labelKey: "orders" as const },
-  { href: "/account/profile", icon: <UserCircle size={18} />, labelKey: "profile" as const },
-  { href: "/account/addresses", icon: <MapPin size={18} />, labelKey: "addresses" as const },
-  { href: "/account/wishlist", icon: <Heart size={18} />, labelKey: "wishlist" as const },
+  { href: "/account", labelKey: "overview" as const },
+  { href: "/account/orders", labelKey: "orders" as const },
+  { href: "/account/profile", labelKey: "profile" as const },
+  { href: "/account/addresses", labelKey: "addresses" as const },
+  { href: "/account/wishlist", labelKey: "wishlist" as const },
 ];
 
-const linkBase =
-  "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors no-underline max-md:shrink-0 max-md:whitespace-nowrap max-md:px-3.5 max-md:py-2 max-md:text-[0.8125rem]";
-
+/**
+ * Account masthead + horizontal section bar (ink strip, yellow active tab).
+ * Kept under its historical name so the layout import stays stable.
+ */
 export function AccountSidebar() {
   const pathname = usePathname();
   const t = useTranslations("account");
   const { user, signOut } = useAuth();
 
   return (
-    <aside className="w-60 max-md:w-full bg-surface-1 border border-line rounded-lg py-6 max-md:py-4 flex flex-col h-fit sticky top-8 max-md:static">
-      <div className="flex items-center gap-3 px-5 max-md:px-4 pb-5 max-md:pb-3 border-b border-line mb-3 max-md:mb-2">
-        <div className="w-10 h-10 rounded-full bg-brand text-white flex items-center justify-center font-bold text-base shrink-0">
-          {(user?.name?.[0] || user?.email?.[0] || "U").toUpperCase()}
-        </div>
-        <div>
-          <p className="font-semibold text-sm leading-[1.2]">{user?.name || "User"}</p>
-          <p className="text-xs text-ink-subtle overflow-hidden text-ellipsis whitespace-nowrap max-w-[150px]">
-            {user?.email}
-          </p>
-        </div>
-      </div>
-      <nav className="flex flex-col gap-0.5 px-3 max-md:flex-row max-md:overflow-x-auto max-md:gap-1.5 max-md:[scrollbar-width:none] max-md:[&::-webkit-scrollbar]:hidden">
-        {navItems.map((item) => {
-          const isActive =
-            pathname.endsWith(item.href) ||
-            (item.href !== "/account" && pathname.includes(item.href));
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`${linkBase} ${
-                isActive
-                  ? "bg-surface-2 text-ink font-semibold"
-                  : "text-ink-muted hover:bg-surface-2 hover:text-ink"
-              }`}
-            >
-              {item.icon}
-              {t(item.labelKey)}
-            </Link>
-          );
-        })}
-        <button
-          className={`${linkBase} text-danger bg-transparent border-0 cursor-pointer w-full text-left mt-2 max-md:mt-0 hover:bg-surface-2`}
-          onClick={signOut}
+    <div className="border-2 border-line-strong">
+      <div className="flex flex-wrap items-center gap-4 px-4 sm:px-5 py-4 bg-surface">
+        <span
+          className="w-12 h-12 shrink-0 flex items-center justify-center bg-hivis text-coal border-2 border-coal font-display font-extrabold text-2xl"
+          aria-hidden="true"
         >
-          <SignOut size={18} />
+          {(user?.name?.[0] || user?.email?.[0] || "U").toUpperCase()}
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="u-cond m-0 text-xs font-bold text-ink-subtle">{t("title")}</p>
+          <p className="m-0 font-display font-extrabold uppercase text-xl leading-tight text-ink truncate">
+            {user?.name || t("noName")}
+          </p>
+          <p className="m-0 font-mono text-xs text-ink-muted truncate">{user?.email}</p>
+        </div>
+        <button type="button" className="btn-line min-h-[38px]! px-3!" onClick={signOut}>
+          <SignOut size={16} />
           {t("logout")}
         </button>
+      </div>
+
+      <nav aria-label={t("title")} className="bg-coal">
+        <ul className="list-none m-0 p-0 flex overflow-x-auto no-scrollbar">
+          {navItems.map((item, i) => {
+            const isActive =
+              pathname.endsWith(item.href) ||
+              (item.href !== "/account" && pathname.includes(item.href));
+            return (
+              <li key={item.href} className="shrink-0 border-r border-white/15">
+                <Link
+                  href={item.href}
+                  aria-current={isActive ? "page" : undefined}
+                  className={`flex items-baseline gap-2 h-12 px-4 sm:px-5 pt-3.5 font-display uppercase font-bold text-[1.0625rem] whitespace-nowrap transition-colors ${
+                    isActive ? "bg-hivis text-coal" : "text-white/80 hover:text-white hover:bg-coal-2"
+                  }`}
+                >
+                  <span className={`text-xs ${isActive ? "text-coal" : "text-hivis"}`}>
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  {t(item.labelKey)}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       </nav>
-    </aside>
+    </div>
   );
 }

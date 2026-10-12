@@ -97,7 +97,18 @@
 }
 
 /* ─── Admin Layout ─── */
+/* The storefront sets headings in uppercase condensed type; the admin keeps
+   plain sentence-case headings in the body face. */
+.admin-layout :is(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--font-sans);
+  text-transform: none;
+  letter-spacing: normal;
+  line-height: 1.25;
+  font-weight: 700;
+}
+
 .admin-layout {
+  font-family: var(--font-sans);
   display: flex;
   min-height: 100vh;
   background: var(--admin-bg);

@@ -1,804 +1,1056 @@
-import { PolicyLayout, ContactBlock } from "@/components/layout/PolicyLayout/PolicyLayout";
+import type { ReactNode } from "react";
+import { Link } from "@/i18n/routing";
+import { PolicyLayout, PolicySection, ContactBlock } from "@/components/layout/PolicyLayout/PolicyLayout";
 import { COMPANY } from "@/lib/company";
+import { EXPRESS_PRICE, FREE_STANDARD_MIN, STANDARD_PRICE, formatGbp } from "@/lib/shipping";
 
-export const metadata = { title: "Terms and Conditions — Solvetaworld" };
+export const metadata = { title: "Terms & Conditions of Sale" };
+
+const TITLE = "Terms & Conditions of Sale";
+
+const TOC = [
+  { id: "parties", title: "The parties and these terms" },
+  { id: "who-may-buy", title: "Who may buy" },
+  { id: "product-information", title: "Product information and suitability" },
+  { id: "electrical-safety", title: "Electrical safety and installation" },
+  { id: "accounts", title: "Accounts and trade access" },
+  { id: "ordering", title: "Ordering and when a contract is made" },
+  { id: "prices", title: "Prices, VAT and currencies" },
+  { id: "payment", title: "Paying for your order" },
+  { id: "offers", title: "Offers, codes and free delivery" },
+  { id: "delivery", title: "Delivery and dispatch" },
+  { id: "customs", title: "Orders outside the UK: customs and import charges" },
+  { id: "ownership-risk", title: "Ownership and risk" },
+  { id: "consumer-cancellation", title: "Cancelling as a consumer" },
+  { id: "restricted-returns", title: "Items with restricted returns" },
+  { id: "faulty-goods", title: "Goods that arrive faulty, damaged or wrong" },
+  { id: "statutory-rights", title: "Statutory rights and the legal guarantee" },
+  { id: "additional-warranty", title: "Additional Warranty" },
+  { id: "business-customers", title: "Terms for business customers" },
+  { id: "local-compliance", title: "Compliance with local rules" },
+  { id: "intellectual-property", title: "Intellectual property" },
+  { id: "website-use", title: "Acceptable use of the website" },
+  { id: "sanctions", title: "Sanctions, export controls and restricted destinations" },
+  { id: "privacy-cookies", title: "Personal data and cookies" },
+  { id: "liability", title: "Limits on our liability" },
+  { id: "force-majeure", title: "Events beyond our control" },
+  { id: "changes", title: "Changes to the website, products and terms" },
+  { id: "general", title: "Severability and transfer of rights" },
+  { id: "law", title: "Governing law and courts" },
+  { id: "contact", title: "Contacting us" },
+];
+
+const KEY_FACTS = [
+  { label: "Seller", value: `${COMPANY.name}, trading as Solvetaworld` },
+  { label: "Minimum age to order", value: "18 years" },
+  { label: "Consumer cancellation", value: "14 days from receipt of the goods" },
+  {
+    label: "Delivery charges",
+    value: `Standard ${formatGbp(STANDARD_PRICE)}, free on orders of ${formatGbp(FREE_STANDARD_MIN)} or more; Express ${formatGbp(EXPRESS_PRICE)}`,
+  },
+  { label: "Visible transit damage", value: "Tell us within 48 hours of delivery where possible" },
+  { label: "Governing law", value: "England and Wales" },
+];
+
+/** Lettered sub-clauses: (a), (b), (c)… */
+function Clauses({ children }: { children: ReactNode }) {
+  return <ol className="list-none! pl-0! my-3 border-l-2 border-line">{children}</ol>;
+}
+
+function Clause({ mark, children }: { mark: string; children: ReactNode }) {
+  return (
+    <li className="grid grid-cols-[2.5rem_1fr] mb-3! last:mb-0!">
+      <span className="font-mono text-xs text-ink-subtle pt-[0.35em] pl-2">({mark})</span>
+      <div>{children}</div>
+    </li>
+  );
+}
+
+function Email() {
+  return <a href={`mailto:${COMPANY.email}`}>{COMPANY.email}</a>;
+}
 
 export default function TermsPage() {
   return (
-    <PolicyLayout title="Terms and Conditions" lastUpdated="29 May 2026">
-      <p>
-        These Terms and Conditions (&ldquo;Terms&rdquo;) govern your access to and use of the website
-        www.solvetaworld.com and any related pages, services, orders, purchases, communications, and
-        transactions operated under the Solvetaworld brand.
-      </p>
-      <p>The Website is operated by:</p>
-      <ContactBlock />
-      <p>
-        In these Terms, &ldquo;Solvetaworld&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo; or &ldquo;our&rdquo; means {COMPANY.name}.
-        &ldquo;Customer&rdquo;, &ldquo;you&rdquo; or &ldquo;your&rdquo; means any person or business accessing the
-        Website, placing an order, purchasing goods, or otherwise using our services.
-      </p>
-      <p>
-        Please read these Terms carefully before placing an order. By accessing the Website, creating an
-        account, submitting an order, or purchasing goods from Solvetaworld, you agree to be bound by these
-        Terms.
-      </p>
+    <PolicyLayout title={TITLE} docRef="SW-01" lastUpdated="12 October 2026" toc={TOC} keyFacts={KEY_FACTS}>
+      <PolicySection id="parties" number={1} title="The parties and these terms">
+        <p>
+          This document (the &ldquo;Terms&rdquo;) sets the rules for visiting and using www.solvetaworld.com,
+          together with every related page, service, order, purchase, communication and transaction carried
+          out under the Solvetaworld name.
+        </p>
+        <p>The Website is run by the company below:</p>
+        <ContactBlock />
+        <table>
+          <thead>
+            <tr>
+              <th>Term used</th>
+              <th>Who it refers to</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>&ldquo;Solvetaworld&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;</td>
+              <td>{COMPANY.name}</td>
+            </tr>
+            <tr>
+              <td>&ldquo;Customer&rdquo;, &ldquo;you&rdquo;, &ldquo;your&rdquo;</td>
+              <td>
+                Any person or business that visits the Website, places an order, buys goods or makes use of our
+                services in any other way
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          Please take the time to read these Terms before you order. You accept them, and agree to be bound by
+          them, as soon as you visit the Website, open an account, submit an order or buy goods from
+          Solvetaworld.
+        </p>
+        <Clauses>
+          <Clause mark="a">
+            Every use of the Website, and every purchase of goods through Solvetaworld, is covered by these
+            Terms.
+          </Clause>
+          <Clause mark="b">
+            Solvetaworld supplies physical goods for domestic, commercial, trade and professional use: hand and
+            power tools, hardware and ironmongery, fixings and fasteners, garden machinery, cable and test
+            equipment, and other workshop supplies.
+          </Clause>
+          <Clause mark="c">
+            These Terms operate alongside the other policies published on the Website, among them our{" "}
+            <Link href="/policies/shipping">Delivery &amp; Dispatch</Link> policy, our{" "}
+            <Link href="/policies/returns">Returns, Refunds &amp; Cancellations</Link> policy, our{" "}
+            <Link href="/policies/privacy">Privacy Notice</Link>, our <Link href="/policies/cookies">Cookies</Link>{" "}
+            policy, and any warranty or additional warranty terms that relate to a particular product.
+          </Clause>
+          <Clause mark="d">
+            Where a product-specific term is clearly shown on a product page or at checkout and it conflicts
+            with these Terms, that product-specific term prevails, but only for the product or order concerned.
+          </Clause>
+          <Clause mark="e">
+            Any legal right you hold that the law does not allow to be excluded or limited is unaffected by
+            anything in these Terms.
+          </Clause>
+        </Clauses>
+      </PolicySection>
 
-      <h2>1. Scope of These Terms</h2>
-      <p>1.1 These Terms apply to all use of the Website and all purchases of goods made through Solvetaworld.</p>
-      <p>
-        1.2 Solvetaworld sells physical electrical products, electrical materials, wiring accessories,
-        lighting-related products, installation components, distribution and circuit protection products,
-        sockets, switches, cables, mounting accessories, and other related goods for domestic, commercial,
-        trade, and professional use.
-      </p>
-      <p>
-        1.3 These Terms apply together with any other policies published on the Website, including our
-        Delivery Policy, Returns and Refunds Policy, Privacy Policy, Cookie Policy, and any product-specific
-        warranty or additional warranty terms.
-      </p>
-      <p>
-        1.4 If there is any conflict between these Terms and a product-specific term clearly stated on the
-        relevant product page or checkout page, the product-specific term will apply only to that specific
-        product or order.
-      </p>
-      <p>
-        1.5 Nothing in these Terms affects your mandatory legal rights where such rights cannot lawfully be
-        excluded or limited.
-      </p>
+      <PolicySection id="who-may-buy" number={2} title="Who may buy">
+        <h3>Eligibility and your responsibilities</h3>
+        <Clauses>
+          <Clause mark="a">
+            To order on the Website you must be 18 years of age or older and have the legal capacity to do so.
+          </Clause>
+          <Clause mark="b">
+            When you order for a business, company, partnership, organisation, trade customer or any other legal
+            entity, you confirm that you have authority to bind that entity to these Terms.
+          </Clause>
+          <Clause mark="c">
+            It is your job to make sure that everything you tell us is accurate, complete and current &mdash;
+            this covers your name, billing details, delivery address, contact details, VAT or tax details and any
+            other information we need in order to process your order.
+          </Clause>
+          <Clause mark="d">
+            Neither the Website nor goods bought from Solvetaworld may be used for any purpose that is unlawful,
+            unsafe, fraudulent or unauthorised.
+          </Clause>
+        </Clauses>
 
-      <h2>2. Eligibility and Customer Responsibility</h2>
-      <p>2.1 You must be at least 18 years old and have legal capacity to place an order on the Website.</p>
-      <p>
-        2.2 If you place an order on behalf of a business, company, partnership, organisation, trade
-        customer, or other legal entity, you confirm that you are authorised to bind that entity to these Terms.
-      </p>
-      <p>
-        2.3 You are responsible for ensuring that all information you provide to us is accurate, complete, and
-        up to date, including your name, billing details, delivery address, contact information, VAT or tax
-        details, and any other information required to process your order.
-      </p>
-      <p>
-        2.4 You must not use the Website or purchase goods from Solvetaworld for any unlawful, unsafe,
-        fraudulent, or unauthorised purpose.
-      </p>
+        <h3>Consumers and business customers</h3>
+        <p>Solvetaworld supplies consumers as well as business customers. In these Terms:</p>
+        <dl className="my-3 border-2 border-line-strong">
+          <div className="px-4 py-3 border-b border-line">
+            <dt className="font-display uppercase tracking-wide text-ink text-sm">Consumer</dt>
+            <dd className="m-0">
+              an individual who is acting entirely or mainly for purposes outside their trade, business, craft
+              or profession.
+            </dd>
+          </div>
+          <div className="px-4 py-3">
+            <dt className="font-display uppercase tracking-wide text-ink text-sm">Business Customer</dt>
+            <dd className="m-0">
+              any person, company, sole trader, contractor, installer, reseller, organisation, public body or
+              professional that buys goods for business, commercial, trade, resale, installation or professional
+              purposes.
+            </dd>
+          </div>
+        </dl>
+        <Clauses>
+          <Clause mark="e">
+            Some rights set out in these Terms &mdash; statutory consumer cancellation rights among them &mdash;
+            are available to Consumers only, and Business Customers do not benefit from them unless the law
+            requires it.
+          </Clause>
+          <Clause mark="f">
+            We expect Business Customers to have suitable technical knowledge, or to have taken professional
+            advice, before buying electrical goods. Before ordering, a Business Customer must check every
+            specification, rating, compatibility point, suitability question, compliance requirement and
+            installation condition.
+          </Clause>
+        </Clauses>
+      </PolicySection>
 
-      <h2>3. Consumer and Business Customers</h2>
-      <p>3.1 Solvetaworld sells to both consumers and business customers.</p>
-      <p>
-        3.2 A &ldquo;Consumer&rdquo; means an individual acting wholly or mainly outside their trade, business,
-        craft, or profession.
-      </p>
-      <p>
-        3.3 A &ldquo;Business Customer&rdquo; means any person, company, sole trader, contractor, installer,
-        reseller, organisation, public body, or professional purchasing goods for business, commercial,
-        trade, resale, installation, or professional purposes.
-      </p>
-      <p>
-        3.4 Certain rights described in these Terms, including statutory consumer cancellation rights, apply
-        only to Consumers and do not apply to Business Customers unless required by law.
-      </p>
-      <p>
-        3.5 Business Customers are expected to have appropriate technical knowledge or professional advice
-        before purchasing electrical goods. Business Customers are responsible for checking all
-        specifications, ratings, compatibility, suitability, compliance requirements, and installation
-        conditions before placing an order.
-      </p>
+      <PolicySection id="product-information" number={3} title="Product information and suitability">
+        <Clauses>
+          <Clause mark="a">
+            We try to keep the descriptions, images, prices, technical details, stock status and other
+            information on the Website accurate and current.
+          </Clause>
+          <Clause mark="b">
+            Product images are there to illustrate only. The goods you receive may differ slightly from them as
+            a result of manufacturer updates, new packaging, lighting, screen settings, colour differences,
+            batch variations or technical improvements.
+          </Clause>
+          <Clause mark="c">
+            Specifications may come from manufacturers, suppliers, distributors or product databases. We take
+            reasonable care with this data but cannot promise that it is free of errors or omissions or that it
+            will not be updated.
+          </Clause>
+          <Clause mark="d">
+            <p>
+              It is your responsibility, before you order, to confirm that the product suits what you intend to
+              do with it. Points to check include, without limitation:
+            </p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Check</th>
+                  <th>What to confirm</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Electrical rating</td><td>Voltage and electrical rating</td></tr>
+                <tr><td>Power</td><td>Current, load, wattage and power requirements</td></tr>
+                <tr><td>Size</td><td>Dimensions and the space available for installation</td></tr>
+                <tr><td>Connection</td><td>Cable type, cable size and connection requirements</td></tr>
+                <tr><td>Environment</td><td>IP rating and environmental suitability; whether it is suitable indoors or outdoors</td></tr>
+                <tr><td>Compatibility</td><td>Fit with existing systems, fittings, devices and installations</td></tr>
+                <tr><td>Rules</td><td>Regulatory, safety and installation requirements in the country or region concerned</td></tr>
+              </tbody>
+            </table>
+          </Clause>
+          <Clause mark="e">
+            If you are not sure that a product is right for the use you have in mind, get in touch with us before
+            ordering, or ask a qualified electrician or other competent professional.
+          </Clause>
+          <Clause mark="f">
+            We cannot guarantee that a product is available until your order has been accepted and processed. We
+            may cancel or hold up an order if a product becomes unavailable, is discontinued, has been listed
+            incorrectly or cannot be supplied for reasons beyond our reasonable control.
+          </Clause>
+        </Clauses>
+      </PolicySection>
 
-      <h2>4. Product Information and Availability</h2>
-      <p>
-        4.1 We aim to ensure that product descriptions, images, prices, technical details, stock status, and
-        other information displayed on the Website are accurate and up to date.
-      </p>
-      <p>
-        4.2 Product images are provided for illustration purposes only. Actual goods may vary slightly from
-        images due to manufacturer updates, packaging changes, lighting, screen settings, colour
-        differences, batch variations, or technical improvements.
-      </p>
-      <p>
-        4.3 Product specifications may be based on information provided by manufacturers, suppliers,
-        distributors, or product databases. While we take reasonable care, we do not guarantee that all
-        product data is free from errors, omissions, or updates.
-      </p>
-      <p>
-        4.4 Before placing an order, you are responsible for checking that the product is suitable for your
-        intended purpose, including but not limited to:
-      </p>
-      <ul>
-        <li>voltage and electrical rating;</li>
-        <li>current, load, wattage, and power requirements;</li>
-        <li>dimensions and installation space;</li>
-        <li>cable type, cable size, and connection requirements;</li>
-        <li>IP rating and environmental suitability;</li>
-        <li>indoor or outdoor suitability;</li>
-        <li>compatibility with existing systems, fittings, devices, and installations;</li>
-        <li>regulatory, safety, and installation requirements in the relevant country or region.</li>
-      </ul>
-      <p>
-        4.5 If you are unsure whether a product is suitable for your intended use, you should contact us
-        before ordering or seek advice from a qualified electrician or competent professional.
-      </p>
-      <p>
-        4.6 Availability of products is not guaranteed until your order has been accepted and processed. We
-        may cancel or delay an order where a product becomes unavailable, is discontinued, is listed
-        incorrectly, or cannot be supplied for reasons outside our reasonable control.
-      </p>
+      <PolicySection id="electrical-safety" number={4} title="Electrical safety and installation">
+        <Clauses>
+          <Clause mark="a">
+            An electrical product can be dangerous if it is chosen, installed, connected, modified, overloaded or
+            used incorrectly.
+          </Clause>
+          <Clause mark="b">
+            Use every product only for what it is designed for, and always in line with the manufacturer&rsquo;s
+            instructions, safety warnings, installation manuals, voltage ratings, load limits and technical
+            specifications, and with all applicable laws, building regulations, electrical standards and local
+            requirements.
+          </Clause>
+          <Clause mark="c">
+            Where it is required or appropriate, any product that needs electrical installation, wiring,
+            connection, testing, commissioning or integration into an electrical system should be fitted only by
+            a qualified electrician or other competent professional.
+          </Clause>
+          <Clause mark="d">
+            The Website does not offer electrical engineering, installation, compliance, inspection,
+            certification or safety approval services from Solvetaworld.
+          </Clause>
+          <Clause mark="e">
+            Any guidance, description, compatibility note or support reply we give is general information only.
+            It is not a replacement for professional advice, an electrical inspection or a compliance assessment.
+          </Clause>
+          <Clause mark="f">
+            We accept no responsibility for damage, loss, injury, malfunction, non-compliance, failed installation
+            or safety incidents that result from incorrect installation, the wrong choice of product, misuse,
+            overloading, unauthorised modification, work by third parties, failure to follow instructions or use
+            for something other than the product&rsquo;s intended purpose.
+          </Clause>
+        </Clauses>
+      </PolicySection>
 
-      <h2>5. Electrical Safety, Installation, and Use</h2>
-      <p>
-        5.1 Electrical products can be dangerous if incorrectly selected, installed, connected, modified,
-        overloaded, or used.
-      </p>
-      <p>
-        5.2 You must use all products only for their intended purpose and in accordance with all manufacturer
-        instructions, safety warnings, installation manuals, voltage ratings, load limits, technical
-        specifications, applicable laws, building regulations, electrical standards, and local requirements.
-      </p>
-      <p>
-        5.3 Products that require electrical installation, wiring, connection, testing, commissioning, or
-        integration into an electrical system should be installed only by a qualified electrician or competent
-        professional where required or appropriate.
-      </p>
-      <p>
-        5.4 Solvetaworld does not provide electrical engineering, installation, compliance, inspection,
-        certification, or safety approval services through the Website.
-      </p>
-      <p>
-        5.5 Any guidance, product description, compatibility note, or customer support response provided by
-        Solvetaworld is general information only and must not be treated as a substitute for professional
-        advice, electrical inspection, or compliance assessment.
-      </p>
-      <p>
-        5.6 We are not responsible for damage, loss, injury, malfunction, non-compliance, failed
-        installation, or safety incidents caused by incorrect installation, incorrect product selection,
-        misuse, overloading, unauthorised modification, third-party work, failure to follow instructions, or
-        use outside the product&rsquo;s intended purpose.
-      </p>
+      <PolicySection id="accounts" number={5} title="Accounts and trade access">
+        <Clauses>
+          <Clause mark="a">
+            The Website may let you open an account, or apply for trade, professional or business customer
+            access.
+          </Clause>
+          <Clause mark="b">
+            We decide, at our discretion, whether to approve, reject, suspend or remove any account, trade
+            account, pricing access or professional access.
+          </Clause>
+          <Clause mark="c">
+            We may ask you for further information to check your identity, business status, professional
+            activity, VAT/tax details, delivery address or anything else relevant.
+          </Clause>
+          <Clause mark="d">
+            Keeping your login details secure is your responsibility. If you think someone has used your account
+            without authorisation, tell us straight away.
+          </Clause>
+          <Clause mark="e">
+            Unless the law requires otherwise, we are not responsible for losses arising from your failure to
+            keep your account details secure.
+          </Clause>
+        </Clauses>
+      </PolicySection>
 
-      <h2>6. Accounts, Trade Customers, and Pro Access</h2>
-      <p>
-        6.1 You may be able to create an account or apply for trade, professional, or business customer
-        access on the Website.
-      </p>
-      <p>
-        6.2 We may approve, reject, suspend, or remove any account, trade account, pricing access, or
-        professional access at our discretion.
-      </p>
-      <p>
-        6.3 We may request additional information to verify your identity, business status, professional
-        activity, VAT/tax details, delivery address, or other relevant information.
-      </p>
-      <p>
-        6.4 You are responsible for keeping your account login details secure. You must notify us immediately
-        if you believe your account has been accessed without authorisation.
-      </p>
-      <p>
-        6.5 We are not responsible for losses caused by your failure to keep your account details secure,
-        except where required by law.
-      </p>
+      <PolicySection id="ordering" number={6} title="Ordering and when a contract is made">
+        <Clauses>
+          <Clause mark="a">
+            Placing an order is an offer by you to buy the goods you have selected on these Terms.
+          </Clause>
+          <Clause mark="b">
+            Once you have ordered, you may be sent an order confirmation or a payment confirmation. Receiving
+            either does not by itself mean that we have accepted your order.
+          </Clause>
+          <Clause mark="c">
+            The contract between you and Solvetaworld comes into existence only at the earliest of these three
+            points: when we accept your order, when we process it for fulfilment, or when we dispatch the goods.
+          </Clause>
+          <Clause mark="d">
+            <p>Before acceptance, we may refuse, cancel or limit an order in any of these cases:</p>
+            <ul>
+              <li>the product is not available;</li>
+              <li>there is an error in the product, the price, the delivery cost or the description;</li>
+              <li>payment has not been authorised, or has been reversed;</li>
+              <li>we suspect fraud, abuse, suspicious activity or misuse;</li>
+              <li>we cannot deliver to the destination requested;</li>
+              <li>customs, sanctions, export, payment processor, carrier or legal restrictions apply;</li>
+              <li>the order looks as though it is for unauthorised resale or an unlawful purpose;</li>
+              <li>we cannot verify customer, billing or delivery information that we need.</li>
+            </ul>
+          </Clause>
+          <Clause mark="e">
+            If we cancel an order after taking payment, we will refund what you paid for the cancelled goods,
+            except where the law requires us to withhold the payment or the transaction is under fraud,
+            chargeback, sanctions or compliance review.
+          </Clause>
+        </Clauses>
+      </PolicySection>
 
-      <h2>7. Orders and Contract Formation</h2>
-      <p>
-        7.1 By placing an order, you make an offer to purchase the selected goods in accordance with these
-        Terms.
-      </p>
-      <p>
-        7.2 After you place an order, you may receive an order confirmation or payment confirmation. This
-        does not automatically mean that your order has been accepted.
-      </p>
-      <p>
-        7.3 A contract between you and Solvetaworld is formed only when we accept your order, process it for
-        fulfilment, or dispatch the goods, whichever occurs first.
-      </p>
-      <p>7.4 We may refuse, cancel, or limit any order before acceptance where:</p>
-      <ul>
-        <li>the product is unavailable;</li>
-        <li>the product, price, delivery cost, or description contains an error;</li>
-        <li>payment is not authorised or is reversed;</li>
-        <li>fraud, abuse, suspicious activity, or misuse is suspected;</li>
-        <li>delivery is not available to the requested destination;</li>
-        <li>customs, sanctions, export, payment processor, carrier, or legal restrictions apply;</li>
-        <li>the order appears to be placed for unauthorised resale or unlawful purposes;</li>
-        <li>we are unable to verify required customer, billing, or delivery information.</li>
-      </ul>
-      <p>
-        7.5 If we cancel an order after payment has been taken, we will refund the amount paid for the
-        cancelled goods, unless we are legally required to withhold payment or the transaction is subject to
-        fraud, chargeback, sanctions, or compliance review.
-      </p>
+      <PolicySection id="prices" number={7} title="Prices, VAT and currencies">
+        <Clauses>
+          <Clause mark="a">Prices on the Website may be shown in EUR, GBP and USD.</Clause>
+          <Clause mark="b">
+            Unless it is clearly stated otherwise, the prices shown on the Website include VAT where VAT applies.
+          </Clause>
+          <Clause mark="c">You will see the final amount payable for your order at checkout, before you pay.</Clause>
+          <Clause mark="d">
+            We may change prices at any time and without notice. Orders we have already accepted are not
+            affected, except where there has been a clear pricing error.
+          </Clause>
+          <Clause mark="e">
+            We are entitled to correct obvious errors in pricing, currency, tax, discounts or products. If such an
+            error affects an order you have placed, we may get in touch to ask whether you want to go ahead at the
+            corrected price or cancel.
+          </Clause>
+          <Clause mark="f">
+            Currency conversion, bank charges, foreign transaction fees, card issuer fees and exchange rate
+            differences are outside Solvetaworld&rsquo;s control and are for the customer to bear.
+          </Clause>
+        </Clauses>
+      </PolicySection>
 
-      <h2>8. Prices, VAT, and Currencies</h2>
-      <p>8.1 The Website may display prices in EUR, GBP, and USD.</p>
-      <p>
-        8.2 Prices displayed on the Website include VAT where applicable, unless clearly stated otherwise.
-      </p>
-      <p>
-        8.3 The final price payable for your order will be shown at checkout before you complete payment.
-      </p>
-      <p>
-        8.4 Prices may change at any time without notice. Changes will not affect orders already accepted,
-        except where a clear pricing error has occurred.
-      </p>
-      <p>
-        8.5 We reserve the right to correct obvious pricing, currency, tax, discount, or product errors. If
-        an error affects an order you have placed, we may contact you to confirm whether you wish to proceed
-        at the corrected price or cancel the order.
-      </p>
-      <p>
-        8.6 Currency conversion, bank fees, foreign transaction fees, card issuer fees, or exchange rate
-        differences are the responsibility of the customer and are not controlled by Solvetaworld.
-      </p>
+      <PolicySection id="payment" number={8} title="Paying for your order">
+        <Clauses>
+          <Clause mark="a">Payment is due at checkout.</Clause>
+          <Clause mark="b">We take secure card payments, including Visa and Mastercard.</Clause>
+          <Clause mark="c">
+            Secure third-party payment providers process payments on our behalf. Solvetaworld does not keep your
+            full card number or your full card security details.
+          </Clause>
+          <Clause mark="d">
+            We do not process your order until payment has been successfully authorised or received.
+          </Clause>
+          <Clause mark="e">
+            We may suspend, cancel or delay your order if your payment is declined, reversed, disputed, charged
+            back or flagged as suspicious.
+          </Clause>
+          <Clause mark="f">
+            You must not make a fraudulent payment, use a payment method you are not authorised to use, or try to
+            get around payment, security, verification or fraud prevention measures.
+          </Clause>
+          <Clause mark="g">
+            Where applicable, and where we have been given enough billing information, we may issue Business
+            Customers with VAT invoices or commercial invoices.
+          </Clause>
+        </Clauses>
+      </PolicySection>
 
-      <h2>9. Payment Terms</h2>
-      <p>9.1 Payment must be made at checkout.</p>
-      <p>9.2 We accept secure card payments, including Visa and Mastercard.</p>
-      <p>
-        9.3 Payments are processed by secure third-party payment providers. Solvetaworld does not store your
-        full card number or full card security details.
-      </p>
-      <p>
-        9.4 Your order will not be processed until payment has been successfully authorised or received.
-      </p>
-      <p>
-        9.5 If your payment is declined, reversed, disputed, charged back, or marked as suspicious, we may
-        suspend, cancel, or delay your order.
-      </p>
-      <p>
-        9.6 You must not make a fraudulent payment, use an unauthorised payment method, or attempt to bypass
-        payment, security, verification, or fraud prevention measures.
-      </p>
-      <p>
-        9.7 For Business Customers, we may issue VAT invoices or commercial invoices where applicable and
-        where sufficient billing information has been provided.
-      </p>
+      <PolicySection id="offers" number={9} title="Offers, codes and free delivery">
+        <Clauses>
+          <Clause mark="a">
+            Solvetaworld may run discounts, promotional codes, special prices, free delivery thresholds or trade
+            pricing from time to time.
+          </Clause>
+          <Clause mark="b">
+            Standard delivery costs {formatGbp(STANDARD_PRICE)} and is free on orders of{" "}
+            {formatGbp(FREE_STANDARD_MIN)} or more; express delivery costs {formatGbp(EXPRESS_PRICE)} on every
+            order. These amounts are set in pounds sterling (GBP); if you shop in EUR or USD, checkout shows the
+            converted equivalent, which is the amount you pay.
+          </Clause>
+          <Clause mark="c">
+            The free-delivery threshold applies to standard delivery only and is measured against the product
+            subtotal after discounts, before tax, customs duties, import taxes or additional local charges are
+            added.
+          </Clause>
+          <Clause mark="d">
+            Free delivery may be unavailable for some destinations and for oversized, heavy, restricted or
+            special order goods, or goods that need special handling.
+          </Clause>
+          <Clause mark="e">
+            If we suspect misuse, error, fraud or technical abuse, we may withdraw, change, refuse or cancel
+            promotional codes and discounts at any time.
+          </Clause>
+          <Clause mark="f">
+            Promotions have no cash alternative and, unless clearly stated, cannot be used together with other
+            offers.
+          </Clause>
+        </Clauses>
+      </PolicySection>
 
-      <h2>10. Discounts, Promotions, and Free Delivery</h2>
-      <p>
-        10.1 From time to time, Solvetaworld may offer discounts, promotional codes, special prices, free
-        delivery thresholds, or trade pricing.
-      </p>
-      <p>
-        10.2 Unless stated otherwise, free delivery applies to eligible orders over &euro;100 / &pound;100 / $100.
-      </p>
-      <p>
-        10.3 The free delivery threshold is calculated based on the product subtotal after discounts and
-        before any customs duties, import taxes, additional local charges, or special delivery services.
-      </p>
-      <p>
-        10.4 Free delivery may not apply to certain destinations, oversized goods, heavy goods, restricted
-        goods, special order goods, or products requiring special handling.
-      </p>
-      <p>
-        10.5 Promotional codes and discounts may be withdrawn, changed, refused, or cancelled at any time
-        where misuse, error, fraud, or technical abuse is suspected.
-      </p>
-      <p>
-        10.6 Promotions cannot be exchanged for cash and may not be combined with other offers unless clearly
-        stated.
-      </p>
+      <PolicySection id="delivery" number={10} title="Delivery and dispatch">
+        <Clauses>
+          <Clause mark="a">Orders are dispatched by Solvetaworld from the United Kingdom.</Clause>
+          <Clause mark="b">
+            We deliver to the supported destinations listed on the Website or at checkout.
+          </Clause>
+          <Clause mark="c">
+            For now we offer standard delivery only; express delivery is not available unless checkout expressly
+            offers it.
+          </Clause>
+          <Clause mark="d">
+            All delivery times are estimates. They run from the date of dispatch, not from the date you order.
+          </Clause>
+          <Clause mark="e">
+            <p>As a general guide, estimated delivery times are:</p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Destination</th>
+                  <th>Estimate, counted from dispatch</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>United Kingdom</td><td>1&ndash;3 business days</td></tr>
+                <tr><td>Europe</td><td>3&ndash;7 business days</td></tr>
+                <tr><td>North America</td><td>5&ndash;10 business days</td></tr>
+                <tr><td>Asia &amp; Oceania</td><td>7&ndash;14 business days</td></tr>
+                <tr><td>Africa &amp; South America</td><td>8&ndash;15 business days</td></tr>
+              </tbody>
+            </table>
+          </Clause>
+          <Clause mark="f">
+            Deliveries to Europe and other international destinations may be carried by DHL, partner carriers,
+            local couriers or other logistics providers.
+          </Clause>
+          <Clause mark="g">
+            Things outside our control can affect delivery times &mdash; for example customs processing, handling
+            by local couriers, remote or rural addresses, incomplete delivery details, public holidays, weather,
+            transport disruption, strikes, security checks, import controls or carrier delays.
+          </Clause>
+          <Clause mark="h">
+            You must give us a full and accurate delivery address. Where delivery fails, is late or goes to the
+            wrong place because the information you supplied was incorrect or incomplete, we are not
+            responsible.
+          </Clause>
+          <Clause mark="i">It may not be possible to change the delivery address once an order has left us.</Clause>
+          <Clause mark="j">
+            Unless the law prevents it, if a parcel comes back to us because you gave an incorrect address, did
+            not collect it, refused delivery or did not complete customs or courier requirements, we may deduct
+            delivery costs, return costs, customs charges, carrier fees and other reasonable costs from any
+            refund.
+          </Clause>
+        </Clauses>
+      </PolicySection>
 
-      <h2>11. Delivery and Dispatch</h2>
-      <p>11.1 Solvetaworld dispatches orders from the United Kingdom.</p>
-      <p>
-        11.2 Delivery is available to supported delivery destinations shown on the Website or at checkout.
-      </p>
-      <p>
-        11.3 We currently offer standard delivery only. Express delivery is not available unless expressly
-        shown at checkout.
-      </p>
-      <p>
-        11.4 Delivery times are estimates only and begin from the dispatch date, not from the date the order
-        is placed.
-      </p>
-      <p>11.5 Estimated delivery times are generally as follows:</p>
-      <table>
-        <thead>
-          <tr>
-            <th>Destination</th>
-            <th>Estimated delivery time from dispatch</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>United Kingdom</td><td>1&ndash;3 business days</td></tr>
-          <tr><td>Europe</td><td>3&ndash;7 business days</td></tr>
-          <tr><td>North America</td><td>5&ndash;10 business days</td></tr>
-          <tr><td>Asia &amp; Oceania</td><td>7&ndash;14 business days</td></tr>
-          <tr><td>Africa &amp; South America</td><td>8&ndash;15 business days</td></tr>
-        </tbody>
-      </table>
-      <p>
-        11.6 European and international deliveries may be handled by DHL, partner carriers, local couriers,
-        or other logistics providers.
-      </p>
-      <p>
-        11.7 Delivery times may be affected by factors outside our control, including customs processing,
-        local courier handling, remote or rural delivery areas, incomplete delivery information, public
-        holidays, weather conditions, transport disruption, strikes, security checks, import controls, or
-        carrier delays.
-      </p>
-      <p>
-        11.8 You are responsible for providing a complete and accurate delivery address. We are not
-        responsible for failed, delayed, or misdirected delivery caused by incorrect or incomplete
-        information provided by you.
-      </p>
-      <p>11.9 Once an order has been dispatched, changes to the delivery address may not be possible.</p>
-      <p>
-        11.10 If a parcel is returned to us because you provided an incorrect address, failed to collect it,
-        refused delivery, or failed to complete customs or courier requirements, we may deduct delivery
-        costs, return costs, customs charges, carrier fees, and other reasonable costs from any refund,
-        unless prohibited by law.
-      </p>
+      <PolicySection id="customs" number={11} title="Orders outside the UK: customs and import charges">
+        <Clauses>
+          <Clause mark="a">
+            Orders delivered outside the United Kingdom may be subject to customs clearance and to import duties,
+            import VAT, taxes, brokerage fees, handling fees, carrier fees or other local charges.
+          </Clause>
+          <Clause mark="b">
+            Unless checkout expressly says otherwise, you are liable for all customs duties, import VAT, taxes,
+            brokerage fees and local charges due in the destination country.
+          </Clause>
+          <Clause mark="c">
+            Customs processing times, customs decisions, import restrictions, local tax assessments and charges
+            levied by authorities, couriers or customs brokers are all outside Solvetaworld&rsquo;s control.
+          </Clause>
+          <Clause mark="d">
+            It is for you to make sure that the goods you order may lawfully be imported into, and used in, your
+            country or region.
+          </Clause>
+          <Clause mark="e">
+            Except where the law requires otherwise, Solvetaworld is not responsible for loss, delay or costs that
+            follow when customs or local authorities delay, return, seize, reject or destroy an order because of
+            import restrictions, unpaid charges, incorrect information you provided or a failure to meet local
+            requirements.
+          </Clause>
+        </Clauses>
+      </PolicySection>
 
-      <h2>12. International Orders, Customs, and Import Charges</h2>
-      <p>
-        12.1 For deliveries outside the United Kingdom, your order may be subject to customs clearance,
-        import duties, import VAT, taxes, brokerage fees, handling fees, carrier fees, or other local
-        charges.
-      </p>
-      <p>
-        12.2 Unless expressly stated otherwise at checkout, you are responsible for all customs duties,
-        import VAT, taxes, brokerage fees, and local charges payable in the destination country.
-      </p>
-      <p>
-        12.3 Solvetaworld has no control over customs processing times, customs decisions, import restrictions,
-        local tax assessments, or charges imposed by authorities, couriers, or customs brokers.
-      </p>
-      <p>
-        12.4 You are responsible for ensuring that the goods you order can lawfully be imported into and used
-        in your country or region.
-      </p>
-      <p>
-        12.5 If an order is delayed, returned, seized, rejected, or destroyed by customs or local
-        authorities due to import restrictions, unpaid charges, incorrect information provided by you, or
-        failure to comply with local requirements, Solvetaworld will not be responsible for the resulting loss,
-        delay, or costs except where required by law.
-      </p>
+      <PolicySection id="ownership-risk" number={12} title="Ownership and risk">
+        <Clauses>
+          <Clause mark="a">
+            The goods become yours only once we have been paid in full for them and for any delivery charges that
+            apply.
+          </Clause>
+          <Clause mark="b">
+            <p>Risk in the goods passes to you as follows:</p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Type of order</th>
+                  <th>Risk passes to you when</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Consumer order</td>
+                  <td>the goods are delivered to you, or to someone you have named to receive them</td>
+                </tr>
+                <tr>
+                  <td>Business Customer order</td>
+                  <td>
+                    depending on the delivery method agreed or used, the goods are delivered to the delivery
+                    address, handed to the first carrier for delivery, or otherwise made available for collection
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </Clause>
+          <Clause mark="c">
+            On delivery, you are responsible for inspecting the goods and for storing them safely and
+            appropriately.
+          </Clause>
+        </Clauses>
+      </PolicySection>
 
-      <h2>13. Risk and Ownership</h2>
-      <p>
-        13.1 Ownership of the goods passes to you only when we have received full payment for the goods and
-        any applicable delivery charges.
-      </p>
-      <p>
-        13.2 For Consumer orders, risk in the goods passes to you when the goods are delivered to you or to a
-        person identified by you to receive them.
-      </p>
-      <p>
-        13.3 For Business Customer orders, risk passes to you when the goods are delivered to the delivery
-        address, handed to the first carrier for delivery, or otherwise made available for collection,
-        depending on the delivery method agreed or used.
-      </p>
-      <p>
-        13.4 You are responsible for inspecting goods upon delivery and storing them safely and appropriately.
-      </p>
+      <PolicySection id="consumer-cancellation" number={13} title="Cancelling as a consumer">
+        <Clauses>
+          <Clause mark="a">
+            As a Consumer, you may be legally entitled to cancel an eligible online purchase within 14 days of
+            receiving the goods, without having to give a reason.
+          </Clause>
+          <Clause mark="b">
+            The cancellation period ends 14 days after the day on which the goods reach you or a person you have
+            named.
+          </Clause>
+          <Clause mark="c">
+            Where an order arrives in several parcels, the period will usually end 14 days after the day the last
+            parcel reaches you.
+          </Clause>
+          <Clause mark="d">
+            To cancel, send us a clear statement by email to <Email /> before the cancellation period runs out.
+          </Clause>
+          <Clause mark="e">
+            Once you have told us you are cancelling, send the goods back without undue delay, and in any case
+            within 14 days of the date on which you notified us.
+          </Clause>
+          <Clause mark="f">
+            Goods you return must be unused, uninstalled and complete, in their original packaging where
+            possible, and include every accessory, manual, label, protective material and other item that came
+            with them.
+          </Clause>
+          <Clause mark="g">
+            You pay the cost of returning the goods unless they are faulty, damaged or incorrect, or we have
+            agreed otherwise in writing.
+          </Clause>
+          <Clause mark="h">
+            If the value of the goods has gone down because they were handled more than was needed to establish
+            their nature, characteristics and functioning, we may reduce your refund to reflect that.
+          </Clause>
+          <Clause mark="i">
+            Where the law requires it, we will refund the basic standard delivery cost you paid for the original
+            delivery. Unless the law requires otherwise, we may not refund additional delivery costs, upgraded
+            services, international charges, customs charges, import duties, brokerage fees or special delivery
+            costs.
+          </Clause>
+          <Clause mark="j">Wherever possible, refunds go back to the payment method you originally used.</Clause>
+        </Clauses>
+      </PolicySection>
 
-      <h2>14. Consumer Cancellation Rights</h2>
-      <p>
-        14.1 If you are a Consumer, you may have a legal right to cancel eligible online purchases within 14
-        days of receiving the goods, without giving a reason.
-      </p>
-      <p>
-        14.2 The cancellation period will expire 14 days after the day on which you, or a person identified
-        by you, receive the goods.
-      </p>
-      <p>
-        14.3 If your order is delivered in multiple parcels, the cancellation period will usually expire 14
-        days after the day on which you receive the last parcel.
-      </p>
-      <p>
-        14.4 To exercise your cancellation right, you must inform us clearly by email at info@solvetaworld.com
-        before the cancellation period expires.
-      </p>
-      <p>
-        14.5 After notifying us that you wish to cancel, you must return the goods to us without undue delay
-        and no later than 14 days from the date you notified us of your cancellation.
-      </p>
-      <p>
-        14.6 Returned goods must be unused, uninstalled, complete, in their original packaging where
-        possible, with all accessories, manuals, labels, protective materials, and included items.
-      </p>
-      <p>
-        14.7 You are responsible for return shipping costs unless the goods are faulty, damaged, incorrect,
-        or we have agreed otherwise in writing.
-      </p>
-      <p>
-        14.8 We may reduce your refund to reflect any reduction in the value of the goods caused by handling
-        beyond what is necessary to inspect the nature, characteristics, and functioning of the goods.
-      </p>
-      <p>
-        14.9 Where required by law, we will refund the basic standard delivery cost paid for the original
-        delivery. Additional delivery costs, upgraded services, international charges, customs charges,
-        import duties, brokerage fees, or special delivery costs may not be refundable unless required by
-        law.
-      </p>
-      <p>14.10 Refunds will be made to the original payment method where possible.</p>
+      <PolicySection id="restricted-returns" number={14} title="Items with restricted returns">
+        <Clauses>
+          <Clause mark="a">
+            Some goods cannot be sent back simply because you have changed your mind, unless they are faulty,
+            damaged or incorrect, or the law requires a right of return.
+          </Clause>
+          <Clause mark="b">
+            <p>Goods that may be non-returnable, or returnable only on restricted terms, include:</p>
+            <ul>
+              <li>goods made to order, or ordered specially for you;</li>
+              <li>goods cut to size, cable and similar materials included;</li>
+              <li>goods that have been customised, modified, assembled or altered;</li>
+              <li>electrical goods that have been installed, wired, connected, tested, commissioned or used;</li>
+              <li>goods damaged after delivery;</li>
+              <li>goods that are missing parts, accessories, packaging, manuals, labels, seals or protective materials;</li>
+              <li>goods no longer in a condition to be resold;</li>
+              <li>goods affected by incorrect storage, moisture, heat, impact, contamination, misuse or unauthorised handling;</li>
+              <li>clearance, final sale or discontinued items, where return restrictions are clearly stated and lawful.</li>
+            </ul>
+          </Clause>
+          <Clause mark="c">
+            Nothing in this section limits your legal rights where goods are faulty, not as described, unsafe or
+            otherwise fail to comply with applicable law.
+          </Clause>
+        </Clauses>
+      </PolicySection>
 
-      <h2>15. Non-Returnable and Restricted Return Items</h2>
-      <p>
-        15.1 Certain goods cannot be returned for a change of mind unless they are faulty, damaged,
-        incorrect, or return rights are required by law.
-      </p>
-      <p>15.2 Non-returnable or restricted return items may include:</p>
-      <ul>
-        <li>goods made to order;</li>
-        <li>goods specially ordered for you;</li>
-        <li>goods cut to size, including cable or similar materials;</li>
-        <li>customised, modified, assembled, or altered goods;</li>
-        <li>installed, wired, connected, tested, commissioned, or used electrical goods;</li>
-        <li>goods damaged after delivery;</li>
-        <li>goods missing parts, accessories, packaging, manuals, labels, seals, or protective materials;</li>
-        <li>goods that are no longer in resaleable condition;</li>
-        <li>goods affected by incorrect storage, moisture, heat, impact, contamination, misuse, or unauthorised handling;</li>
-        <li>clearance, final sale, or discontinued items where return restrictions are clearly stated and lawful.</li>
-      </ul>
-      <p>
-        15.3 This section does not limit your legal rights where goods are faulty, not as described, unsafe,
-        or otherwise non-compliant with applicable law.
-      </p>
+      <PolicySection id="faulty-goods" number={15} title="Goods that arrive faulty, damaged or wrong">
+        <Clauses>
+          <Clause mark="a">
+            If what you receive is damaged, faulty, incomplete or not what you ordered, contact us at <Email /> as
+            soon as you can.
+          </Clause>
+          <Clause mark="b">
+            Please include your order number, a description of the problem and, where reasonably possible, clear
+            photos or videos of the goods, packaging, labels, damage or defect.
+          </Clause>
+          <Clause mark="c">
+            Hold on to the product, packaging, labels and delivery materials until we have reviewed the issue:
+            we may need them for a carrier claim, a supplier inspection or a warranty assessment.
+          </Clause>
+          <Clause mark="d">
+            Where possible, report visible delivery damage within 48 hours of delivery. This lets us look into
+            courier problems quickly; it does not take away any mandatory legal rights you may have.
+          </Clause>
+          <Clause mark="e">
+            If we confirm that goods are faulty, were damaged before delivery, are incorrect or otherwise do not
+            conform to the contract, we may offer a repair, replacement, refund, partial refund or other remedy in
+            line with applicable law.
+          </Clause>
+          <Clause mark="f">
+            We may ask for the goods to be sent back for inspection before we approve a refund, replacement or
+            warranty remedy.
+          </Clause>
+          <Clause mark="g">
+            Once goods are confirmed as faulty, damaged or incorrect, we will either pay reasonable return
+            shipping costs or give you return instructions.
+          </Clause>
+          <Clause mark="h">
+            We are not responsible for faults or damage that result from incorrect installation, misuse,
+            overloading, unauthorised modification, external damage, an unsuitable environment, incorrect storage,
+            work by third parties, failure to follow instructions, power surges, wear and tear, or use for
+            something other than the product&rsquo;s intended purpose.
+          </Clause>
+        </Clauses>
+      </PolicySection>
 
-      <h2>16. Faulty, Damaged, or Incorrect Goods</h2>
-      <p>
-        16.1 If goods arrive damaged, faulty, incomplete, or incorrect, you should contact us as soon as
-        possible at info@solvetaworld.com.
-      </p>
-      <p>
-        16.2 Please provide your order number, a description of the issue, and clear photos or videos
-        showing the goods, packaging, labels, damage, or defect where reasonably possible.
-      </p>
-      <p>
-        16.3 You should keep the product, packaging, labels, and delivery materials until the issue has been
-        reviewed, as they may be required for carrier claims, supplier inspection, or warranty assessment.
-      </p>
-      <p>
-        16.4 For visible delivery damage, please notify us within 48 hours of delivery where possible. This
-        helps us investigate courier issues quickly, but it does not remove any mandatory legal rights you
-        may have.
-      </p>
-      <p>
-        16.5 Where goods are confirmed to be faulty, damaged before delivery, incorrect, or otherwise not in
-        conformity with the contract, we may offer a repair, replacement, refund, partial refund, or other
-        remedy in accordance with applicable law.
-      </p>
-      <p>
-        16.6 We may require the goods to be returned for inspection before approving a refund, replacement,
-        or warranty remedy.
-      </p>
-      <p>
-        16.7 If the goods are confirmed to be faulty, damaged, or incorrect, we will cover reasonable return
-        shipping costs or provide return instructions.
-      </p>
-      <p>
-        16.8 We are not responsible for faults or damage caused by incorrect installation, misuse,
-        overloading, unauthorised modification, external damage, unsuitable environment, incorrect storage,
-        third-party work, failure to follow instructions, power surges, wear and tear, or use outside the
-        product&rsquo;s intended purpose.
-      </p>
+      <PolicySection id="statutory-rights" number={16} title="Statutory rights and the legal guarantee">
+        <Clauses>
+          <Clause mark="a">
+            Applicable consumer protection laws may give Consumers statutory rights where goods are faulty, not
+            as described, not fit for purpose, unsafe or not in conformity with the contract.
+          </Clause>
+          <Clause mark="b">
+            <p>How those rights apply depends on where you are:</p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Consumer location</th>
+                  <th>Position</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>European Union</td>
+                  <td>
+                    Applicable consumer law may provide a legal guarantee of at least 2 years from the date the goods
+                    are received. It covers defects or lack of conformity that existed at delivery and come to light
+                    during the legal guarantee period.
+                  </td>
+                </tr>
+                <tr>
+                  <td>United Kingdom</td>
+                  <td>
+                    Statutory rights apply under applicable UK consumer law and may include remedies where goods are
+                    faulty, not as described or not fit for purpose.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </Clause>
+          <Clause mark="c">
+            Your statutory rights stand apart from any manufacturer warranty, commercial warranty, additional
+            warranty or return policy that Solvetaworld offers, and none of those limits them.
+          </Clause>
+          <Clause mark="d">
+            Save where mandatory law says otherwise, Business Customers do not have consumer statutory
+            cancellation rights and may have narrower rights than Consumers.
+          </Clause>
+        </Clauses>
+      </PolicySection>
 
-      <h2>17. Legal Guarantee and Statutory Rights</h2>
-      <p>
-        17.1 Consumers may have statutory rights under applicable consumer protection laws where goods are
-        faulty, not as described, not fit for purpose, unsafe, or not in conformity with the contract.
-      </p>
-      <p>
-        17.2 For EU Consumers, applicable consumer law may provide a minimum 2-year legal guarantee from the
-        date the goods are received, covering defects or lack of conformity that existed at the time of
-        delivery and become apparent during the legal guarantee period.
-      </p>
-      <p>
-        17.3 For UK Consumers, statutory rights apply under applicable UK consumer law. These rights may
-        include remedies where goods are faulty, not as described, or not fit for purpose.
-      </p>
-      <p>
-        17.4 These statutory rights are separate from, and are not limited by, any manufacturer warranty,
-        commercial warranty, additional warranty, or return policy offered by Solvetaworld.
-      </p>
-      <p>
-        17.5 Business Customers do not receive consumer statutory cancellation rights and may have more
-        limited rights than Consumers, except where mandatory law provides otherwise.
-      </p>
+      <PolicySection id="additional-warranty" number={17} title="Additional Warranty">
+        <Clauses>
+          <Clause mark="a">
+            For selected products, Solvetaworld may offer paid Additional Warranty options. Additional Warranty
+            is optional and, where offered, can be bought at checkout.
+          </Clause>
+          <Clause mark="b">
+            <p>Unless the product page or checkout says otherwise, Additional Warranty is priced as follows:</p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Option</th>
+                  <th>Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>+1 Year Additional Warranty</td><td>10% of the product price, minimum &euro;6.99 / &pound;6.99 / $6.99</td></tr>
+                <tr><td>+2 Year Additional Warranty</td><td>16% of the product price, minimum &euro;9.99 / &pound;9.99 / $9.99</td></tr>
+                <tr><td>+3 Year Additional Warranty</td><td>22% of the product price, minimum &euro;12.99 / &pound;12.99 / $12.99</td></tr>
+              </tbody>
+            </table>
+          </Clause>
+          <Clause mark="c">
+            The price is worked out on the product price before any delivery charges, customs duties, import
+            taxes, brokerage fees or other local charges.
+          </Clause>
+          <Clause mark="d">
+            Additional Warranty is a commercial warranty that sits on top of your statutory rights. It does not
+            replace, reduce or limit any mandatory legal rights you may have.
+          </Clause>
+          <Clause mark="e">
+            Unless stated otherwise, Additional Warranty cover starts once the original warranty, legal guarantee,
+            manufacturer warranty or standard warranty period that applies to the product has expired.
+          </Clause>
+          <Clause mark="f">
+            It covers eligible manufacturing and material defects that appear during normal use of the product
+            in accordance with the manufacturer&rsquo;s instructions and the applicable technical requirements.
+          </Clause>
+          <Clause mark="g">
+            <p>Additional Warranty does not extend to:</p>
+            <ul>
+              <li>incorrect installation, wiring, connection, testing or commissioning;</li>
+              <li>installation by an unqualified or unauthorised person where professional installation is required or appropriate;</li>
+              <li>misuse, negligence, abuse, overloading or operation outside rated specifications;</li>
+              <li>repair, modification, opening, dismantling or alteration carried out without authorisation;</li>
+              <li>accidental, impact, water, moisture, fire or other external damage;</li>
+              <li>damage from power surges, an unstable power supply, incorrect voltage, lightning or electrical faults in the wider installation;</li>
+              <li>normal wear and tear;</li>
+              <li>cosmetic damage that does not affect how the product works;</li>
+              <li>consumable parts, batteries, bulbs, fuses, seals, connectors, accessories or parts expected to wear out, unless expressly covered;</li>
+              <li>defects caused by unsuitable storage, transport, environment, contamination, corrosion, dust, humidity, chemicals or temperature conditions;</li>
+              <li>products used for purposes other than the use intended by the manufacturer;</li>
+              <li>loss of profits, labour costs, electrician costs, removal costs, reinstallation costs, downtime or indirect losses.</li>
+            </ul>
+          </Clause>
+          <Clause mark="h">
+            To claim, email <Email /> with your order number, proof of purchase and a description of the defect,
+            plus supporting photos, videos or diagnostic information where we reasonably ask for them.
+          </Clause>
+          <Clause mark="i">
+            Before approving any warranty remedy, we may ask for the product to be returned for inspection.
+          </Clause>
+          <Clause mark="j">
+            If we approve a valid claim, we may, depending on the product and the circumstances, repair it,
+            replace it, supply an equivalent replacement, give a partial refund or provide another reasonable
+            remedy.
+          </Clause>
+          <Clause mark="k">
+            Additional Warranty is tied to the product and the original order, and may not be transferred unless
+            we expressly agree in writing.
+          </Clause>
+          <Clause mark="l">
+            If you lawfully cancel or return a product before its Additional Warranty has started, the Additional
+            Warranty bought for it will also be refunded where the law requires it.
+          </Clause>
+        </Clauses>
+      </PolicySection>
 
-      <h2>18. Additional Warranty</h2>
-      <p>18.1 Solvetaworld may offer paid additional warranty options for selected products.</p>
-      <p>18.2 Additional Warranty is optional and may be purchased at checkout where available.</p>
-      <p>
-        18.3 Unless otherwise stated on the product page or at checkout, Additional Warranty pricing is
-        calculated as follows:
-      </p>
-      <table>
-        <thead>
-          <tr>
-            <th>Additional Warranty option</th>
-            <th>Price</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>+1 Year Additional Warranty</td><td>10% of the product price, minimum &euro;6.99 / &pound;6.99 / $6.99</td></tr>
-          <tr><td>+2 Year Additional Warranty</td><td>16% of the product price, minimum &euro;9.99 / &pound;9.99 / $9.99</td></tr>
-          <tr><td>+3 Year Additional Warranty</td><td>22% of the product price, minimum &euro;12.99 / &pound;12.99 / $12.99</td></tr>
-        </tbody>
-      </table>
-      <p>
-        18.4 The Additional Warranty price is calculated based on the product price before delivery charges,
-        customs duties, import taxes, brokerage fees, or other local charges.
-      </p>
-      <p>
-        18.5 Additional Warranty is a commercial warranty offered in addition to your statutory rights. It
-        does not replace, reduce, or limit any mandatory legal rights you may have.
-      </p>
-      <p>
-        18.6 Unless otherwise stated, Additional Warranty coverage begins after the expiry of the original
-        warranty, legal guarantee, manufacturer warranty, or standard warranty period applicable to the
-        relevant product.
-      </p>
-      <p>
-        18.7 Additional Warranty covers eligible manufacturing defects and material defects that arise during
-        normal use of the product in accordance with the manufacturer&rsquo;s instructions and applicable
-        technical requirements.
-      </p>
-      <p>18.8 Additional Warranty does not cover:</p>
-      <ul>
-        <li>incorrect installation, wiring, connection, testing, or commissioning;</li>
-        <li>installation by an unqualified or unauthorised person where professional installation is required or appropriate;</li>
-        <li>misuse, negligence, abuse, overloading, or operation outside rated specifications;</li>
-        <li>unauthorised repair, modification, opening, dismantling, or alteration;</li>
-        <li>accidental damage, impact damage, water damage, moisture damage, fire damage, or external damage;</li>
-        <li>damage caused by power surges, unstable power supply, incorrect voltage, lightning, or electrical faults in the wider installation;</li>
-        <li>normal wear and tear;</li>
-        <li>cosmetic damage that does not affect functionality;</li>
-        <li>consumable parts, batteries, bulbs, fuses, seals, connectors, accessories, or parts expected to wear out unless expressly covered;</li>
-        <li>defects caused by unsuitable storage, transport, environment, contamination, corrosion, dust, humidity, chemicals, or temperature conditions;</li>
-        <li>products used for purposes outside the manufacturer&rsquo;s stated intended use;</li>
-        <li>loss of profits, labour costs, electrician costs, removal costs, reinstallation costs, downtime, or indirect losses.</li>
-      </ul>
-      <p>
-        18.9 To make an Additional Warranty claim, you must contact us at info@solvetaworld.com with your order
-        number, proof of purchase, description of the defect, and supporting photos, videos, or diagnostic
-        information where reasonably requested.
-      </p>
-      <p>
-        18.10 We may require the product to be returned for inspection before approving any warranty remedy.
-      </p>
-      <p>
-        18.11 Where a valid Additional Warranty claim is approved, we may, depending on the product and
-        circumstances, provide repair, replacement, equivalent replacement, partial refund, or another
-        reasonable remedy.
-      </p>
-      <p>
-        18.12 Additional Warranty is linked to the product and original order. It may not be transferable
-        unless we expressly agree in writing.
-      </p>
-      <p>
-        18.13 If you cancel or return a product in accordance with your legal rights before the Additional
-        Warranty begins, any Additional Warranty purchased for that product will also be refunded where
-        required by law.
-      </p>
+      <PolicySection id="business-customers" number={18} title="Terms for business customers">
+        <Clauses>
+          <Clause mark="a">
+            Before ordering, Business Customers must check every product specification, suitability point,
+            compatibility point, compliance requirement, installation requirement and local regulatory
+            obligation.
+          </Clause>
+          <Clause mark="b">
+            Unless we agree otherwise in writing, Business Customers have no general right to cancel or return
+            goods because of a change of mind, an ordering mistake, surplus stock, an unsuitable specification, a
+            change to their project, or because the goods are simply not faulty.
+          </Clause>
+          <Clause mark="c">
+            Whether we accept a return from a Business Customer is at our discretion, and any return we accept may
+            be subject to inspection, restocking fees, return shipping costs and a deduction for reduced resale
+            value.
+          </Clause>
+          <Clause mark="d">
+            Business Customers must inspect goods promptly when they arrive and tell us as soon as reasonably
+            possible about visible damage, shortages, wrong goods or delivery problems.
+          </Clause>
+          <Clause mark="e">
+            So far as the law permits, our total liability to a Business Customer for any order is capped at the
+            price paid for the goods that give rise to the claim.
+          </Clause>
+          <Clause mark="f">
+            We are not liable to Business Customers for loss of profit, revenue, contract, business opportunity,
+            goodwill or data, for labour, installation, removal or reinstallation costs, for downtime or project
+            delays, or for any indirect or consequential loss.
+          </Clause>
+        </Clauses>
+      </PolicySection>
 
-      <h2>19. Business Customer Terms</h2>
-      <p>
-        19.1 Business Customers are responsible for checking all product specifications, suitability,
-        compatibility, compliance requirements, installation requirements, and local regulatory obligations
-        before ordering.
-      </p>
-      <p>
-        19.2 Business Customers do not have a general right to cancel or return goods due to change of mind,
-        incorrect ordering, surplus stock, unsuitable specification, customer project changes, or non-faulty
-        goods unless we agree otherwise in writing.
-      </p>
-      <p>
-        19.3 Any return accepted from a Business Customer is at our discretion and may be subject to
-        inspection, restocking fees, return shipping costs, and deduction for reduced resale value.
-      </p>
-      <p>
-        19.4 Business Customers must inspect goods promptly upon delivery and notify us of visible damage,
-        shortages, incorrect goods, or delivery issues as soon as reasonably possible.
-      </p>
-      <p>
-        19.5 Where permitted by law, our total liability to a Business Customer for any order will not exceed
-        the price paid for the goods giving rise to the claim.
-      </p>
-      <p>
-        19.6 We will not be liable to Business Customers for loss of profit, loss of revenue, loss of
-        contract, loss of business opportunity, loss of goodwill, loss of data, labour costs, installation
-        costs, removal costs, reinstallation costs, downtime, project delays, or indirect or consequential
-        losses.
-      </p>
+      <PolicySection id="local-compliance" number={19} title="Compliance with local rules">
+        <Clauses>
+          <Clause mark="a">
+            Products sold by Solvetaworld may have been designed for particular markets, standards, voltage
+            systems, fittings or installation environments.
+          </Clause>
+          <Clause mark="b">
+            You must check whether a product is suitable for, and may lawfully be used in, installed in, resold in
+            or imported into, your country, region, property, project or electrical system.
+          </Clause>
+          <Clause mark="c">
+            Beyond what is expressly stated on the product page, we do not guarantee that products bought from
+            Solvetaworld will satisfy every local building code, electrical code, certification requirement,
+            insurance requirement, workplace requirement or project specification.
+          </Clause>
+          <Clause mark="d">
+            Business Customers, installers, contractors, resellers and professional buyers must obtain every
+            permit, approval, inspection, certification and professional sign-off needed for their use,
+            installation, resale or project.
+          </Clause>
+        </Clauses>
+      </PolicySection>
 
-      <h2>20. Product Compliance and Local Regulations</h2>
-      <p>
-        20.1 Products sold by Solvetaworld may be designed for specific markets, standards, voltage systems,
-        fittings, or installation environments.
-      </p>
-      <p>
-        20.2 You are responsible for checking whether a product is suitable and lawful for installation,
-        resale, import, or use in your country, region, property, project, or electrical system.
-      </p>
-      <p>
-        20.3 We do not guarantee that products purchased from Solvetaworld will meet every local building code,
-        electrical code, certification requirement, insurance requirement, workplace requirement, or project
-        specification outside the information expressly stated on the product page.
-      </p>
-      <p>
-        20.4 Business Customers, installers, contractors, resellers, and professional buyers are responsible
-        for obtaining all permits, approvals, inspections, certifications, and professional sign-offs
-        required for their use, installation, resale, or project.
-      </p>
+      <PolicySection id="intellectual-property" number={20} title="Intellectual property">
+        <Clauses>
+          <Clause mark="a">
+            All Website content &mdash; text, layout, branding, logos, graphics, icons, product descriptions,
+            photographs, videos, design elements and other materials &mdash; belongs to Solvetaworld,{" "}
+            {COMPANY.name}, our suppliers, manufacturers or licensors, or other rights holders.
+          </Clause>
+          <Clause mark="b">
+            You may use the Website only for personal, business or purchasing purposes and in line with these
+            Terms.
+          </Clause>
+          <Clause mark="c">
+            Without our prior written permission, you must not copy, reproduce, scrape, extract, distribute, sell,
+            modify, publish or commercially exploit any Website content.
+          </Clause>
+          <Clause mark="d">
+            Buying a product does not transfer to you any intellectual property rights in the product, brand,
+            design, software, documentation or related materials; you receive only the right to use the product
+            you bought lawfully and as intended.
+          </Clause>
+        </Clauses>
+      </PolicySection>
 
-      <h2>21. Intellectual Property</h2>
-      <p>
-        21.1 All content on the Website, including text, layout, branding, logos, graphics, icons, product
-        descriptions, photographs, videos, design elements, and other materials, belongs to Solvetaworld,
-        {COMPANY.name}, suppliers, manufacturers, licensors, or other rights holders.
-      </p>
-      <p>
-        21.2 You may use the Website only for personal, business, or purchasing purposes in accordance with
-        these Terms.
-      </p>
-      <p>
-        21.3 You must not copy, reproduce, scrape, extract, distribute, sell, modify, publish, or
-        commercially exploit any Website content without our prior written permission.
-      </p>
-      <p>
-        21.4 Purchase of a product does not transfer any intellectual property rights in the product, brand,
-        design, software, documentation, or related materials, except the right to use the purchased product
-        lawfully and as intended.
-      </p>
+      <PolicySection id="website-use" number={21} title="Acceptable use of the website">
+        <Clauses>
+          <Clause mark="a">
+            <p>Misuse of the Website is not permitted. In particular, you must not:</p>
+            <ul>
+              <li>try to gain unauthorised access to the Website or to its servers, systems, accounts or data;</li>
+              <li>interfere with the security, operation or availability of the Website;</li>
+              <li>use bots, scrapers, crawlers, automated tools or data extraction methods without permission;</li>
+              <li>upload malicious code, viruses or harmful material;</li>
+              <li>place orders that are fraudulent, false, abusive or speculative;</li>
+              <li>pretend to be another person or business;</li>
+              <li>use the Website for any unlawful, harmful, misleading or prohibited purpose;</li>
+              <li>try to get around geographic, payment, security, fraud prevention or sanctions controls.</li>
+            </ul>
+          </Clause>
+          <Clause mark="b">
+            Where we suspect misuse, fraud, a security risk, a breach of these Terms or unlawful activity, we may
+            restrict, suspend or end access to the Website.
+          </Clause>
+        </Clauses>
+      </PolicySection>
 
-      <h2>22. Website Use and Prohibited Conduct</h2>
-      <p>22.1 You must not misuse the Website.</p>
-      <p>22.2 You must not:</p>
-      <ul>
-        <li>attempt to gain unauthorised access to the Website, servers, systems, accounts, or data;</li>
-        <li>interfere with Website security, operation, or availability;</li>
-        <li>use bots, scrapers, crawlers, automated tools, or data extraction methods without permission;</li>
-        <li>upload malicious code, viruses, or harmful material;</li>
-        <li>place fraudulent, false, abusive, or speculative orders;</li>
-        <li>impersonate another person or business;</li>
-        <li>use the Website for unlawful, harmful, misleading, or prohibited purposes;</li>
-        <li>attempt to bypass geographic, payment, security, fraud prevention, or sanctions controls.</li>
-      </ul>
-      <p>
-        22.3 We may restrict, suspend, or terminate access to the Website where we suspect misuse, fraud,
-        security risk, breach of these Terms, or unlawful activity.
-      </p>
+      <PolicySection id="sanctions" number={22} title="Sanctions, export controls and restricted destinations">
+        <Clauses>
+          <Clause mark="a">
+            We may refuse, cancel, suspend or block an order where sanctions, export controls, financial crime
+            controls, payment processor rules, courier restrictions, customs restrictions or legal obligations
+            require it or make it appropriate.
+          </Clause>
+          <Clause mark="b">
+            Orders, customers, billing details, delivery addresses, payment information and destinations may be
+            screened by us against applicable sanctions, restricted party, fraud prevention and compliance
+            requirements.
+          </Clause>
+          <Clause mark="c">
+            We are unable to accept an order if doing so would breach applicable laws, sanctions, export controls,
+            carrier rules, payment processor requirements or our internal compliance controls.
+          </Clause>
+          <Clause mark="d">
+            You confirm that you are not subject to sanctions, are not located in a restricted territory, and are
+            not buying goods for export, resale, transfer or use in breach of applicable sanctions, export controls
+            or laws.
+          </Clause>
+          <Clause mark="e">
+            Losses, delays, cancellations or blocked transactions caused by sanctions, export controls, customs
+            restrictions, payment processor rules or legal compliance requirements are not our responsibility.
+          </Clause>
+        </Clauses>
+      </PolicySection>
 
-      <h2>23. Sanctions, Export Controls, and Restricted Destinations</h2>
-      <p>
-        23.1 We may refuse, cancel, suspend, or block any order where required or appropriate due to
-        sanctions, export controls, financial crime controls, payment processor rules, courier restrictions,
-        customs restrictions, or legal obligations.
-      </p>
-      <p>
-        23.2 We may screen orders, customers, billing details, delivery addresses, payment information, and
-        destinations against applicable sanctions, restricted party, fraud prevention, and compliance
-        requirements.
-      </p>
-      <p>
-        23.3 We cannot accept orders where doing so would breach applicable laws, sanctions, export controls,
-        carrier rules, payment processor requirements, or internal compliance controls.
-      </p>
-      <p>
-        23.4 You confirm that you are not subject to sanctions, not located in a restricted territory, and
-        not purchasing goods for export, resale, transfer, or use in breach of applicable sanctions, export
-        controls, or laws.
-      </p>
-      <p>
-        23.5 We are not responsible for losses, delays, cancellations, or blocked transactions caused by
-        sanctions, export controls, customs restrictions, payment processor rules, or legal compliance
-        requirements.
-      </p>
+      <PolicySection id="privacy-cookies" number={23} title="Personal data and cookies">
+        <Clauses>
+          <Clause mark="a">
+            Personal data is processed by us in line with our <Link href="/policies/privacy">Privacy Notice</Link>.
+          </Clause>
+          <Clause mark="b">
+            Cookies and similar technologies are used on the Website in line with our{" "}
+            <Link href="/policies/cookies">Cookies</Link> policy.
+          </Clause>
+          <Clause mark="c">
+            By using the Website, you acknowledge that your personal data may be processed for order fulfilment,
+            payment processing, delivery, customer support, fraud prevention, legal compliance, account
+            management, analytics and service improvement, among other purposes.
+          </Clause>
+        </Clauses>
+      </PolicySection>
 
-      <h2>24. Privacy and Cookies</h2>
-      <p>24.1 We process personal data in accordance with our Privacy Policy.</p>
-      <p>
-        24.2 The Website uses cookies and similar technologies in accordance with our Cookie Policy.
-      </p>
-      <p>
-        24.3 By using the Website, you acknowledge that your personal data may be processed for purposes
-        including order fulfilment, payment processing, delivery, customer support, fraud prevention, legal
-        compliance, account management, analytics, and service improvement.
-      </p>
+      <PolicySection id="liability" number={24} title="Limits on our liability">
+        <Clauses>
+          <Clause mark="a">
+            These Terms do not exclude or limit any liability where doing so would be unlawful &mdash; including
+            liability for death or personal injury caused by negligence, for fraud or fraudulent
+            misrepresentation, and any other liability that applicable law does not allow to be excluded.
+          </Clause>
+          <Clause mark="b">Your mandatory statutory rights as a Consumer are not limited by anything in these Terms.</Clause>
+          <Clause mark="c">
+            <p>Subject to clauses 24(a) and 24(b), Solvetaworld is not liable for:</p>
+            <ul>
+              <li>indirect, incidental, special, consequential or punitive losses;</li>
+              <li>loss of profit, revenue, business, opportunity, contract, goodwill or anticipated savings;</li>
+              <li>loss of data or interruption to systems;</li>
+              <li>costs of labour, installation, removal, reinstallation, testing, inspection, certification or contractors;</li>
+              <li>project delays, operational downtime or business interruption;</li>
+              <li>losses arising from incorrect product selection, installation, misuse, overloading, unauthorised modification or failure to follow instructions;</li>
+              <li>losses arising from events beyond our reasonable control.</li>
+            </ul>
+          </Clause>
+          <Clause mark="d">
+            Products have to be chosen, installed and used correctly. We are not responsible for the consequences
+            of incorrect or unsafe installation, or of use that goes against the manufacturer&rsquo;s instructions
+            or applicable regulations.
+          </Clause>
+          <Clause mark="e">
+            If you are a Business Customer, then to the fullest extent the law permits, our total liability in
+            connection with any order will not be more than the amount paid for the goods that give rise to the
+            claim.
+          </Clause>
+        </Clauses>
+      </PolicySection>
 
-      <h2>25. Limitation of Liability</h2>
-      <p>
-        25.1 Nothing in these Terms excludes or limits liability where it would be unlawful to do so,
-        including liability for death or personal injury caused by negligence, fraud, fraudulent
-        misrepresentation, or any liability that cannot be excluded under applicable law.
-      </p>
-      <p>25.2 Nothing in these Terms limits your mandatory statutory rights as a Consumer.</p>
-      <p>25.3 Subject to sections 25.1 and 25.2, Solvetaworld will not be liable for:</p>
-      <ul>
-        <li>indirect, incidental, special, consequential, or punitive losses;</li>
-        <li>loss of profit, revenue, business, opportunity, contract, goodwill, or anticipated savings;</li>
-        <li>loss of data or system interruption;</li>
-        <li>labour, installation, removal, reinstallation, testing, inspection, certification, or contractor costs;</li>
-        <li>project delays, operational downtime, or business interruption;</li>
-        <li>losses caused by incorrect product selection, installation, misuse, overloading, unauthorised modification, or failure to follow instructions;</li>
-        <li>losses caused by events outside our reasonable control.</li>
-      </ul>
-      <p>
-        25.4 Products must be selected, installed, and used correctly. We are not responsible for
-        consequences arising from incorrect installation, unsafe installation, or use contrary to
-        manufacturer instructions or applicable regulations.
-      </p>
-      <p>
-        25.5 Where you are a Business Customer, and to the fullest extent permitted by law, our total
-        liability in connection with any order will not exceed the amount paid for the goods giving rise to
-        the claim.
-      </p>
+      <PolicySection id="force-majeure" number={25} title="Events beyond our control">
+        <Clauses>
+          <Clause mark="a">
+            We are not responsible for any failure or delay in meeting our obligations that is caused by events
+            beyond our reasonable control.
+          </Clause>
+          <Clause mark="b">
+            Examples include supply chain disruption, manufacturer delays, transport disruption, courier failure,
+            customs delays, strikes, labour disputes, extreme weather, natural disasters, fire, flood, war,
+            terrorism, civil unrest, epidemics, pandemics, government action, regulatory change, sanctions, power
+            failure, internet failure, technical failure and any other circumstances beyond our reasonable
+            control.
+          </Clause>
+          <Clause mark="c">
+            If your order is affected by such an event, we will take reasonable steps to keep disruption to a
+            minimum and may contact you with updated information where appropriate.
+          </Clause>
+        </Clauses>
+      </PolicySection>
 
-      <h2>26. Events Outside Our Control</h2>
-      <p>
-        26.1 We will not be responsible for failure or delay in performing our obligations where caused by
-        events outside our reasonable control.
-      </p>
-      <p>
-        26.2 Such events may include supply chain disruption, manufacturer delay, transport disruption,
-        courier failure, customs delay, strikes, labour disputes, extreme weather, natural disasters, fire,
-        flood, war, terrorism, civil unrest, epidemic, pandemic, government action, regulatory change,
-        sanctions, power failure, internet failure, technical failure, or other circumstances beyond our
-        reasonable control.
-      </p>
-      <p>
-        26.3 If such an event affects your order, we will take reasonable steps to minimise disruption and
-        may contact you with updated information where appropriate.
-      </p>
+      <PolicySection id="changes" number={26} title="Changes to the website, products and terms">
+        <Clauses>
+          <Clause mark="a">
+            The Website, our product range, pricing, delivery options, policies and these Terms may be updated by
+            us from time to time.
+          </Clause>
+          <Clause mark="b">
+            Each order is governed by the version of the Terms in force when it was placed, unless a change is
+            required by law or concerns a correction that has to be applied.
+          </Clause>
+          <Clause mark="c">
+            If you carry on using the Website after updated Terms are published, you accept those updated Terms
+            for future use and future orders.
+          </Clause>
+        </Clauses>
+      </PolicySection>
 
-      <h2>27. Changes to the Website, Products, and Terms</h2>
-      <p>
-        27.1 We may update the Website, product range, pricing, delivery options, policies, and these Terms
-        from time to time.
-      </p>
-      <p>
-        27.2 The version of the Terms in force at the time you place your order will apply to that order,
-        unless a change is required by law or relates to a correction that must be applied.
-      </p>
-      <p>
-        27.3 Continued use of the Website after updated Terms are published means you accept the updated
-        Terms for future use and future orders.
-      </p>
+      <PolicySection id="general" number={27} title="Severability and transfer of rights">
+        <h3>Severability</h3>
+        <Clauses>
+          <Clause mark="a">
+            Should any part of these Terms be held invalid, unlawful or unenforceable, that part will be treated
+            as removed, or as modified only so far as is necessary.
+          </Clause>
+          <Clause mark="b">Everything else in these Terms stays fully in force and effect.</Clause>
+        </Clauses>
+        <h3>Transfer of rights</h3>
+        <Clauses>
+          <Clause mark="c">
+            We may transfer, assign or subcontract our rights and obligations under these Terms, or otherwise deal
+            with them, provided this does not materially reduce your rights as a Consumer.
+          </Clause>
+          <Clause mark="d">
+            You may not transfer your rights or obligations under these Terms unless we have given our prior
+            written consent, except where the law requires it.
+          </Clause>
+        </Clauses>
+      </PolicySection>
 
-      <h2>28. Severability</h2>
-      <p>
-        28.1 If any part of these Terms is found to be invalid, unlawful, or unenforceable, that part will
-        be treated as removed or modified to the minimum extent necessary.
-      </p>
-      <p>28.2 The remaining parts of these Terms will continue in full force and effect.</p>
+      <PolicySection id="law" number={28} title="Governing law and courts">
+        <Clauses>
+          <Clause mark="a">The laws of England and Wales govern these Terms.</Clause>
+          <Clause mark="b">
+            As a Consumer, you may also have the benefit of any mandatory consumer protection rights available
+            under the laws of the country where you live.
+          </Clause>
+        </Clauses>
+        <table>
+          <thead>
+            <tr>
+              <th>Who you are</th>
+              <th>Where disputes are heard</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>(c) Consumer living in the United Kingdom</td>
+              <td>
+                Disputes may be brought before the courts of England and Wales, or before any other UK court with
+                jurisdiction under applicable law.
+              </td>
+            </tr>
+            <tr>
+              <td>(d) Consumer living in the European Union, or elsewhere where mandatory local consumer rights apply</td>
+              <td>Nothing in these Terms stops you from relying on those mandatory rights.</td>
+            </tr>
+            <tr>
+              <td>(e) Business Customer</td>
+              <td>
+                The courts of England and Wales have exclusive jurisdiction over any dispute arising out of, or in
+                connection with, these Terms, the Website or any order.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </PolicySection>
 
-      <h2>29. Transfer of Rights</h2>
-      <p>
-        29.1 We may transfer, assign, subcontract, or otherwise deal with our rights and obligations under
-        these Terms where this does not materially reduce your rights as a Consumer.
-      </p>
-      <p>
-        29.2 You may not transfer your rights or obligations under these Terms without our prior written
-        consent, except where required by law.
-      </p>
-
-      <h2>30. Governing Law and Jurisdiction</h2>
-      <p>30.1 These Terms are governed by the laws of England and Wales.</p>
-      <p>
-        30.2 If you are a Consumer, you may also benefit from any mandatory consumer protection rights
-        available under the laws of your country of residence.
-      </p>
-      <p>
-        30.3 If you are a Consumer living in the United Kingdom, disputes may be brought before the courts
-        of England and Wales, or any other UK court that has jurisdiction under applicable law.
-      </p>
-      <p>
-        30.4 If you are a Consumer living in the European Union or another jurisdiction where mandatory local
-        consumer rights apply, nothing in these Terms prevents you from relying on those mandatory rights.
-      </p>
-      <p>
-        30.5 If you are a Business Customer, the courts of England and Wales will have exclusive jurisdiction
-        over any dispute arising out of or in connection with these Terms, the Website, or any order.
-      </p>
-
-      <h2>31. Contact Information</h2>
-      <p>
-        If you have any questions about these Terms, your order, delivery, returns, warranty, or any other
-        matter, please contact us:
-      </p>
-      <ContactBlock />
+      <PolicySection id="contact" number={29} title="Contacting us">
+        <p>
+          Questions about these Terms, an order, delivery, returns, warranty or anything else can be sent to us
+          using the details below:
+        </p>
+        <ContactBlock />
+      </PolicySection>
     </PolicyLayout>
   );
 }

@@ -8,6 +8,7 @@ import { AuthProvider } from "@/providers/AuthProvider";
 import { CartProvider } from "@/providers/CartProvider";
 import { CurrencyProvider } from "@/providers/CurrencyProvider";
 import { ToastProvider } from "@/providers/ToastProvider";
+import { IconProvider } from "@/providers/IconProvider";
 import { Header } from "@/components/layout/Header/Header";
 import { Footer } from "@/components/layout/Footer/Footer";
 
@@ -35,6 +36,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
     <NextIntlClientProvider>
       <LocaleSync />
       <ThemeProvider>
+        <IconProvider>
         <AuthProvider>
           <CurrencyProvider>
             <CartProvider>
@@ -47,6 +49,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
             </CartProvider>
           </CurrencyProvider>
         </AuthProvider>
+        </IconProvider>
       </ThemeProvider>
     </NextIntlClientProvider>
   );

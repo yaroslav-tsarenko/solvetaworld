@@ -4,129 +4,150 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { LinkedinLogo, InstagramLogo } from "@phosphor-icons/react";
-import { SolvetaMark } from "../SolvetaMark";
+import { Logo } from "../Logo/Logo";
 import { COMPANY } from "@/lib/company";
 import visaLogo from "@/assets/visa-logo.svg";
 import mastercardLogo from "@/assets/mastercard-logo.svg";
 import pciDssLogo from "@/assets/pci-dss-compliant-logo-vector.svg";
 
-const linkCls =
-  "text-sm text-ink-muted transition-all hover:text-brand hover:pl-1";
-const sectionTitleCls =
-  "text-[0.8125rem] font-bold uppercase tracking-[0.06em] text-ink mb-4";
-const socialIconCls =
-  "w-9 h-9 rounded-lg bg-surface-2 flex items-center justify-center text-ink-muted transition-all cursor-pointer border-0 hover:bg-brand hover:text-white hover:-translate-y-0.5";
+const colHead =
+  "font-display font-bold uppercase tracking-[0.08em] text-hivis text-[0.95rem] m-0 mb-3 pb-2 border-b border-white/15";
+const colLink = "block py-1 text-[0.9rem] text-white/80 hover:text-hivis hover:underline underline-offset-4";
 
 export function Footer() {
   const t = useTranslations("footer");
-  const nav = useTranslations("nav");
-  const currentYear = new Date().getFullYear();
+  const year = new Date().getFullYear();
+
+  const columns: { title: string; links: { href: string; label: string }[] }[] = [
+    {
+      title: t("colShop"),
+      links: [
+        { href: "/catalog", label: t("linkCatalogue") },
+        { href: "/catalog?sort=newest", label: t("linkJustIn") },
+        { href: "/search", label: t("linkSearch") },
+        { href: "/account/wishlist", label: t("linkSaved") },
+      ],
+    },
+    {
+      title: t("colHelp"),
+      links: [
+        { href: "/contact", label: t("contact") },
+        { href: "/faq", label: t("linkFaq") },
+        { href: "/policies/shipping", label: t("shipping") },
+        { href: "/policies/returns", label: t("returns") },
+        { href: "/policies/warranty", label: t("linkWarranty") },
+        { href: "/account/orders", label: t("linkOrders") },
+      ],
+    },
+    {
+      title: t("colSmallPrint"),
+      links: [
+        { href: "/policies/terms", label: t("terms") },
+        { href: "/policies/privacy", label: t("privacy") },
+        { href: "/policies/cookies", label: t("linkCookies") },
+        { href: "/policies/payment", label: t("linkPayment") },
+        { href: "/policies", label: t("linkAllPolicies") },
+        { href: "/about", label: t("about") },
+      ],
+    },
+  ];
 
   return (
-    <footer className="bg-surface-1 border-t border-line mt-auto">
-      <div className="max-w-container mx-auto px-4 lg:px-8">
-        <div className="pt-12 pb-10 grid grid-cols-1 lg:grid-cols-[1.6fr_2fr_1fr] gap-10 lg:gap-12">
-          {/* Brand + company contact details */}
-          <div className="flex flex-col gap-4">
-            <Link
-              href="/"
-              className="flex items-center gap-2 text-2xl font-extrabold tracking-[-0.04em] text-ink"
-            >
-              <SolvetaMark size={28} gradientId="solvetaMarkFooter" />
-              <span>
-                Solveta<span className="text-brand">world</span>
-              </span>
-            </Link>
-            <p className="text-sm text-ink-muted leading-[1.6] max-w-[280px]">
-              Your trusted source for electrical materials, wiring, and installation supplies. Professional quality delivered to your door.
-            </p>
-            <div className="text-xs text-ink-subtle leading-[1.7]">
-              <p className="font-semibold text-ink mb-1">{COMPANY.name}</p>
-              <p>
-                Company number: {COMPANY.companyNumber}
-                <br />
-                {COMPANY.registeredOffice}
-                <br />
-                {COMPANY.phone ? (
-                  <>
-                    Phone:{" "}
-                    <a
-                      href={`tel:${COMPANY.phone.replace(/\s/g, "")}`}
-                      className="hover:text-brand transition-colors"
-                    >
-                      {COMPANY.phone}
-                    </a>
-                    {" "}&middot;{" "}
-                  </>
-                ) : null}
-                Email:{" "}
-                <a href={`mailto:${COMPANY.email}`} className="hover:text-brand transition-colors">
-                  {COMPANY.email}
-                </a>
-              </p>
-            </div>
-          </div>
+    <footer className="mt-auto bg-coal text-white" data-sw="footer">
+      <div className="h-1.5 bg-hivis" aria-hidden="true" />
 
-          {/* Explore: shop + account links merged under one heading, two columns */}
-          <div>
-            <h3 className={sectionTitleCls}>Explore</h3>
-            <div className="grid grid-cols-2 gap-x-8">
-              <ul className="list-none p-0 m-0 flex flex-col gap-2.5">
-                <li><Link href="/catalog" className={linkCls}>{nav("catalog")}</Link></li>
-                <li><Link href="/catalog?sort=newest" className={linkCls}>New Arrivals</Link></li>
-                <li><Link href="/catalog?onSale=true" className={linkCls}>Sale</Link></li>
-                <li><Link href="/catalog?sort=popular" className={linkCls}>Best Sellers</Link></li>
-              </ul>
-              <ul className="list-none p-0 m-0 flex flex-col gap-2.5">
-                <li><Link href="/auth/login" className={linkCls}>{nav("login")}</Link></li>
-                <li><Link href="/account/orders" className={linkCls}>My Orders</Link></li>
-                <li><Link href="/account/wishlist" className={linkCls}>Wishlist</Link></li>
-                <li><Link href="/contact" className={linkCls}>{t("contact")}</Link></li>
-              </ul>
-            </div>
-          </div>
+      <div className="max-w-container mx-auto px-4 lg:px-6">
+        {/* Masthead row */}
+        <div className="py-10 flex flex-col md:flex-row md:items-end md:justify-between gap-6 border-b border-white/15">
+          <Link href="/" aria-label="Solvetaworld" className="inline-flex">
+            <Logo tone="dark" height={52} className="max-sm:h-[36px] max-sm:w-auto" />
+          </Link>
+          <p className="font-display font-semibold uppercase text-[1.35rem] leading-[1.15] tracking-wide text-white/90 max-w-[520px] m-0 md:text-right">
+            {t("slogan")}
+          </p>
+        </div>
 
-          {/* Information: policies */}
-          <div>
-            <h3 className={sectionTitleCls}>Information</h3>
-            <ul className="list-none p-0 m-0 flex flex-col gap-2.5">
-              <li><Link href="/policies/terms" className={linkCls}>{t("terms")}</Link></li>
-              <li><Link href="/policies/privacy" className={linkCls}>{t("privacy")}</Link></li>
-              <li><Link href="/policies/returns" className={linkCls}>{t("returns")}</Link></li>
-              <li><Link href="/policies/shipping" className={linkCls}>Shipping Policy</Link></li>
-              <li><Link href="/policies/warranty" className={linkCls}>Warranty</Link></li>
-              <li><Link href="/policies/payment" className={linkCls}>Payment Policy</Link></li>
-            </ul>
+        {/* Four columns */}
+        <div className="py-10 grid grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-10">
+          {columns.map((col) => (
+            <nav key={col.title} aria-label={col.title}>
+              <h2 className={colHead}>{col.title}</h2>
+              <ul className="list-none m-0 p-0">
+                {col.links.map((l) => (
+                  <li key={l.href}>
+                    <Link href={l.href} className={colLink}>{l.label}</Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ))}
+
+          <div className="col-span-2 lg:col-span-1">
+            <h2 className={colHead}>{t("colCompany")}</h2>
+            <dl className="m-0 text-[0.875rem] text-white/80 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5">
+              <dt className="font-display uppercase tracking-wide text-white/50">{t("entity")}</dt>
+              <dd className="m-0 font-semibold text-white">{COMPANY.name}</dd>
+              <dt className="font-display uppercase tracking-wide text-white/50">{t("regNo")}</dt>
+              <dd className="m-0 tabular-nums">{COMPANY.companyNumber}</dd>
+              <dt className="font-display uppercase tracking-wide text-white/50">{t("office")}</dt>
+              <dd className="m-0">{COMPANY.registeredOffice}</dd>
+              {COMPANY.phone ? (
+                <>
+                  <dt className="font-display uppercase tracking-wide text-white/50">{t("phone")}</dt>
+                  <dd className="m-0">
+                    <a href={`tel:${COMPANY.phone.replace(/\s/g, "")}`} className="hover:text-hivis">{COMPANY.phone}</a>
+                  </dd>
+                </>
+              ) : null}
+              <dt className="font-display uppercase tracking-wide text-white/50">{t("email")}</dt>
+              <dd className="m-0">
+                <a href={`mailto:${COMPANY.email}`} className="hover:text-hivis break-all">{COMPANY.email}</a>
+              </dd>
+            </dl>
           </div>
         </div>
 
-        {/* Slim bottom bar: copyright · social · payment */}
-        <div className="border-t border-line py-5 flex flex-wrap items-center gap-4 justify-between max-md:flex-col max-md:items-start">
-          <p className="text-xs text-ink-subtle m-0">
-            {t("copyright", { year: currentYear, storeName: "Solvetaworld" })}
+        {/* Base line */}
+        <div className="py-5 border-t border-white/15 flex flex-wrap items-center justify-between gap-4">
+          <p className="m-0 text-xs text-white/60">
+            {t("copyright", { year, storeName: "Solvetaworld" })}
           </p>
-          <div className="flex items-center gap-2">
-            {process.env.NEXT_PUBLIC_LINKEDIN_URL && (
-              <a href={process.env.NEXT_PUBLIC_LINKEDIN_URL} className={socialIconCls} aria-label="LinkedIn" target="_blank" rel="noopener noreferrer">
-                <LinkedinLogo size={16} />
-              </a>
-            )}
-            {process.env.NEXT_PUBLIC_INSTAGRAM_URL && (
-              <a href={process.env.NEXT_PUBLIC_INSTAGRAM_URL} className={socialIconCls} aria-label="Instagram" target="_blank" rel="noopener noreferrer">
-                <InstagramLogo size={16} />
-              </a>
-            )}
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="flex items-center justify-center">
-              <Image src={visaLogo} alt="Visa" height={100} width={100} className="!w-[60px] !h-auto object-contain" />
-            </span>
-            <span className="flex items-center justify-center">
-              <Image src={mastercardLogo} alt="Mastercard" height={100} width={100} className="!w-[60px] !h-auto object-contain" />
-            </span>
-            <span className="flex items-center justify-center">
-              <Image src={pciDssLogo} alt="PCI DSS Compliant" height={100} width={100} className="!w-[60px] !h-auto object-contain" />
-            </span>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1">
+              {process.env.NEXT_PUBLIC_LINKEDIN_URL && (
+                <a
+                  href={process.env.NEXT_PUBLIC_LINKEDIN_URL}
+                  aria-label="LinkedIn"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 flex items-center justify-center border border-white/25 text-white hover:bg-hivis hover:text-coal hover:border-hivis"
+                >
+                  <LinkedinLogo size={18} />
+                </a>
+              )}
+              {process.env.NEXT_PUBLIC_INSTAGRAM_URL && (
+                <a
+                  href={process.env.NEXT_PUBLIC_INSTAGRAM_URL}
+                  aria-label="Instagram"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 flex items-center justify-center border border-white/25 text-white hover:bg-hivis hover:text-coal hover:border-hivis"
+                >
+                  <InstagramLogo size={18} />
+                </a>
+              )}
+            </div>
+            <ul className="list-none m-0 p-0 flex items-center gap-1.5" aria-label={t("weAccept")}>
+              {[
+                { src: visaLogo, alt: "Visa" },
+                { src: mastercardLogo, alt: "Mastercard" },
+                { src: pciDssLogo, alt: "PCI DSS" },
+              ].map((logo) => (
+                <li key={logo.alt} className="bg-white h-8 w-14 flex items-center justify-center px-1.5">
+                  <Image src={logo.src} alt={logo.alt} width={48} height={24} className="!w-auto !h-[20px] object-contain" />
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </div>

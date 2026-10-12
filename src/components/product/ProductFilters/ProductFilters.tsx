@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { CaretDown, CaretUp } from "@phosphor-icons/react";
+import { Check, Minus, Plus } from "@phosphor-icons/react";
 
 interface Category {
   id: string;
@@ -29,77 +29,47 @@ interface ProductFiltersProps {
   onBrandChange: (value: string) => void;
 }
 
-function FilterSection({ title, defaultOpen = true, children }: { title: string; defaultOpen?: boolean; children: React.ReactNode }) {
+function count(cat: Category): number {
+  return (cat._count?.products || 0) + (cat.children || []).reduce((s, c) => s + count(c), 0);
+}
+
+/** Square tick box drawn in the brand style; the real control is the wrapping button/label. */
+function Tick({ on }: { on: boolean }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`w-[18px] h-[18px] shrink-0 flex items-center justify-center border-2 ${
+        on ? "bg-hivis border-coal text-coal" : "bg-surface border-line-strong"
+      }`}
+    >
+      {on && <Check size={12} weight="bold" />}
+    </span>
+  );
+}
+
+function Group({ title, children, defaultOpen = true }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="border-b border-line last:border-b-0">
-      <button className="flex items-center justify-between w-full px-5 py-4 bg-transparent border-0 cursor-pointer text-ink-muted transition-colors hover:bg-surface-2" onClick={() => setOpen(!open)}>
-        <h3 className="text-[0.8125rem] font-bold uppercase tracking-[0.05em] text-ink">{title}</h3>
-        {open ? <CaretUp size={16} /> : <CaretDown size={16} />}
-      </button>
-      {open && <div className="px-5 pb-4">{children}</div>}
-    </div>
-  );
-}
-
-function CategoryItem({
-  cat,
-  depth,
-  selectedCategory,
-  onCategoryChange,
-}: {
-  cat: Category;
-  depth: number;
-  selectedCategory: string;
-  onCategoryChange: (slug: string) => void;
-}) {
-  const [expanded, setExpanded] = useState(true);
-  const hasChildren = cat.children && cat.children.length > 0;
-  const isActive = selectedCategory === cat.slug;
-  const count = cat._count?.products || 0;
-
-  return (
-    <>
-      <li
-        className={`text-sm text-ink-muted px-2.5 py-2 rounded-md cursor-pointer transition-colors ${isActive ? "bg-brand-soft text-brand font-semibold" : "hover:bg-surface-2 hover:text-ink"}`}
-        style={{ paddingLeft: `${0.75 + depth * 1}rem` }}
+    <fieldset className="m-0 p-0 border-0 border-t-2 border-line-strong first:border-t-0">
+      <legend className="sr-only">{title}</legend>
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        aria-expanded={open}
+        className="w-full flex items-center justify-between px-4 py-3 bg-surface-1 border-0 cursor-pointer text-ink"
       >
-        <span
-          onClick={() => onCategoryChange(cat.slug)}
-          style={{ flex: 1, cursor: "pointer" }}
-        >
-          {cat.name}
-          {count > 0 && (
-            <span style={{ color: "var(--color-text-tertiary)", fontSize: "0.75rem", marginLeft: "0.25rem" }}>
-              ({count})
-            </span>
-          )}
-        </span>
-        {hasChildren && (
-          <button
-            onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
-            style={{
-              background: "none", border: "none", cursor: "pointer",
-              color: "var(--color-text-tertiary)", padding: "0.125rem", display: "flex",
-            }}
-          >
-            {expanded ? <CaretUp size={12} /> : <CaretDown size={12} />}
-          </button>
-        )}
-      </li>
-      {hasChildren && expanded && cat.children!.map((child) => (
-        <CategoryItem
-          key={child.id}
-          cat={child}
-          depth={depth + 1}
-          selectedCategory={selectedCategory}
-          onCategoryChange={onCategoryChange}
-        />
-      ))}
-    </>
+        <span className="font-display font-bold uppercase tracking-wide text-[1.05rem]">{title}</span>
+        {open ? <Minus size={16} /> : <Plus size={16} />}
+      </button>
+      {open && <div className="px-4 py-3">{children}</div>}
+    </fieldset>
   );
 }
 
+const rowCls =
+  "w-full flex items-center gap-2.5 py-1.5 text-left text-[0.875rem] bg-transparent border-0 cursor-pointer text-ink hover:underline underline-offset-2";
+
+/** Left-rail filter checklist: departments, price band, brand, stock & markdown. */
 export function ProductFilters({
   categories,
   selectedCategory,
@@ -116,100 +86,161 @@ export function ProductFilters({
   onSaleChange,
   onBrandChange,
 }: ProductFiltersProps) {
-  const t = useTranslations("product");
-  const nav = useTranslations("nav");
+  const t = useTranslations("listing");
+  const [brandQuery, setBrandQuery] = useState("");
+  const [showAllDepts, setShowAllDepts] = useState(false);
+
+  const sortedCats = useMemo(
+    () => [...categories].filter((c) => count(c) > 0).sort((a, b) => count(b) - count(a)),
+    [categories],
+  );
+  const visibleCats = showAllDepts ? sortedCats : sortedCats.slice(0, 10);
+  const shownBrands = useMemo(() => {
+    const q = brandQuery.trim().toLowerCase();
+    return (q ? brands.filter((b) => b.toLowerCase().includes(q)) : brands).slice(0, 60);
+  }, [brands, brandQuery]);
+
+  const bands: { label: string; min: string; max: string }[] = [
+    { label: t("bandUnder", { amount: "£25" }), min: "", max: "25" },
+    { label: "£25 – £50", min: "25", max: "50" },
+    { label: "£50 – £100", min: "50", max: "100" },
+    { label: t("bandOver", { amount: "£100" }), min: "100", max: "" },
+  ];
 
   return (
-    <aside className="flex flex-col gap-0 bg-surface border border-line rounded-xl overflow-hidden">
-      <FilterSection title={t("filterBy")}>
+    <div className="border-2 border-line-strong bg-surface" data-sw="filters">
+      <Group title={t("filterDepartment")}>
         {categories.length === 0 ? (
-          <div style={{ display: "flex", flexDirection: "column" }}>
+          <ul className="list-none m-0 p-0 flex flex-col gap-2 animate-pulse">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-2 px-2.5 py-2">
-                <div className="h-3 rounded-md bg-[linear-gradient(90deg,var(--color-bg-tertiary)_25%,var(--color-bg-secondary)_50%,var(--color-bg-tertiary)_75%)] bg-[length:200%_100%] animate-shimmer" style={{ width: `${50 + (i * 19) % 40}%`, flex: 1 }} />
-                <div className="h-3 rounded-md bg-[linear-gradient(90deg,var(--color-bg-tertiary)_25%,var(--color-bg-secondary)_50%,var(--color-bg-tertiary)_75%)] bg-[length:200%_100%] animate-shimmer" style={{ width: "20px" }} />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <ul className="list-none p-0 m-0 flex flex-col gap-0.5 max-h-[220px] overflow-y-auto">
-            <li
-              className={`text-sm text-ink-muted px-2.5 py-2 rounded-md cursor-pointer transition-colors ${!selectedCategory ? "bg-brand-soft text-brand font-semibold" : "hover:bg-surface-2 hover:text-ink"}`}
-              onClick={() => onCategoryChange("")}
-            >
-              {nav("allCategories")}
-            </li>
-            {categories.map((cat) => (
-              <CategoryItem
-                key={cat.id}
-                cat={cat}
-                depth={0}
-                selectedCategory={selectedCategory}
-                onCategoryChange={onCategoryChange}
-              />
+              <li key={i} className="h-4 bg-surface-2" style={{ width: `${55 + ((i * 17) % 40)}%` }} />
             ))}
           </ul>
+        ) : (
+          <ul className="list-none m-0 p-0">
+            <li>
+              <button type="button" className={rowCls} onClick={() => onCategoryChange("")} aria-pressed={!selectedCategory}>
+                <Tick on={!selectedCategory} />
+                <span className="flex-1 font-semibold">{t("allDepartments")}</span>
+              </button>
+            </li>
+            {visibleCats.map((cat) => {
+              const activeChild = cat.children?.find((c) => c.slug === selectedCategory);
+              const on = selectedCategory === cat.slug;
+              return (
+                <li key={cat.id}>
+                  <button type="button" className={rowCls} onClick={() => onCategoryChange(cat.slug)} aria-pressed={on}>
+                    <Tick on={on} />
+                    <span className="flex-1 min-w-0 truncate">{cat.name}</span>
+                    <span className="font-mono text-xs text-ink-subtle tabular-nums">{count(cat)}</span>
+                  </button>
+                  {(on || activeChild) && cat.children && cat.children.length > 0 && (
+                    <ul className="list-none m-0 p-0 pl-6 border-l-2 border-hivis ml-2 mb-1">
+                      {cat.children.map((ch) => (
+                        <li key={ch.id}>
+                          <button
+                            type="button"
+                            className={rowCls}
+                            onClick={() => onCategoryChange(ch.slug)}
+                            aria-pressed={selectedCategory === ch.slug}
+                          >
+                            <Tick on={selectedCategory === ch.slug} />
+                            <span className="flex-1 min-w-0 truncate">{ch.name}</span>
+                            <span className="font-mono text-xs text-ink-subtle tabular-nums">{count(ch)}</span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
         )}
-      </FilterSection>
+        {sortedCats.length > 10 && (
+          <button
+            type="button"
+            onClick={() => setShowAllDepts(!showAllDepts)}
+            className="mt-2 text-sm font-semibold text-link bg-transparent border-0 cursor-pointer p-0 underline underline-offset-2"
+          >
+            {showAllDepts ? t("showFewer") : t("showAll", { count: sortedCats.length })}
+          </button>
+        )}
+      </Group>
 
-      <FilterSection title={t("priceRange")}>
-        <div className="flex gap-2 items-center mb-3">
-          <input
-            type="number"
-            placeholder="Min"
-            value={minPrice}
-            onChange={(e) => onMinPriceChange(e.target.value)}
-            className="w-full px-3 py-2 rounded-md border border-line bg-surface text-ink text-sm transition-colors focus:outline-none focus:border-brand"
-          />
-          <span className="text-ink-subtle shrink-0">–</span>
-          <input
-            type="number"
-            placeholder="Max"
-            value={maxPrice}
-            onChange={(e) => onMaxPriceChange(e.target.value)}
-            className="w-full px-3 py-2 rounded-md border border-line bg-surface text-ink text-sm transition-colors focus:outline-none focus:border-brand"
-          />
+      <Group title={t("filterPrice")}>
+        <ul className="list-none m-0 p-0 mb-3">
+          {bands.map((b) => {
+            const on = minPrice === b.min && maxPrice === b.max;
+            return (
+              <li key={b.label}>
+                <button
+                  type="button"
+                  className={rowCls}
+                  aria-pressed={on}
+                  onClick={() => {
+                    onMinPriceChange(on ? "" : b.min);
+                    onMaxPriceChange(on ? "" : b.max);
+                  }}
+                >
+                  <Tick on={on} />
+                  <span>{b.label}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+        <div className="grid grid-cols-2 gap-2">
+          <label className="block">
+            <span className="field-label !text-xs">{t("min")}</span>
+            <input type="number" inputMode="decimal" min={0} value={minPrice} onChange={(e) => onMinPriceChange(e.target.value)} className="field !min-h-10 !py-1.5" />
+          </label>
+          <label className="block">
+            <span className="field-label !text-xs">{t("max")}</span>
+            <input type="number" inputMode="decimal" min={0} value={maxPrice} onChange={(e) => onMaxPriceChange(e.target.value)} className="field !min-h-10 !py-1.5" />
+          </label>
         </div>
-        <div className="grid grid-cols-2 gap-1.5">
-          <button className="px-1 py-1.5 text-xs rounded-md border border-line bg-surface text-ink-muted cursor-pointer transition-all font-medium hover:bg-brand-soft hover:text-brand hover:border-brand" onClick={() => { onMinPriceChange(""); onMaxPriceChange("25"); }}>Under £25</button>
-          <button className="px-1 py-1.5 text-xs rounded-md border border-line bg-surface text-ink-muted cursor-pointer transition-all font-medium hover:bg-brand-soft hover:text-brand hover:border-brand" onClick={() => { onMinPriceChange("25"); onMaxPriceChange("50"); }}>£25–£50</button>
-          <button className="px-1 py-1.5 text-xs rounded-md border border-line bg-surface text-ink-muted cursor-pointer transition-all font-medium hover:bg-brand-soft hover:text-brand hover:border-brand" onClick={() => { onMinPriceChange("50"); onMaxPriceChange("100"); }}>£50–£100</button>
-          <button className="px-1 py-1.5 text-xs rounded-md border border-line bg-surface text-ink-muted cursor-pointer transition-all font-medium hover:bg-brand-soft hover:text-brand hover:border-brand" onClick={() => { onMinPriceChange("100"); onMaxPriceChange(""); }}>£100+</button>
-        </div>
-      </FilterSection>
+      </Group>
 
       {brands.length > 0 && (
-        <FilterSection title="Brand" defaultOpen={false}>
-          <ul className="list-none p-0 m-0 flex flex-col gap-0.5 max-h-[220px] overflow-y-auto">
-            <li
-              className={`text-sm text-ink-muted px-2.5 py-2 rounded-md cursor-pointer transition-colors ${!selectedBrand ? "bg-brand-soft text-brand font-semibold" : "hover:bg-surface-2 hover:text-ink"}`}
-              onClick={() => onBrandChange("")}
-            >
-              All Brands
+        <Group title={t("filterBrand")} defaultOpen={!!selectedBrand}>
+          <input
+            type="search"
+            value={brandQuery}
+            onChange={(e) => setBrandQuery(e.target.value)}
+            placeholder={t("brandSearch")}
+            aria-label={t("brandSearch")}
+            className="field !min-h-10 !py-1.5 mb-2"
+          />
+          <ul className="list-none m-0 p-0 max-h-[260px] overflow-y-auto">
+            <li>
+              <button type="button" className={rowCls} onClick={() => onBrandChange("")} aria-pressed={!selectedBrand}>
+                <Tick on={!selectedBrand} />
+                <span className="font-semibold">{t("anyBrand")}</span>
+              </button>
             </li>
-            {brands.map((brand) => (
-              <li
-                key={brand}
-                className={`text-sm text-ink-muted px-2.5 py-2 rounded-md cursor-pointer transition-colors ${selectedBrand === brand ? "bg-brand-soft text-brand font-semibold" : "hover:bg-surface-2 hover:text-ink"}`}
-                onClick={() => onBrandChange(brand)}
-              >
-                {brand}
+            {shownBrands.map((b) => (
+              <li key={b}>
+                <button type="button" className={rowCls} onClick={() => onBrandChange(b)} aria-pressed={selectedBrand === b}>
+                  <Tick on={selectedBrand === b} />
+                  <span className="truncate">{b}</span>
+                </button>
               </li>
             ))}
           </ul>
-        </FilterSection>
+        </Group>
       )}
 
-      <FilterSection title={t("availability")} defaultOpen={false}>
-        <label className="flex items-center gap-2 text-sm text-ink-muted cursor-pointer py-1.5 [&_input[type=checkbox]]:accent-brand [&_input[type=checkbox]]:w-4 [&_input[type=checkbox]]:h-4">
-          <input type="checkbox" checked={inStock} onChange={(e) => onInStockChange(e.target.checked)} />
-          <span>{t("inStock")}</span>
-        </label>
-        <label className="flex items-center gap-2 text-sm text-ink-muted cursor-pointer py-1.5 [&_input[type=checkbox]]:accent-brand [&_input[type=checkbox]]:w-4 [&_input[type=checkbox]]:h-4">
-          <input type="checkbox" checked={onSale} onChange={(e) => onSaleChange(e.target.checked)} />
-          <span>On Sale</span>
-        </label>
-      </FilterSection>
-    </aside>
+      <Group title={t("filterStock")}>
+        <button type="button" className={rowCls} onClick={() => onInStockChange(!inStock)} aria-pressed={inStock}>
+          <Tick on={inStock} />
+          <span>{t("onlyInStock")}</span>
+        </button>
+        <button type="button" className={rowCls} onClick={() => onSaleChange(!onSale)} aria-pressed={onSale}>
+          <Tick on={onSale} />
+          <span>{t("onlyReduced")}</span>
+        </button>
+      </Group>
+    </div>
   );
 }
