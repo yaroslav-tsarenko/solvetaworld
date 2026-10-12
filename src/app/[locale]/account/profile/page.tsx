@@ -34,11 +34,12 @@ export default function ProfilePage() {
   const onSubmit = async (data: ProfileFormData) => {
     setLoading(true);
     try {
-      await fetch("/api/auth/sync-user", {
-        method: "POST",
+      const res = await fetch("/api/auth/me", {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: user?.id, email: user?.email, name: data.name }),
+        body: JSON.stringify({ name: data.name }),
       });
+      if (!res.ok) throw new Error("Profile update failed");
       await refresh();
       toast.success(t("profileSaved"));
     } catch {

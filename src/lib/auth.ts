@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { verifyToken, createToken } from "@/lib/token";
 
@@ -7,6 +8,26 @@ export { verifyToken };
 
 const SESSION_COOKIE = "session_token";
 const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
+
+// The session user is returned to the browser by /api/auth/me, so only list
+// fields that are safe to expose. Never add passwordHash or passwordResetTokens.
+const sessionUserSelect = {
+  id: true,
+  email: true,
+  name: true,
+  firstName: true,
+  lastName: true,
+  dateOfBirth: true,
+  avatarUrl: true,
+  role: true,
+  phone: true,
+  welcomeDiscountUsed: true,
+  newsletterDiscountUsed: true,
+  newsletterSubscribed: true,
+  createdAt: true,
+  updatedAt: true,
+  addresses: true,
+} satisfies Prisma.UserSelect;
 
 export async function hashPassword(password: string) {
   return bcrypt.hash(password, 12);
@@ -44,7 +65,7 @@ export async function getSessionUser() {
 
   const user = await prisma.user.findUnique({
     where: { id: payload.sub },
-    include: { addresses: true },
+    select: sessionUserSelect,
   });
 
   return user;
