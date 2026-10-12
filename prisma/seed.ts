@@ -19,9 +19,9 @@ async function main() {
       id: "default",
       name: "My Store",
       email: "store@example.com",
-      currency: "EUR",
+      currency: "GBP",
       taxRate: 21,
-      freeShippingMin: 50,
+      freeShippingMin: 120, // informational only: delivery terms live in src/lib/shipping.ts
     },
   });
   console.log("Store settings:", storeSettings.name);

@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Sliders, X } from "@phosphor-icons/react";
+import { Sliders, X, CaretLeft, CaretRight } from "@phosphor-icons/react";
 import { ProductGrid } from "@/components/product/ProductGrid/ProductGrid";
 import { ProductFilters } from "@/components/product/ProductFilters/ProductFilters";
 import { ProductSort } from "@/components/product/ProductSort/ProductSort";
@@ -13,7 +13,7 @@ import { Breadcrumbs } from "@/components/layout/Breadcrumbs/Breadcrumbs";
 import { cachedFetchJSON, readCached } from "@/lib/utils/reliable-fetch";
 
 export default function CatalogPage() {
-  const t = useTranslations("product");
+  const t = useTranslations("listing");
   const nav = useTranslations("nav");
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -118,152 +118,170 @@ export default function CatalogPage() {
 
   const activeFilterCount = [category, minPrice, maxPrice, inStock, onSale, selectedBrand].filter(Boolean).length;
 
-  return (
-    <div className="max-w-container mx-auto px-4">
-      <Breadcrumbs
-        items={[
-          { label: nav("home"), href: "/" },
-          { label: nav("catalog") },
-        ]}
-      />
+  const findCat = (slug: string) => {
+    for (const c of categories) {
+      if (c.slug === slug) return c.name as string;
+      for (const ch of c.children || []) if (ch.slug === slug) return ch.name as string;
+    }
+    return slug;
+  };
 
-      <div className="flex justify-between items-end mb-6 gap-4 flex-wrap">
+  const chips: { key: string; label: string; clear: Record<string, string> }[] = [
+    ...(category ? [{ key: "cat", label: findCat(category), clear: { category: "" } }] : []),
+    ...(selectedBrand ? [{ key: "brand", label: selectedBrand, clear: { brand: "" } }] : []),
+    ...(minPrice || maxPrice
+      ? [{ key: "price", label: `£${minPrice || "0"} – ${maxPrice ? `£${maxPrice}` : "∞"}`, clear: { minPrice: "", maxPrice: "" } }]
+      : []),
+    ...(inStock ? [{ key: "stock", label: t("onlyInStock"), clear: { inStock: "" } }] : []),
+    ...(onSale ? [{ key: "sale", label: t("onlyReduced"), clear: { onSale: "" } }] : []),
+  ];
+
+  const filters = (mobile: boolean) => (
+    <ProductFilters
+      categories={categories}
+      selectedCategory={category}
+      minPrice={minPrice}
+      maxPrice={maxPrice}
+      inStock={inStock}
+      onSale={onSale}
+      brands={brands}
+      selectedBrand={selectedBrand}
+      onCategoryChange={(v) => { updateParams({ category: v, page: "1" }); if (mobile) setMobileFiltersOpen(false); }}
+      onMinPriceChange={(v) => updateParams({ minPrice: v, page: "1" })}
+      onMaxPriceChange={(v) => updateParams({ maxPrice: v, page: "1" })}
+      onInStockChange={(v) => updateParams({ inStock: v ? "true" : "", page: "1" })}
+      onSaleChange={(v) => updateParams({ onSale: v ? "true" : "", page: "1" })}
+      onBrandChange={(v) => { updateParams({ brand: v, page: "1" }); if (mobile) setMobileFiltersOpen(false); }}
+    />
+  );
+
+  const pages: (number | "gap-a" | "gap-b")[] = [];
+  if (totalPages <= 7) {
+    for (let i = 1; i <= totalPages; i++) pages.push(i);
+  } else {
+    pages.push(1);
+    if (page > 3) pages.push("gap-a");
+    for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) pages.push(i);
+    if (page < totalPages - 2) pages.push("gap-b");
+    pages.push(totalPages);
+  }
+  const pageBtn = "min-w-10 h-10 px-3 flex items-center justify-center border-2 border-line-strong bg-surface text-ink font-display font-bold text-base cursor-pointer hover:bg-hivis hover:text-coal disabled:opacity-35 disabled:cursor-not-allowed disabled:hover:bg-surface disabled:hover:text-ink";
+
+  return (
+    <div className="max-w-container mx-auto px-4 lg:px-6 pb-16">
+      <Breadcrumbs items={[{ label: nav("home"), href: "/" }, { label: t("catalogueTitle") }]} />
+
+      <header className="flex flex-wrap items-end justify-between gap-4 pb-4 mb-5 border-b-4 border-line-strong">
         <div>
-          <h1 className="text-[1.75rem] max-[480px]:text-[1.375rem] font-extrabold tracking-[-0.03em]">{nav("catalog")}</h1>
-          <p className="text-sm text-ink-muted mt-1">
-            {t("showing", { count: products.length, total })}
+          <h1 className="m-0 text-[3rem] max-sm:text-[2.25rem] leading-none text-ink">
+            {onSale ? t("reducedTitle") : t("catalogueTitle")}
+          </h1>
+          <p className="m-0 mt-2 font-mono text-sm text-ink-muted">
+            {t("resultCount", { shown: products.length, total })}
           </p>
         </div>
-        <div className="flex items-center gap-3 max-[480px]:w-full max-[480px]:justify-between max-[480px]:gap-2">
+        <div className="flex items-center gap-2 max-sm:w-full max-sm:justify-between">
           <button
             onClick={() => setMobileFiltersOpen(true)}
-            className="hidden max-lg:inline-flex items-center gap-1.5 px-4 py-2 rounded-pill border border-line bg-surface cursor-pointer text-[0.8125rem] font-semibold text-ink-muted hover:border-brand hover:text-brand"
+            className="lg:hidden btn-line !min-h-10 !text-base"
             type="button"
           >
-            <Sliders size={16} />
-            Filters
+            <Sliders size={18} />
+            {t("filters")}
             {activeFilterCount > 0 && (
-              <span className="bg-brand text-white rounded-pill px-1.5 py-px text-[0.6875rem] font-bold">{activeFilterCount}</span>
+              <span className="bg-hivis text-coal px-1.5 text-sm">{activeFilterCount}</span>
             )}
           </button>
           <ProductSort value={sort} onChange={(v) => updateParams({ sort: v, page: "1" })} />
         </div>
-      </div>
+      </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-4 lg:gap-8">
-        <aside className="hidden lg:block sticky top-[calc(var(--header-height)+var(--announcement-height)+1rem)] self-start">
-          <ProductFilters
-            categories={categories}
-            selectedCategory={category}
-            minPrice={minPrice}
-            maxPrice={maxPrice}
-            inStock={inStock}
-            onSale={onSale}
-            brands={brands}
-            selectedBrand={selectedBrand}
-            onCategoryChange={(v) => updateParams({ category: v, page: "1" })}
-            onMinPriceChange={(v) => updateParams({ minPrice: v, page: "1" })}
-            onMaxPriceChange={(v) => updateParams({ maxPrice: v, page: "1" })}
-            onInStockChange={(v) => updateParams({ inStock: v ? "true" : "", page: "1" })}
-            onSaleChange={(v) => updateParams({ onSale: v ? "true" : "", page: "1" })}
-            onBrandChange={(v) => updateParams({ brand: v, page: "1" })}
-          />
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
+        <aside className="hidden lg:block sticky top-[calc(var(--header-height)+var(--deptbar-height)+1rem)] self-start max-h-[calc(100vh-var(--header-height)-var(--deptbar-height)-2rem)] overflow-y-auto">
+          {filters(false)}
         </aside>
 
         <div className="min-w-0">
+          {chips.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              <span className="u-cond font-bold text-sm">{t("activeFilters")}</span>
+              {chips.map((c) => (
+                <button
+                  key={c.key}
+                  type="button"
+                  onClick={() => updateParams({ ...c.clear, page: "1" })}
+                  className="inline-flex items-center gap-1.5 h-8 pl-2.5 pr-1.5 bg-coal text-white text-sm font-semibold border-0 cursor-pointer hover:bg-sale"
+                  aria-label={t("removeFilter", { name: c.label })}
+                >
+                  {c.label} <X size={14} />
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => updateParams({ category: "", brand: "", minPrice: "", maxPrice: "", inStock: "", onSale: "", page: "1" })}
+                className="text-sm font-semibold text-link underline underline-offset-2 bg-transparent border-0 cursor-pointer"
+              >
+                {t("clearAll")}
+              </button>
+            </div>
+          )}
+
           {loading ? (
             <ProductSkeleton count={12} />
           ) : products.length === 0 ? (
             <EmptyState
-              title={t("filterBy")}
-              subtitle={t("priceRange")}
-              actionLabel={nav("home")}
-              actionHref="/"
+              title={t("noMatchTitle")}
+              subtitle={t("noMatchText")}
+              actionLabel={t("clearAll")}
+              actionHref="/catalog"
             />
           ) : (
             <>
               <ProductGrid products={products} />
               {totalPages > 1 && (
-                <div className="flex justify-center items-center gap-1.5 mt-10 pb-12 flex-wrap">
-                  <button
-                    onClick={() => updateParams({ page: String(page - 1) })}
-                    disabled={page <= 1}
-                    className={`w-9 h-9 rounded-lg border border-line bg-surface text-ink cursor-pointer text-[0.8125rem] font-medium flex items-center justify-center px-4 !w-auto h-9 ${page <= 1 ? "opacity-50 cursor-not-allowed" : ""}`}
-                  >
-                    Prev
+                <nav className="flex justify-center items-center gap-1.5 mt-10 flex-wrap" aria-label={t("pagination")}>
+                  <button onClick={() => updateParams({ page: String(page - 1) })} disabled={page <= 1} className={pageBtn}>
+                    <CaretLeft size={16} /> <span className="max-sm:hidden u-cond ml-1">{t("prev")}</span>
                   </button>
-                  {(() => {
-                    const pages: (number | "ellipsis-start" | "ellipsis-end")[] = [];
-                    if (totalPages <= 7) {
-                      for (let i = 1; i <= totalPages; i++) pages.push(i);
-                    } else {
-                      pages.push(1);
-                      if (page > 3) pages.push("ellipsis-start");
-                      const start = Math.max(2, page - 1);
-                      const end = Math.min(totalPages - 1, page + 1);
-                      for (let i = start; i <= end; i++) pages.push(i);
-                      if (page < totalPages - 2) pages.push("ellipsis-end");
-                      pages.push(totalPages);
-                    }
-                    return pages.map((p) =>
-                      typeof p === "string" ? (
-                        <span key={p} className="w-9 h-9 flex items-center justify-center text-[0.8125rem] text-ink-muted">…</span>
-                      ) : (
-                        <button
-                          key={p}
-                          onClick={() => updateParams({ page: String(p) })}
-                          className={`w-9 h-9 rounded-lg border border-line bg-surface text-ink cursor-pointer text-[0.8125rem] font-medium flex items-center justify-center ${p === page ? "bg-brand !border-0 text-white font-bold" : ""}`}
-                        >
-                          {p}
-                        </button>
-                      )
-                    );
-                  })()}
-                  <button
-                    onClick={() => updateParams({ page: String(page + 1) })}
-                    disabled={page >= totalPages}
-                    className={`w-9 h-9 rounded-lg border border-line bg-surface text-ink cursor-pointer text-[0.8125rem] font-medium flex items-center justify-center px-4 !w-auto h-9 ${page >= totalPages ? "opacity-50 cursor-not-allowed" : ""}`}
-                  >
-                    Next
+                  {pages.map((p) =>
+                    typeof p === "string" ? (
+                      <span key={p} className="min-w-10 h-10 flex items-center justify-center text-ink-muted">…</span>
+                    ) : (
+                      <button
+                        key={p}
+                        onClick={() => updateParams({ page: String(p) })}
+                        aria-current={p === page ? "page" : undefined}
+                        className={p === page ? `${pageBtn} !bg-coal !text-hivis` : pageBtn}
+                      >
+                        {p}
+                      </button>
+                    )
+                  )}
+                  <button onClick={() => updateParams({ page: String(page + 1) })} disabled={page >= totalPages} className={pageBtn}>
+                    <span className="max-sm:hidden u-cond mr-1">{t("next")}</span> <CaretRight size={16} />
                   </button>
-                </div>
+                </nav>
               )}
             </>
           )}
         </div>
       </div>
 
-      {/* Mobile filters overlay */}
       {mobileFiltersOpen && (
-        <div className="fixed inset-0 z-[200]">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setMobileFiltersOpen(false)} />
-          <div className="absolute bottom-0 left-0 right-0 max-h-[85vh] bg-surface rounded-t-2xl overflow-auto p-6 flex flex-col">
-            <div className="flex justify-between items-center mb-4">
-              <span className="font-bold text-lg">Filters</span>
+        <div className="fixed inset-0 z-[200] lg:hidden" role="dialog" aria-modal="true" aria-label={t("filters")}>
+          <div className="absolute inset-0 bg-black/60" onClick={() => setMobileFiltersOpen(false)} />
+          <div className="absolute inset-y-0 right-0 w-[min(92vw,380px)] bg-surface overflow-y-auto border-l-4 border-hivis">
+            <div className="sticky top-0 z-10 flex justify-between items-center h-14 px-4 bg-coal text-white">
+              <span className="u-cond font-bold text-lg">{t("filters")}</span>
               <button
                 onClick={() => setMobileFiltersOpen(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-lg border-0 bg-surface-2 cursor-pointer text-ink"
-                aria-label="Close filters"
+                className="w-10 h-10 flex items-center justify-center bg-transparent border-0 cursor-pointer text-white"
+                aria-label={t("closeFilters")}
               >
-                <X size={18} />
+                <X size={22} />
               </button>
             </div>
-            <ProductFilters
-              categories={categories}
-              selectedCategory={category}
-              minPrice={minPrice}
-              maxPrice={maxPrice}
-              inStock={inStock}
-              onSale={onSale}
-              brands={brands}
-              selectedBrand={selectedBrand}
-              onCategoryChange={(v) => { updateParams({ category: v, page: "1" }); setMobileFiltersOpen(false); }}
-              onMinPriceChange={(v) => updateParams({ minPrice: v, page: "1" })}
-              onMaxPriceChange={(v) => updateParams({ maxPrice: v, page: "1" })}
-              onInStockChange={(v) => updateParams({ inStock: v ? "true" : "", page: "1" })}
-              onSaleChange={(v) => updateParams({ onSale: v ? "true" : "", page: "1" })}
-              onBrandChange={(v) => { updateParams({ brand: v, page: "1" }); setMobileFiltersOpen(false); }}
-            />
+            <div className="p-3">{filters(true)}</div>
           </div>
         </div>
       )}

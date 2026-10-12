@@ -1,132 +1,162 @@
 "use client";
 
 import Image from "next/image";
+import { useState } from "react";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
-import { Basket, Heart, ImageBroken } from "@phosphor-icons/react";
-import { PriceDisplay } from "@/components/shared/PriceDisplay/PriceDisplay";
+import { ShoppingCartSimple, Check } from "@phosphor-icons/react";
 import { useCart } from "@/providers/CartProvider";
+import { useCurrency } from "@/providers/CurrencyProvider";
+import { formatPrice } from "@/lib/utils/format-price";
+import { getProductImage, getProductImageFallback } from "@/lib/utils/product-image";
 
-interface ProductCardProps {
+export interface ProductCardProps {
   id: string;
   name: string;
   slug: string;
-  sku: string;
+  sku?: string | null;
+  brand?: string | null;
   price: number;
   comparePrice?: number | null;
   imageUrl?: string | null;
-  category?: string;
-  quantity: number;
+  /** Stock on hand; undefined = unknown (treated as available). */
+  quantity?: number;
+  lowStockAlert?: number;
+  /** Visual density: "rail" cards are fixed-width inside horizontal scrollers. */
+  variant?: "grid" | "rail";
 }
 
-const badgeBase =
-  "absolute top-3 left-3 px-3 py-[0.3rem] rounded-pill text-[0.6875rem] font-bold z-[4] tracking-[0.03em] uppercase";
-const overlayBtnBase =
-  "w-10 h-10 rounded-pill bg-surface border-0 flex items-center justify-center cursor-pointer text-ink shadow-[var(--shadow-md)] transition-all hover:scale-110 hover:bg-brand hover:text-white active:scale-95";
-
+/**
+ * Spec-sheet product card: brand + SKU strip, image, name, big condensed
+ * price, stock indicator and a full-width ink "add" bar.
+ */
 export function ProductCard({
   id,
   name,
   slug,
   sku,
+  brand,
   price,
   comparePrice,
   imageUrl,
-  category,
   quantity,
+  lowStockAlert = 5,
+  variant = "grid",
 }: ProductCardProps) {
   const t = useTranslations("product");
   const { addItem } = useCart();
-  const isOnSale = comparePrice && comparePrice > price;
-  const outOfStock = quantity <= 0;
+  const { currency, convert } = useCurrency();
+  const [added, setAdded] = useState(false);
 
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (outOfStock) return;
+  const onSale = comparePrice != null && comparePrice > price;
+  const pctOff = onSale ? Math.round(((comparePrice! - price) / comparePrice!) * 100) : 0;
+  const stock = quantity ?? 99;
+  const out = stock <= 0;
+  const low = !out && quantity !== undefined && stock <= lowStockAlert;
+  const src = getProductImage(imageUrl, name);
+  const href = `/product/${slug}`;
+
+  const add = () => {
+    if (out) return;
     addItem({
       productId: id,
       name,
       slug,
-      sku,
+      sku: sku || id,
       price,
       quantity: 1,
-      imageUrl: imageUrl || null,
-      maxQuantity: quantity,
+      imageUrl: src,
+      maxQuantity: stock,
     });
-  };
-
-  const handleWishlist = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+    setAdded(true);
+    setTimeout(() => setAdded(false), 1400);
   };
 
   return (
-    <Link
-      href={`/product/${slug}`}
-      className="group rounded-xl overflow-hidden bg-surface border border-line transition-all duration-300 flex flex-col min-w-0 hover:-translate-y-1.5 hover:shadow-card-hover"
+    <article
+      className={`group relative flex flex-col bg-surface border-2 border-line transition-[border-color,box-shadow,transform] hover:border-line-strong hover:shadow-card-hover hover:-translate-x-[2px] hover:-translate-y-[2px] ${
+        variant === "rail" ? "w-[232px] max-sm:w-[176px] shrink-0 snap-start" : "min-w-0"
+      }`}
+      data-sw="card"
     >
-      <div className="relative aspect-square overflow-hidden bg-white">
-        {imageUrl ? (
-          <div className="absolute inset-3 max-sm:inset-1.5">
-            <Image
-              src={imageUrl}
-              alt={name}
-              fill
-              sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="object-contain transition-transform duration-500 group-hover:scale-[1.06]"
-            />
-          </div>
-        ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-ink-subtle text-[0.8125rem]">
-            <ImageBroken size={32} />
-            No Image
-          </div>
-        )}
-
-        {isOnSale && (
-          <span className={`${badgeBase} bg-sale text-white`}>Sale</span>
-        )}
-        {outOfStock && (
-          <span className={`${badgeBase} bg-ink-subtle text-white`}>
-            {t("outOfStock")}
+      <div className="flex items-center justify-between gap-2 px-2.5 h-7 border-b border-line bg-surface-1 text-[0.7rem] leading-none">
+        <span className="font-display font-bold uppercase tracking-wide truncate text-ink">
+          {brand || t("unbranded")}
+        </span>
+        {sku && (
+          <span className="font-mono text-ink-muted truncate" title={`${t("sku")} ${sku}`}>
+            {sku}
           </span>
         )}
-
-        <button
-          className="absolute top-3 right-3 w-8 h-8 rounded-pill bg-surface border-0 flex items-center justify-center cursor-pointer z-[4] text-ink-subtle shadow-[var(--shadow-sm)] transition-all opacity-0 group-hover:opacity-100 hover:text-danger hover:scale-[1.15]"
-          onClick={handleWishlist}
-          aria-label="Add to wishlist"
-        >
-          <Heart size={14} />
-        </button>
       </div>
 
-      <div className="p-4 max-sm:p-3 flex-1 flex flex-col gap-1.5 max-sm:gap-1">
-        {category && (
-          <span className="text-[0.6875rem] max-sm:text-[0.625rem] text-brand uppercase tracking-[0.06em] font-semibold">
-            {category}
+      <Link href={href} className="relative block aspect-square bg-white" tabIndex={-1} aria-hidden="true">
+        <Image
+          src={src}
+          alt=""
+          fill
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 240px"
+          className="object-contain p-4 max-sm:p-2"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = getProductImageFallback();
+          }}
+        />
+        {onSale && (
+          <span className="absolute left-0 bottom-0 bg-coal text-hivis font-display font-extrabold text-[0.95rem] leading-none px-2 py-1.5 tabular-nums">
+            −{pctOff}%
           </span>
         )}
-        <h3 className="text-[0.9375rem] max-sm:text-[0.8125rem] font-semibold text-ink line-clamp-2 leading-[1.4] max-sm:leading-[1.35] break-words [overflow-wrap:anywhere] min-h-[calc(0.9375rem*1.4*2)] max-sm:min-h-[calc(0.8125rem*1.35*2)]">
-          {name}
+      </Link>
+
+      <div className="flex flex-col flex-1 gap-1.5 px-2.5 pt-2.5 pb-3 border-t border-line">
+        <h3 className="m-0 font-sans normal-case tracking-normal text-[0.875rem] max-sm:text-[0.8125rem] font-semibold leading-[1.3] line-clamp-2 min-h-[2.6em] [overflow-wrap:anywhere]">
+          <Link href={href} className="hover:underline underline-offset-2 decoration-2 decoration-hivis">
+            {name}
+          </Link>
         </h3>
-        <div className="flex items-center justify-between mt-auto pt-2">
-          <PriceDisplay price={price} comparePrice={comparePrice} size="sm" />
-          <button
-            className={`w-9 h-9 max-sm:w-8 max-sm:h-8 rounded-lg bg-brand-soft border-0 flex items-center justify-center cursor-pointer text-brand transition-all ${
-              outOfStock
-                ? "opacity-40 cursor-not-allowed"
-                : "hover:bg-brand hover:text-white hover:scale-[1.08] active:scale-95"
-            }`}
-            onClick={handleAddToCart}
-            disabled={outOfStock}
-            aria-label={t("addToCart")}
-          >
-            <Basket size={16} />
-          </button>
+
+        <div className="mt-auto flex items-end justify-between gap-2">
+          <div className="flex flex-col leading-none">
+            {onSale && (
+              <span className="text-[0.75rem] text-ink-subtle line-through tabular-nums mb-0.5">
+                {formatPrice(convert(comparePrice!), currency)}
+              </span>
+            )}
+            <span
+              className={`font-display font-extrabold text-[1.6rem] max-sm:text-[1.3rem] tabular-nums tracking-tight ${
+                onSale ? "text-sale" : "text-ink"
+              }`}
+            >
+              {formatPrice(convert(price), currency)}
+            </span>
+          </div>
         </div>
+
+        <p className="m-0 flex items-center gap-1.5 text-[0.75rem] font-medium text-ink-muted">
+          <span
+            aria-hidden="true"
+            className={`inline-block w-2 h-2 ${out ? "bg-danger" : low ? "bg-warning" : "bg-success"}`}
+          />
+          {out ? t("outOfStock") : low ? t("onlyLeft", { count: stock }) : t("inStock")}
+        </p>
       </div>
-    </Link>
+
+      <button
+        type="button"
+        onClick={add}
+        disabled={out}
+        aria-label={`${t("addToCart")}: ${name}`}
+        className={`h-10 w-full flex items-center justify-center gap-2 font-display font-bold uppercase tracking-wide text-[0.95rem] border-0 transition-colors ${
+          out
+            ? "bg-surface-2 text-ink-subtle cursor-not-allowed"
+            : added
+              ? "bg-hivis text-coal cursor-pointer"
+              : "bg-coal text-white cursor-pointer hover:bg-hivis hover:text-coal"
+        }`}
+      >
+        {added ? <Check size={18} /> : <ShoppingCartSimple size={18} />}
+        {out ? t("outOfStock") : added ? t("added") : t("addToCart")}
+      </button>
+    </article>
   );
 }

@@ -2,7 +2,7 @@ import type { Config } from "tailwindcss";
 import { heroui } from "@heroui/theme";
 
 /*
- * Tailwind v4 primarily consumes design tokens through the @theme block in
+ * "Bold Utility" tokens. Tailwind v4 primarily consumes design tokens through the @theme block in
  * globals.css. This config keeps the plugin surface (HeroUI, dark-mode class)
  * and exposes the same tokens for any consumer that still expects them via
  * `theme.extend.colors`.
@@ -16,14 +16,14 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-karla)", "Karla", "system-ui", "sans-serif"],
-        display: ["var(--font-bricolage)", "Bricolage Grotesque", "Georgia", "serif"],
+        sans: ["var(--font-barlow)", "Barlow", "Helvetica Neue", "Arial", "sans-serif"],
+        display: ["var(--font-barlow-condensed)", "Barlow Condensed", "Arial Narrow", "sans-serif"],
         mono: ["ui-monospace", "SF Mono", "Menlo", "monospace"],
       },
       maxWidth: {
-        container: "1320px",
-        narrow: "1120px",
-        wide: "1440px",
+        container: "1360px",
+        narrow: "1080px",
+        wide: "1480px",
       },
       colors: {
         surface: {
@@ -31,6 +31,7 @@ const config: Config = {
           1: "var(--color-bg-secondary)",
           2: "var(--color-bg-tertiary)",
           warm: "var(--color-bg-warm)",
+          dark: "var(--color-surface-dark)",
         },
         ink: {
           DEFAULT: "var(--color-text)",
@@ -41,17 +42,15 @@ const config: Config = {
           DEFAULT: "var(--color-accent)",
           hover: "var(--color-accent-hover)",
           soft: "var(--color-accent-light)",
+          ink: "var(--color-accent-ink)",
           2: "var(--color-accent-2)",
         },
+        link: "var(--color-accent-2)",
         sale: "var(--color-accent-3)",
         line: {
           DEFAULT: "var(--color-border)",
           hover: "var(--color-border-hover)",
-        },
-        promo: {
-          blue: "var(--promo-bg-blue)",
-          warm: "var(--promo-bg-warm)",
-          green: "var(--promo-bg-green)",
+          strong: "var(--color-border-strong)",
         },
         success: "var(--color-success)",
         warning: "var(--color-warning)",
@@ -62,6 +61,7 @@ const config: Config = {
         card: "var(--shadow-card)",
         "card-hover": "var(--shadow-card-hover)",
         accent: "var(--shadow-accent)",
+        hard: "var(--shadow-lg)",
       },
       borderRadius: {
         sm: "var(--radius-sm)",
@@ -70,13 +70,6 @@ const config: Config = {
         xl: "var(--radius-xl)",
         "2xl": "var(--radius-2xl)",
         pill: "var(--radius-pill)",
-      },
-      backgroundImage: {
-        "gradient-brand": "var(--gradient-accent)",
-        "gradient-warm": "var(--gradient-warm)",
-        "gradient-cool": "var(--gradient-cool)",
-        "gradient-hero": "var(--gradient-hero)",
-        "gradient-badge": "var(--gradient-badge)",
       },
     },
   },

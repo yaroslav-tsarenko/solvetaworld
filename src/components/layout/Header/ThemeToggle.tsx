@@ -8,11 +8,11 @@ export function ThemeToggle() {
 
   return (
     <button
-      className="relative flex items-center justify-center w-9 h-9 rounded-md bg-transparent border-0 cursor-pointer text-ink-muted transition-colors no-underline hover:bg-surface-1 hover:text-ink"
+      className="relative flex items-center justify-center w-11 h-11 bg-transparent border-2 border-transparent cursor-pointer text-coal transition-colors hover:border-coal max-sm:hidden"
       onClick={toggleTheme}
       aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
     >
-      {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
+      {theme === "light" ? <Moon size={22} /> : <Sun size={22} />}
     </button>
   );
 }

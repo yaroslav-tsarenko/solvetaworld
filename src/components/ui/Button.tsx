@@ -41,21 +41,23 @@ export function Button({
   ...rest
 }: ButtonProps) {
   const sizeStyles: Record<string, React.CSSProperties> = {
-    sm: { padding: isIconOnly ? "0.375rem" : "0.375rem 0.75rem", fontSize: "0.8125rem" },
-    md: { padding: isIconOnly ? "0.5rem" : "0.5rem 1rem", fontSize: "0.875rem" },
-    lg: { padding: isIconOnly ? "0.625rem" : "0.625rem 1.5rem", fontSize: "1rem" },
+    sm: { padding: isIconOnly ? "0.375rem" : "0 0.875rem", minHeight: "34px", minWidth: isIconOnly ? "34px" : undefined, fontSize: "0.9375rem" },
+    md: { padding: isIconOnly ? "0.5rem" : "0 1.125rem", minHeight: "42px", minWidth: isIconOnly ? "42px" : undefined, fontSize: "1rem" },
+    lg: { padding: isIconOnly ? "0.625rem" : "0 1.5rem", minHeight: "50px", minWidth: isIconOnly ? "50px" : undefined, fontSize: "1.125rem" },
   };
 
   const resolvedVariant = resolveVariant(variant, color);
 
+  // "Bold Utility": primary = safety yellow with ink type; secondary = ink;
+  // everything square with a 2px rule.
   const variantStyles: Record<string, React.CSSProperties> = {
-    primary: { background: "var(--color-accent)", color: "#fff", border: "1px solid var(--color-accent)" },
-    secondary: { background: "var(--color-bg-secondary)", color: "var(--color-text)", border: "1px solid var(--color-border)" },
-    tertiary: { background: "transparent", color: "var(--color-text-secondary)", border: "1px solid transparent" },
-    outline: { background: "transparent", color: "var(--color-text)", border: "1px solid var(--color-border)" },
-    ghost: { background: "transparent", color: "var(--color-text)", border: "1px solid transparent" },
-    danger: { background: "var(--color-danger)", color: "#fff", border: "1px solid var(--color-danger)" },
-    "danger-soft": { background: "var(--color-danger-bg, rgba(168,64,47,0.12))", color: "var(--color-danger)", border: "1px solid transparent" },
+    primary: { background: "var(--color-accent)", color: "var(--color-accent-ink)", border: "2px solid var(--color-accent-ink)" },
+    secondary: { background: "var(--color-text)", color: "var(--color-bg)", border: "2px solid var(--color-text)" },
+    tertiary: { background: "transparent", color: "var(--color-text-secondary)", border: "2px solid transparent" },
+    outline: { background: "transparent", color: "var(--color-text)", border: "2px solid var(--color-border-strong)" },
+    ghost: { background: "transparent", color: "var(--color-text)", border: "2px solid transparent" },
+    danger: { background: "var(--color-danger)", color: "#fff", border: "2px solid var(--color-danger)" },
+    "danger-soft": { background: "transparent", color: "var(--color-danger)", border: "2px solid var(--color-danger)" },
   };
 
   const baseStyle: React.CSSProperties = {
@@ -64,12 +66,16 @@ export function Button({
     justifyContent: "center",
     gap: "0.5rem",
     borderRadius: "var(--radius-md)",
-    fontWeight: 600,
-    letterSpacing: "0.01em",
+    fontFamily: "var(--font-display)",
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.03em",
+    lineHeight: 1,
     cursor: isDisabled || isLoading ? "not-allowed" : "pointer",
-    opacity: isDisabled || isLoading ? 0.6 : 1,
-    transition: "all 0.2s ease",
+    opacity: isDisabled || isLoading ? 0.5 : 1,
+    transition: "background-color 0.12s, color 0.12s, transform 0.12s",
     textDecoration: "none",
+    whiteSpace: "nowrap",
     width: fullWidth ? "100%" : undefined,
     ...sizeStyles[size],
     ...variantStyles[resolvedVariant],
@@ -84,7 +90,7 @@ export function Button({
 
   const content = (
     <>
-      {isLoading && <span style={{ width: "1em", height: "1em", border: "2px solid currentColor", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.6s linear infinite", display: "inline-block" }} />}
+      {isLoading && <span style={{ width: "1em", height: "1em", border: "2px solid currentColor", borderTopColor: "transparent", borderRadius: 0, animation: "spin 0.6s linear infinite", display: "inline-block" }} />}
       {!isLoading && startContent}
       {!isIconOnly && children}
       {endContent}

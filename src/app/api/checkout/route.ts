@@ -5,6 +5,8 @@ import { getSessionUser } from "@/lib/auth";
 import { sendOrderConfirmationEmail, sendOrderInvoiceEmail } from "@/lib/email";
 import { scheduleEmail } from "@/lib/email-jobs";
 import { resolveDiscount, markDiscountUsed } from "@/lib/discounts";
+import { shippingCost as shippingCostFor } from "@/lib/shipping";
+import { getGbpRates, convertFromGbp, isSupportedCurrency, type ChargeCurrency } from "@/lib/exchange-rates";
 
 export async function POST(request: NextRequest) {
   try {
@@ -65,35 +67,25 @@ export async function POST(request: NextRequest) {
     const discountedSubtotal = subtotal - discountAmount;
 
     const settings = await prisma.storeSettings.findFirst();
-    const baseCurrency = settings?.currency || "EUR";
+    // Product prices and delivery charges are stored in GBP (the store's base
+    // currency); anything else is a conversion of the GBP total.
     const currencyCookie = request.cookies.get("currency")?.value;
-    const selectedCurrency = (body.currency && ["EUR", "USD", "GBP"].includes(body.currency))
+    const selectedCurrency: ChargeCurrency = isSupportedCurrency(body.currency)
       ? body.currency
-      : ((currencyCookie && ["EUR", "USD", "GBP"].includes(currencyCookie))
+      : isSupportedCurrency(currencyCookie)
         ? currencyCookie
-        : baseCurrency);
+        : "GBP";
 
     const taxRate = Number(settings?.taxRate ?? 21);
     const taxAmount = +(discountedSubtotal * (taxRate / 100)).toFixed(2);
-    const shippingCost = discountedSubtotal >= Number(settings?.freeShippingMin ?? 100) ? 0 : 5.99;
+    // Delivery terms live in src/lib/shipping.ts (DB freeShippingMin is ignored).
+    const shippingCost = shippingCostFor(validated.shippingMethod, discountedSubtotal);
     const total = +(discountedSubtotal + taxAmount + shippingCost).toFixed(2);
 
-    // Convert total to the selected currency for Oppwa
-    let totalInSelectedCurrency = total;
-    let rates = { EUR: 1, USD: 1.08, GBP: 0.85 };
-    if (selectedCurrency !== "EUR") {
-      try {
-        const res = await fetch("https://api.frankfurter.dev/v1/latest?base=EUR&symbols=USD,GBP");
-        if (res.ok) {
-          const data = await res.json();
-          rates = { EUR: 1, USD: data.rates.USD, GBP: data.rates.GBP };
-        }
-      } catch (e) {
-        console.warn("Failed to fetch exchange rates, using fallback:", e);
-      }
-      const rate = rates[selectedCurrency as keyof typeof rates] || 1;
-      totalInSelectedCurrency = total * rate;
-    }
+    // Convert to the shopper's currency with the same GBP-based rates and
+    // rounding the storefront uses, so the charged amount equals the displayed one.
+    const rates = await getGbpRates();
+    const totalInSelectedCurrency = convertFromGbp(total, selectedCurrency, rates);
 
     const order = await prisma.order.create({
       data: {
@@ -156,15 +148,14 @@ export async function POST(request: NextRequest) {
     params.append("billing.postcode", validated.shipping.postalCode);
     params.append("billing.country", validated.shipping.country);
 
-    const conversionRate = rates[selectedCurrency as keyof typeof rates] || 1;
     order.items.forEach((item, index) => {
       params.append(`cart.items[${index}].currency`, selectedCurrency);
       params.append(`cart.items[${index}].description`, item.productName);
       params.append(`cart.items[${index}].merchantItemId`, item.productId);
       params.append(`cart.items[${index}].name`, item.productName);
-      params.append(`cart.items[${index}].price`, (Number(item.price) * conversionRate).toFixed(2));
+      params.append(`cart.items[${index}].price`, convertFromGbp(Number(item.price), selectedCurrency, rates).toFixed(2));
       params.append(`cart.items[${index}].quantity`, String(item.quantity));
-      params.append(`cart.items[${index}].totalAmount`, (Number(item.total) * conversionRate).toFixed(2));
+      params.append(`cart.items[${index}].totalAmount`, convertFromGbp(Number(item.total), selectedCurrency, rates).toFixed(2));
     });
 
     const paybyLinkUrl = `${baseUrl}/paybylink/v1`;

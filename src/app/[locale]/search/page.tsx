@@ -6,11 +6,11 @@ import { useSearchParams } from "next/navigation";
 import { MagnifyingGlass } from "@phosphor-icons/react";
 import { ProductGrid } from "@/components/product/ProductGrid/ProductGrid";
 import { EmptyState } from "@/components/shared/EmptyState/EmptyState";
-import { LoadingSpinner } from "@/components/shared/LoadingSpinner/LoadingSpinner";
+import { ProductSkeleton } from "@/components/product/ProductSkeleton/ProductSkeleton";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs/Breadcrumbs";
 
 export default function SearchPage() {
-  const t = useTranslations("common");
+  const t = useTranslations("listing");
   const nav = useTranslations("nav");
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q") || "";
@@ -19,6 +19,13 @@ export default function SearchPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+
+  // A new ?q= from the header search replaces the field's contents.
+  const [lastParam, setLastParam] = useState(initialQuery);
+  if (initialQuery !== lastParam) {
+    setLastParam(initialQuery);
+    setQuery(initialQuery);
+  }
 
   useEffect(() => {
     if (query.length < 2) {
@@ -39,43 +46,45 @@ export default function SearchPage() {
   }, [query]);
 
   return (
-    <div style={{ maxWidth: "var(--max-width)", margin: "0 auto", padding: "0 1rem 4rem" }}>
-      <Breadcrumbs items={[{ label: nav("home"), href: "/" }, { label: t("search") }]} />
+    <div className="max-w-container mx-auto px-4 lg:px-6 pb-16">
+      <Breadcrumbs items={[{ label: nav("home"), href: "/" }, { label: t("searchTitle") }]} />
 
-      <div style={{ textAlign: "center", marginBottom: "1.75rem" }}>
-        <h1 style={{ fontSize: "clamp(1.375rem, 4.5vw, 1.75rem)", fontWeight: 800, letterSpacing: "-0.03em", marginBottom: "1rem" }}>
-          Search
-        </h1>
-        <div style={{ maxWidth: "32rem", margin: "0 auto", position: "relative" }}>
-          <div style={{ position: "absolute", left: "1rem", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: "var(--color-text-tertiary)" }}>
-            <MagnifyingGlass size={20} />
-          </div>
+      <section className="border-2 border-line-strong bg-hivis text-coal p-5 sm:p-8 mb-8">
+        <h1 className="m-0 text-[2.75rem] max-sm:text-[2rem] leading-none text-coal">{t("searchTitle")}</h1>
+        <p className="m-0 mt-2 text-[0.95rem]">{t("searchHint")}</p>
+        <div className="mt-5 flex items-stretch h-14 border-2 border-coal bg-white max-w-[760px]">
+          <span className="w-12 flex items-center justify-center text-coal" aria-hidden="true">
+            <MagnifyingGlass size={22} />
+          </span>
           <input
-            placeholder={nav("search")}
+            type="search"
+            aria-label={t("searchTitle")}
+            placeholder={nav("searchPlaceholder")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             autoFocus
-            style={{
-              width: "100%",
-              padding: "0.875rem 1rem 0.875rem 2.75rem",
-              borderRadius: "var(--radius-pill)",
-              border: "1px solid var(--color-border)",
-              background: "var(--color-bg-secondary)",
-              color: "var(--color-text)",
-              fontSize: "1rem",
-              outline: "none",
-              transition: "border-color 0.2s, box-shadow 0.2s",
-            }}
+            className="flex-1 min-w-0 bg-transparent text-coal text-lg outline-none pr-3"
           />
         </div>
-      </div>
+      </section>
+
+      {query.length >= 2 && !loading && results.length > 0 && (
+        <p className="m-0 mb-4 font-mono text-sm text-ink-muted">
+          {t("searchCount", { count: results.length, query })}
+        </p>
+      )}
 
       {loading ? (
-        <LoadingSpinner />
+        <ProductSkeleton count={8} />
       ) : results.length > 0 ? (
-        <ProductGrid products={results} />
+        <ProductGrid products={results} wide />
       ) : query.length >= 2 ? (
-        <EmptyState title={t("noResults")} actionLabel={nav("catalog")} actionHref="/catalog" />
+        <EmptyState
+          title={t("searchNoneTitle")}
+          subtitle={t("searchNoneText")}
+          actionLabel={t("browseDepartments")}
+          actionHref="/catalog"
+        />
       ) : null}
     </div>
   );

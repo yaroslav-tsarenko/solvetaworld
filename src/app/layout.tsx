@@ -1,28 +1,31 @@
 import type { Metadata, Viewport } from "next";
 import { getLocale } from "next-intl/server";
-import { Bricolage_Grotesque, Karla } from "next/font/google";
+import { Barlow, Barlow_Condensed } from "next/font/google";
 import "@/styles/globals.css";
 
-// Brand type: Bricolage Grotesque for display/headings, Karla for body —
-// deliberately distinct from the sibling store's Geist stack.
-const bricolage = Bricolage_Grotesque({
-  variable: "--font-bricolage",
-  subsets: ["latin"],
+// Brand type: Barlow Condensed (heavy, uppercase) for headings, navigation,
+// prices and badges; Barlow for body and UI text.
+const barlowCondensed = Barlow_Condensed({
+  variable: "--font-barlow-condensed",
+  weight: ["600", "700", "800"],
+  subsets: ["latin", "latin-ext"],
   display: "swap",
 });
 
-const karla = Karla({
-  variable: "--font-karla",
-  subsets: ["latin"],
+const barlow = Barlow({
+  variable: "--font-barlow",
+  weight: ["400", "500", "600", "700"],
+  subsets: ["latin", "latin-ext"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
   title: {
-    default: "Solvetaworld — Electrical Materials & Supplies",
+    default: "Solvetaworld — Tools, Hardware & Workshop Supplies",
     template: "%s | Solvetaworld",
   },
-  description: "Your trusted source for electrical materials, wiring, and installation supplies. Professional quality delivered to your door.",
+  description:
+    "Hand and power tools, ironmongery, garden machinery, cable, wiring and test gear from Solvetaworld — browse by department, brand or SKU.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
   applicationName: "Solvetaworld",
   manifest: "/manifest.json",
@@ -45,8 +48,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#2E5E4E" },
-    { media: "(prefers-color-scheme: dark)", color: "#161B18" },
+    { media: "(prefers-color-scheme: light)", color: "#FFD21F" },
+    { media: "(prefers-color-scheme: dark)", color: "#111111" },
   ],
 };
 
@@ -63,7 +66,8 @@ export default async function RootLayout({
     <html
       lang={locale}
       suppressHydrationWarning
-      className={`${karla.variable} ${bricolage.variable} h-full antialiased`}
+      data-scroll-behavior="smooth"
+      className={`${barlow.variable} ${barlowCondensed.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

@@ -7,10 +7,11 @@ import { ProductGrid } from "@/components/product/ProductGrid/ProductGrid";
 import { EmptyState } from "@/components/shared/EmptyState/EmptyState";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner/LoadingSpinner";
 
+type GridProduct = React.ComponentProps<typeof ProductGrid>["products"][number];
+
 export default function WishlistPage() {
   const t = useTranslations("account");
-  const nav = useTranslations("nav");
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState<GridProduct[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,7 +19,7 @@ export default function WishlistPage() {
       .then((res) => res.json())
       .then((data) => {
         setItems(
-          data.map((item: { product: Record<string, unknown> }) => item.product)
+          Array.isArray(data) ? data.map((item: { product: GridProduct }) => item.product) : []
         );
       })
       .catch(() => setItems([]))
@@ -29,14 +30,20 @@ export default function WishlistPage() {
 
   return (
     <div>
-      <h1 style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: "1.25rem" }}>{t("wishlist")}</h1>
+      <div className="sec-head">
+        <h1 className="m-0 text-[2rem] text-ink">{t("wishlist")}</h1>
+        {items.length > 0 && (
+          <span className="u-cond text-sm font-bold text-ink-muted">{t("savedCount", { count: items.length })}</span>
+        )}
+      </div>
 
       {items.length === 0 ? (
         <EmptyState
           title={t("emptyWishlist")}
-          actionLabel={nav("catalog")}
+          subtitle={t("emptyWishlistSubtitle")}
+          actionLabel={t("browseCatalog")}
           actionHref="/catalog"
-          icon={<Heart size={48} />}
+          icon={<Heart size={34} />}
         />
       ) : (
         <ProductGrid products={items} />

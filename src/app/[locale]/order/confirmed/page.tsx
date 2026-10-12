@@ -4,17 +4,23 @@ import { useEffect, useState, Suspense } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { useSearchParams } from "next/navigation";
-import { Button } from "@/components/ui/Button";
-import { CheckCircle, Warning, Package, MapPin, Truck, EnvelopeSimple, CaretRight } from "@phosphor-icons/react";
-import { motion } from "framer-motion";
+import { CheckSquare, WarningOctagon, ArrowRight, Receipt } from "@phosphor-icons/react";
 import { useCurrency } from "@/providers/CurrencyProvider";
 import { formatPrice } from "@/lib/utils/format-price";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner/LoadingSpinner";
 import { useCart } from "@/providers/CartProvider";
 import type { OrderDetail } from "@/types/order";
+import { isShippingMethod } from "@/lib/shipping";
+
+const KNOWN_PAYMENT_STATUSES = ["PAID", "PENDING", "FAILED", "REFUNDED"] as const;
+
+const dtCls = "u-cond text-xs font-bold text-ink-subtle pt-0.5";
+const ddCls = "m-0 text-sm text-ink";
+const thCls = "px-3 py-2 u-cond text-xs font-bold text-hivis";
 
 function ConfirmedContent() {
-  const t = useTranslations("notifications");
+  const t = useTranslations("order");
+  const tCheckout = useTranslations("checkout");
   const { currency, convert } = useCurrency();
   const { clearCart } = useCart();
   const searchParams = useSearchParams();
@@ -28,7 +34,6 @@ function ConfirmedContent() {
   useEffect(() => {
     if (paymentLinkId && checkoutId) {
       let isSubscribed = true;
-      let intervalId: NodeJS.Timeout;
 
       const checkStatus = () => {
         fetch(`/api/orders/verify?paymentLinkId=${paymentLinkId}&checkoutId=${checkoutId}`)
@@ -56,11 +61,11 @@ function ConfirmedContent() {
           });
       };
 
+      // Poll every 2 seconds (callbacks above only read intervalId asynchronously)
+      const intervalId = setInterval(checkStatus, 2000);
+
       // Run immediately
       checkStatus();
-
-      // Poll every 2 seconds
-      intervalId = setInterval(checkStatus, 2000);
 
       return () => {
         isSubscribed = false;
@@ -82,210 +87,186 @@ function ConfirmedContent() {
 
   if (loading) {
     return (
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", gap: "1.5rem" }}>
-        <LoadingSpinner />
-        <h2 style={{ fontSize: "1.25rem", fontWeight: 700 }}>Checking payment status...</h2>
-        <p style={{ color: "var(--color-text-secondary)", fontSize: "0.875rem" }}>Please do not close or refresh this page.</p>
+      <div className="max-w-xl mx-auto my-16 px-4">
+        <div className="border-2 border-line-strong bg-surface-1 px-6 py-10 flex flex-col items-center gap-4 text-center" role="status" aria-live="polite">
+          <LoadingSpinner />
+          <h1 className="m-0 text-2xl text-ink">{t("checking")}</h1>
+          <p className="m-0 text-sm text-ink-muted">{t("checkingHint")}</p>
+        </div>
       </div>
     );
   }
 
   const isFailed = order?.paymentStatus === "FAILED";
+  const money = (amount: number | string) => formatPrice(convert(Number(amount)), currency);
+  const statusLabel = (s: string) =>
+    (KNOWN_PAYMENT_STATUSES as readonly string[]).includes(s)
+      ? t(`paymentStatus.${s}` as "paymentStatus.PAID")
+      : s;
+  const methodLabel = (m: string | null) =>
+    isShippingMethod(m) ? tCheckout(`methods.${m}`) : m || "—";
+  const placedOn = order
+    ? new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(order.createdAt))
+    : "";
+  const shippingCost = order ? Number(order.shippingCost) : 0;
+  const discountAmount = order ? Number(order.discountAmount ?? 0) : 0;
 
   return (
-    <div style={{ maxWidth: "640px", margin: "2rem auto 4rem", padding: "0 1rem" }}>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-        style={{ textAlign: "center", marginBottom: "2rem" }}
-      >
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-          style={{
-            width: 72,
-            height: 72,
-            borderRadius: "50%",
-            background: isFailed
-              ? "rgba(168, 64, 47, 0.12)"
-              : "var(--color-success-light, rgba(63,122,84,0.12))",
-            color: isFailed ? "var(--color-danger, #A8402F)" : "var(--color-success)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            margin: "0 auto 1rem",
-          }}
+    <div className="max-w-3xl mx-auto mt-8 mb-16 px-4">
+      <article className="border-2 border-line-strong bg-surface">
+        {/* Status bar */}
+        <div
+          className={`flex items-center gap-2.5 px-5 py-2.5 border-b-2 border-line-strong ${
+            isFailed ? "bg-danger text-white" : "bg-hivis text-coal"
+          }`}
         >
-          {isFailed ? <Warning size={40} /> : <CheckCircle size={40} />}
-        </motion.div>
-        <h1 style={{ fontSize: "1.75rem", fontWeight: 800, letterSpacing: "-0.02em", marginBottom: "0.5rem" }}>
-          {isFailed ? "Payment Failed" : t("orderPlaced")}
-        </h1>
-        <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9375rem" }}>
-          {isFailed 
-            ? "Your payment transaction could not be completed. Please try again or use another payment method."
-            : "Thank you for your order. We'll send a confirmation email shortly."}
-        </p>
-        {order && (
-          <p style={{ marginTop: "0.75rem", fontSize: "0.875rem", color: "var(--color-text-tertiary)" }}>
-            Order <strong style={{ color: "var(--color-text)" }}>#{order.orderNumber.slice(-8)}</strong>
-          </p>
-        )}
-      </motion.div>
+          {isFailed ? <WarningOctagon size={20} /> : <CheckSquare size={20} />}
+          <span className="u-cond font-extrabold tracking-wider">{isFailed ? t("failedBar") : t("receivedBar")}</span>
+        </div>
 
-      {order && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          style={{
-            border: "1px solid var(--color-border)",
-            borderRadius: "var(--radius-xl)",
-            background: "var(--color-bg)",
-            padding: "1.5rem",
-            marginBottom: "1.5rem",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
-            <Package size={18} color="var(--color-accent)" />
-            <h2 style={{ fontSize: "1rem", fontWeight: 700 }}>Order Summary</h2>
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginBottom: "1rem" }}>
-            {order.items.map((item) => (
-              <div key={item.id} style={{ display: "flex", justifyContent: "space-between", gap: "1rem", fontSize: "0.875rem", paddingBottom: "0.75rem", borderBottom: "1px solid var(--color-border)" }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis" }}>{item.productName}</div>
-                  <div style={{ fontSize: "0.75rem", color: "var(--color-text-tertiary)", marginTop: "0.125rem" }}>
-                    Qty {item.quantity} × {formatPrice(convert(Number(item.price)), currency)}
-                  </div>
-                </div>
-                <span style={{ fontWeight: 700, whiteSpace: "nowrap" }}>{formatPrice(convert(Number(item.total)), currency)}</span>
-              </div>
-            ))}
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem", fontSize: "0.875rem" }}>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "var(--color-text-secondary)" }}>Subtotal</span>
-              <span>{formatPrice(convert(Number(order.subtotal)), currency)}</span>
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "var(--color-text-secondary)" }}>Shipping</span>
-              <span>{Number(order.shippingCost) === 0 ? "Free" : formatPrice(convert(Number(order.shippingCost)), currency)}</span>
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "var(--color-text-secondary)" }}>Tax</span>
-              <span>{formatPrice(convert(Number(order.taxAmount)), currency)}</span>
-            </div>
-            <div style={{
-              display: "flex",
-              justifyContent: "space-between",
-              fontWeight: 800,
-              fontSize: "1.0625rem",
-              borderTop: "1px solid var(--color-border)",
-              paddingTop: "0.625rem",
-              marginTop: "0.375rem",
-            }}>
-              <span>Total</span>
-              <span>{formatPrice(convert(Number(order.total)), currency)}</span>
-            </div>
-          </div>
-        </motion.div>
-      )}
-
-      {order && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-            gap: "0.875rem",
-            marginBottom: "1.5rem",
-          }}
-        >
-          <div style={{ padding: "1rem 1.25rem", border: "1px solid var(--color-border)", borderRadius: "var(--radius-lg)", background: "var(--color-bg)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
-              <MapPin size={14} color="var(--color-accent)" />
-              <span style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", color: "var(--color-text-tertiary)" }}>
-                Delivery to
-              </span>
-            </div>
-            <p style={{ fontSize: "0.8125rem", color: "var(--color-text-secondary)", lineHeight: 1.5 }}>
-              {order.shippingAddress.firstName} {order.shippingAddress.lastName}<br />
-              {order.shippingAddress.address1}<br />
-              {order.shippingAddress.city}, {order.shippingAddress.postalCode}<br />
-              {order.shippingAddress.country}
+        {/* Docket head */}
+        <header className="px-6 pt-6 pb-5 max-sm:px-4 grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end border-b border-line">
+          <div>
+            <h1 className="m-0 text-[2rem] max-sm:text-[1.6rem] text-ink">
+              {order ? (isFailed ? t("failedTitle") : t("receivedTitle")) : t("notFoundTitle")}
+            </h1>
+            <p className="m-0 mt-2 text-sm text-ink-muted max-w-[52ch]">
+              {order ? (isFailed ? t("failedBody") : t("receivedBody")) : t("notFoundBody")}
             </p>
           </div>
-          <div style={{ padding: "1rem 1.25rem", border: "1px solid var(--color-border)", borderRadius: "var(--radius-lg)", background: "var(--color-bg)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
-              <Truck size={14} color="var(--color-accent)" />
-              <span style={{ fontSize: "0.75rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em", color: "var(--color-text-tertiary)" }}>
-                Next Steps
+          {order && (
+            <div className="sm:text-right">
+              <span className="block u-cond text-xs font-bold text-ink-subtle">{t("orderNo")}</span>
+              <span className="block font-mono text-[1.75rem] max-sm:text-2xl font-bold leading-tight tracking-tight text-ink">
+                #{order.orderNumber.slice(-8)}
               </span>
             </div>
-            {isFailed ? (
-              <p style={{ fontSize: "0.8125rem", color: "var(--color-text-secondary)", lineHeight: 1.5, margin: 0 }}>
-                Please check your card details and try again. Alternatively, you can contact our customer support for assistance.
-              </p>
-            ) : (
-              <ul style={{ fontSize: "0.8125rem", color: "var(--color-text-secondary)", lineHeight: 1.6, paddingLeft: "1rem", margin: 0 }}>
-                <li>We&apos;ll prepare your order within 1–2 business days</li>
-                <li>You&apos;ll receive a tracking link by email</li>
-                <li>Estimated delivery depends on destination</li>
-              </ul>
-            )}
-          </div>
-        </motion.div>
-      )}
+          )}
+        </header>
 
-      {order && !isFailed && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          style={{
-            padding: "0.875rem 1rem",
-            background: "var(--color-accent-light)",
-            border: "1px solid var(--color-accent)",
-            borderRadius: "var(--radius-lg)",
-            display: "flex",
-            alignItems: "center",
-            gap: "0.625rem",
-            marginBottom: "1.5rem",
-            fontSize: "0.8125rem",
-          }}
-        >
-          <EnvelopeSimple size={16} color="var(--color-accent)" style={{ flexShrink: 0 }} />
-          <span>
-            A confirmation email has been sent to{" "}
-            <strong>{order.customerEmail}</strong>
-          </span>
-        </motion.div>
-      )}
+        {order && (
+          <>
+            {/* Details */}
+            <dl className="m-0 px-6 py-5 max-sm:px-4 grid grid-cols-[8.5rem_minmax(0,1fr)] max-sm:grid-cols-[6.5rem_minmax(0,1fr)] gap-x-4 gap-y-2.5 border-b border-line">
+              <dt className={dtCls}>{t("placed")}</dt>
+              <dd className={`${ddCls} font-mono`}>{placedOn}</dd>
+              <dt className={dtCls}>{t("email")}</dt>
+              <dd className={`${ddCls} break-all`}>{order.customerEmail}</dd>
+              <dt className={dtCls}>{t("payment")}</dt>
+              <dd className={`${ddCls} font-semibold ${isFailed ? "text-danger" : order.paymentStatus === "PAID" ? "text-success" : ""}`}>
+                {statusLabel(order.paymentStatus)}
+              </dd>
+              <dt className={dtCls}>{t("deliveryService")}</dt>
+              <dd className={ddCls}>{methodLabel(order.shippingMethod)}</dd>
+              <dt className={dtCls}>{t("deliverTo")}</dt>
+              <dd className={`${ddCls} leading-relaxed`}>
+                {order.shippingAddress.firstName} {order.shippingAddress.lastName}
+                <br />
+                {order.shippingAddress.address1}
+                {order.shippingAddress.address2 ? (
+                  <>
+                    <br />
+                    {order.shippingAddress.address2}
+                  </>
+                ) : null}
+                <br />
+                {order.shippingAddress.city}, {order.shippingAddress.postalCode}
+                <br />
+                {order.shippingAddress.country}
+              </dd>
+            </dl>
 
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6 }}
-        style={{
-          display: "flex",
-          gap: "0.75rem",
-          flexWrap: "wrap",
-        }}
-      >
-        <Button as={Link} href="/account/orders" variant="bordered" style={{ flex: "1 1 200px" }}>
-          View Orders <CaretRight size={16} />
-        </Button>
-        <Button as={Link} href="/catalog" color="primary" style={{ flex: "1 1 200px" }}>
-          Continue Shopping
-        </Button>
-      </motion.div>
+            {/* Items */}
+            <section className="px-6 py-5 max-sm:px-4 border-b border-line">
+              <h2 className="m-0 mb-3 text-lg text-ink">{t("items")}</h2>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse border-2 border-line-strong text-sm min-w-[460px]">
+                  <thead>
+                    <tr className="bg-coal text-left">
+                      <th scope="col" className={thCls}>{t("colItem")}</th>
+                      <th scope="col" className={thCls}>{t("colSku")}</th>
+                      <th scope="col" className={`${thCls} text-center`}>{t("colQty")}</th>
+                      <th scope="col" className={`${thCls} text-right`}>{t("colUnit")}</th>
+                      <th scope="col" className={`${thCls} text-right`}>{t("colLine")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {order.items.map((item) => (
+                      <tr key={item.id} className="border-t border-line align-top">
+                        <td className="px-3 py-2.5">
+                          <span className="font-semibold text-ink [overflow-wrap:anywhere]">{item.productName}</span>
+                          {item.variantName && <span className="block text-xs text-ink-muted">{item.variantName}</span>}
+                        </td>
+                        <td className="px-3 py-2.5 font-mono text-xs text-ink-muted whitespace-nowrap">{item.productSku}</td>
+                        <td className="px-3 py-2.5 font-mono text-center tabular-nums">{item.quantity}</td>
+                        <td className="px-3 py-2.5 font-mono text-right tabular-nums whitespace-nowrap">{money(item.price)}</td>
+                        <td className="px-3 py-2.5 font-mono text-right font-semibold tabular-nums whitespace-nowrap">{money(item.total)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <dl className="m-0 mt-4 ml-auto max-w-xs text-sm">
+                <div className="flex justify-between gap-4 py-1">
+                  <dt className="text-ink-muted">{t("subtotal")}</dt>
+                  <dd className="m-0 font-mono tabular-nums">{money(order.subtotal)}</dd>
+                </div>
+                {discountAmount > 0 && (
+                  <div className="flex justify-between gap-4 py-1 text-success">
+                    <dt>{t("discount")}</dt>
+                    <dd className="m-0 font-mono tabular-nums">−{money(discountAmount)}</dd>
+                  </div>
+                )}
+                <div className="flex justify-between gap-4 py-1">
+                  <dt className="text-ink-muted">{t("delivery")}</dt>
+                  <dd className="m-0 font-mono tabular-nums">{shippingCost === 0 ? t("free") : money(shippingCost)}</dd>
+                </div>
+                <div className="flex justify-between gap-4 py-1">
+                  <dt className="text-ink-muted">{t("tax")}</dt>
+                  <dd className="m-0 font-mono tabular-nums">{money(order.taxAmount)}</dd>
+                </div>
+                <div className="flex justify-between gap-4 mt-2 px-3 py-2 bg-coal text-hivis">
+                  <dt className="u-cond font-extrabold">{t("total")}</dt>
+                  <dd className="m-0 font-display font-extrabold text-xl tabular-nums">{money(order.total)}</dd>
+                </div>
+              </dl>
+            </section>
+
+            {/* Next steps */}
+            <section className="px-6 py-5 max-sm:px-4">
+              <h2 className="m-0 mb-3 text-lg text-ink">{t("nextTitle")}</h2>
+              <ol className="list-none m-0 p-0 flex flex-col gap-2.5">
+                {(isFailed
+                  ? [t("failedNext1"), t("failedNext2")]
+                  : [
+                      ...(order.paymentStatus === "PAID" ? [t("next1", { email: order.customerEmail })] : []),
+                      t("next2"),
+                      t("next3"),
+                      t("next4"),
+                    ]
+                ).map((text, i) => (
+                  <li key={i} className="flex items-start gap-3 text-sm text-ink">
+                    <span className="w-8 h-8 shrink-0 flex items-center justify-center bg-hivis text-coal border-2 border-coal font-display font-extrabold tabular-nums">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span className="pt-1.5 [overflow-wrap:anywhere]">{text}</span>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          </>
+        )}
+      </article>
+
+      <div className="mt-5 flex gap-3 flex-wrap">
+        <Link href="/catalog" className="btn-yellow flex-1 basis-52">
+          {t("backToCatalogue")} <ArrowRight size={18} />
+        </Link>
+        <Link href="/account/orders" className="btn-line flex-1 basis-52">
+          <Receipt size={18} /> {t("myOrders")}
+        </Link>
+      </div>
     </div>
   );
 }

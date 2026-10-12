@@ -1,28 +1,32 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { useParams } from "next/navigation";
-import Image from "next/image";
 import { Link } from "@/i18n/routing";
-import { Button } from "@/components/ui/Button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useCart } from "@/providers/CartProvider";
 import { useAuth } from "@/providers/AuthProvider";
 import { useCurrency } from "@/providers/CurrencyProvider";
 import { checkoutSchema, type CheckoutFormData } from "@/lib/validators/checkout";
 import { formatPrice } from "@/lib/utils/format-price";
 import { COUNTRIES } from "@/lib/countries";
+import {
+  SHIPPING_METHODS,
+  DEFAULT_SHIPPING_METHOD,
+  FREE_STANDARD_MIN,
+  amountToFreeStandard,
+  deliveryZone,
+  isShippingMethod,
+  shippingCost,
+} from "@/lib/shipping";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs/Breadcrumbs";
 import { MerchantInfo } from "@/components/checkout/MerchantInfo";
 import { toast } from "sonner";
-import {
-  EnvelopeSimple, Phone, MapPin, Truck, CreditCard,
-  CaretRight, ShieldCheck, Lock, Check, ImageBroken, UserPlus, Tag, X as XIcon,
-} from "@phosphor-icons/react";
+import { ArrowRight, ArrowLeft, Check, Lock, ShieldCheck, Tag, Truck, UserCircle, X as XIcon } from "@phosphor-icons/react";
 
 interface AppliedDiscount {
   type: "welcome" | "newsletter";
@@ -31,88 +35,84 @@ interface AppliedDiscount {
   source: "auto" | "code";
 }
 
-const SHIPPING_METHODS = [
-  { key: "standard", label: "Standard Shipping", time: "5-7 business days", price: 5.99, icon: Truck },
-  { key: "express", label: "Express Shipping", time: "2-3 business days", price: 12.99, icon: Truck },
-  { key: "free", label: "Economy Shipping", time: "7-14 business days", price: 0, icon: Truck },
-];
+const TOTAL_STEPS = 3;
 
-const stepIcons = [EnvelopeSimple, MapPin, CreditCard];
-const stepVariants = {
-  enter: { opacity: 0, x: 30 },
-  center: { opacity: 1, x: 0 },
-  exit: { opacity: 0, x: -30 },
-};
+const errCls = "block mt-1 text-xs font-medium text-danger";
+const fieldCls = (hasError: boolean) => `field ${hasError ? "!border-danger" : ""}`;
 
-const inputBaseStyle: React.CSSProperties = {
-  width: "100%",
-  padding: "0.75rem 1rem",
-  paddingLeft: "2.75rem",
-  borderRadius: "12px",
-  border: "1.5px solid var(--color-border)",
-  background: "var(--color-bg)",
-  color: "var(--color-text)",
-  fontSize: "0.875rem",
-  outline: "none",
-  transition: "border-color 0.2s, box-shadow 0.2s",
-};
+type StepState = "active" | "done" | "todo";
 
-const inputPlainStyle: React.CSSProperties = {
-  ...inputBaseStyle,
-  paddingLeft: "1rem",
-};
-
-const selectStyle: React.CSSProperties = {
-  ...inputPlainStyle,
-  appearance: "none" as const,
-  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236F756D' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
-  backgroundRepeat: "no-repeat",
-  backgroundPosition: "right 0.75rem center",
-  paddingRight: "2rem",
-};
-
-const labelStyle: React.CSSProperties = {
-  display: "block",
-  fontSize: "0.8125rem",
-  fontWeight: 600,
-  marginBottom: "0.375rem",
-  color: "var(--color-text-secondary)",
-};
-
-const errorStyle: React.CSSProperties = {
-  color: "var(--color-danger)",
-  fontSize: "0.75rem",
-  marginTop: "0.25rem",
-  display: "flex",
-  alignItems: "center",
-  gap: "0.25rem",
-};
-
-function InputWithIcon({ icon: Icon, error, ...props }: { icon: React.ElementType; error?: string } & React.InputHTMLAttributes<HTMLInputElement>) {
+/** One numbered checkout stage: yellow number block, heading, optional summary or body. */
+function StepBlock({
+  index,
+  title,
+  state,
+  changeLabel,
+  onChange,
+  summary,
+  children,
+}: {
+  index: number;
+  title: string;
+  state: StepState;
+  changeLabel: string;
+  onChange?: () => void;
+  summary?: ReactNode;
+  children?: ReactNode;
+}) {
+  const num = String(index + 1).padStart(2, "0");
   return (
-    <div style={{ position: "relative" }}>
-      <Icon size={16} style={{ position: "absolute", left: "0.875rem", top: "50%", transform: "translateY(-50%)", color: "var(--color-text-tertiary)", pointerEvents: "none" }} />
-      <input
-        {...props}
-        style={{
-          ...inputBaseStyle,
-          borderColor: error ? "var(--color-danger)" : undefined,
-        }}
-        onFocus={(e) => { e.currentTarget.style.borderColor = "var(--color-accent)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(46,94,78,0.14)"; }}
-        onBlur={(e) => { e.currentTarget.style.borderColor = error ? "var(--color-danger)" : "var(--color-border)"; e.currentTarget.style.boxShadow = "none"; }}
-      />
-      {error && <span style={errorStyle}>{error}</span>}
-    </div>
+    <li className={`border-2 ${state === "todo" ? "border-line" : "border-line-strong"} bg-surface`}>
+      <div className="flex items-center gap-3.5 pr-4">
+        <span
+          className={`w-12 h-12 shrink-0 flex items-center justify-center font-display font-extrabold text-xl tabular-nums border-r-2 ${
+            state === "todo"
+              ? "bg-surface-1 text-ink-subtle border-line"
+              : "bg-hivis text-coal border-line-strong"
+          }`}
+          aria-hidden="true"
+        >
+          {state === "done" ? <Check size={20} /> : num}
+        </span>
+        <h2 className={`m-0 flex-1 text-xl max-sm:text-lg ${state === "todo" ? "text-ink-subtle" : "text-ink"}`}>
+          <span className="sr-only">{num} </span>
+          {title}
+        </h2>
+        {state === "done" && onChange && (
+          <button
+            type="button"
+            onClick={onChange}
+            className="u-cond text-sm font-bold text-ink underline underline-offset-4 decoration-2 decoration-hivis bg-transparent border-0 cursor-pointer hover:decoration-ink"
+          >
+            {changeLabel}
+          </button>
+        )}
+      </div>
+      {state === "done" && summary && (
+        <div className="border-t border-line px-4 py-3 pl-[4.125rem] text-sm text-ink-muted">{summary}</div>
+      )}
+      {state === "active" && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.18 }}
+          className="border-t-2 border-line-strong p-6 max-sm:p-4 flex flex-col gap-5"
+        >
+          {children}
+        </motion.div>
+      )}
+    </li>
   );
 }
 
 export default function CheckoutPage() {
   const t = useTranslations("checkout");
+  const tc = useTranslations("cart");
   const nav = useTranslations("nav");
   const router = useRouter();
   const params = useParams();
   const locale = params.locale as string;
-  const { cart, clearCart } = useCart();
+  const { cart } = useCart();
   const { user } = useAuth();
   const { currency, convert } = useCurrency();
   const [step, setStep] = useState(0);
@@ -142,7 +142,7 @@ export default function CheckoutPage() {
         postalCode: "",
         country: "",
       },
-      shippingMethod: "standard",
+      shippingMethod: DEFAULT_SHIPPING_METHOD,
       acceptedPolicies: false,
     },
   });
@@ -150,10 +150,7 @@ export default function CheckoutPage() {
   const steps = [t("contact"), t("shipping"), t("review")];
   const selectedMethod = watch("shippingMethod");
   const selectedCountry = watch("shipping.country");
-  const availableMethods = cart.subtotal >= 100
-    ? SHIPPING_METHODS
-    : SHIPPING_METHODS.filter((m) => m.key !== "free");
-  const shippingPrice = SHIPPING_METHODS.find((m) => m.key === selectedMethod)?.price ?? 5.99;
+  const zone = deliveryZone(selectedCountry);
 
   const countryData = COUNTRIES.find((c) => c.code === selectedCountry);
   const phoneHint = countryData ? `${countryData.phone} XX XXX XXXX` : "+44 XX XXX XXXX";
@@ -161,7 +158,10 @@ export default function CheckoutPage() {
   const discountAmount = discount ? +(cart.subtotal * (discount.percent / 100)).toFixed(2) : 0;
   const discountedSubtotal = Math.max(cart.subtotal - discountAmount, 0);
   const taxOnDiscounted = +(discountedSubtotal * 0.21).toFixed(2);
-  const finalShipping = discountedSubtotal >= 100 && selectedMethod === "free" ? 0 : shippingPrice;
+  // Delivery terms (prices in GBP, free standard from £120 after discounts) come from src/lib/shipping.ts,
+  // the same helper /api/checkout charges with.
+  const methodKey = isShippingMethod(selectedMethod) ? selectedMethod : DEFAULT_SHIPPING_METHOD;
+  const finalShipping = shippingCost(methodKey, discountedSubtotal);
 
   useEffect(() => {
     let cancelled = false;
@@ -187,12 +187,12 @@ export default function CheckoutPage() {
       if (data?.discount) {
         setDiscount(data.discount);
         setPromoInput("");
-        toast.success(`${data.discount.percent}% discount applied!`);
+        toast.success(t("promoApplied", { percent: data.discount.percent }));
       } else {
-        setPromoError("Invalid or expired code");
+        setPromoError(t("promoInvalid"));
       }
     } catch {
-      setPromoError("Failed to apply code");
+      setPromoError(t("promoFailed"));
     } finally {
       setApplyingPromo(false);
     }
@@ -248,11 +248,11 @@ export default function CheckoutPage() {
       if (order.paymentLink) {
         window.location.href = order.paymentLink;
       } else {
-        toast.success("Order placed successfully!");
+        toast.success(t("orderPlaced"));
         router.push(`/order/confirmed?orderId=${order.id}`);
       }
-    } catch (err: any) {
-      toast.error(err.message || "Failed to place order. Please try again.");
+    } catch (err: unknown) {
+      toast.error((err instanceof Error && err.message) || t("orderFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -266,605 +266,395 @@ export default function CheckoutPage() {
 
   if (cart.items.length === 0) return null;
 
-  const freeShippingThreshold = convert(100);
-  const subtotalConverted = convert(cart.subtotal);
-  const amountToFreeShipping = freeShippingThreshold - subtotalConverted;
+  const amountToFreeShipping = amountToFreeStandard(discountedSubtotal);
+  const meterFilled = Math.floor(Math.min(discountedSubtotal / FREE_STANDARD_MIN, 1) * 10);
+
+  const money = (amount: number) => formatPrice(convert(amount), currency);
+  // Rounded to the penny before conversion, exactly as /api/checkout does.
+  const grandTotal = +(discountedSubtotal + taxOnDiscounted + finalShipping).toFixed(2);
+  const stateOf = (i: number): StepState => (i === step ? "active" : i < step ? "done" : "todo");
+  const methodName = (key: string) => (isShippingMethod(key) ? t(`methods.${key}`) : key);
+
+  const contact = watch("contact");
+  const ship = watch("shipping");
+  const countryName = COUNTRIES.find((c) => c.code === ship.country)?.name ?? ship.country;
 
   return (
     <div className="max-w-container mx-auto px-4 pb-16">
-      <Breadcrumbs items={[{ label: nav("home"), href: "/" }, { label: nav("cart"), href: "/cart" }, { label: t("title") }]} />
+      <Breadcrumbs items={[{ label: nav("home"), href: "/" }, { label: tc("title"), href: "/cart" }, { label: t("title") }]} />
 
-      <motion.h1
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-[1.75rem] max-[480px]:text-[1.375rem] font-extrabold tracking-[-0.03em] mb-4 max-[480px]:mb-3"
-      >
-        {t("title")}
-      </motion.h1>
+      <header className="sec-head">
+        <h1 className="m-0 text-[2.25rem] max-sm:text-[1.75rem] text-ink">{t("title")}</h1>
+        <p className="m-0 font-mono text-sm text-ink-muted tabular-nums">
+          {t("stepOf", { current: step + 1, total: TOTAL_STEPS })}
+        </p>
+      </header>
 
-      {/* Guest checkout notice */}
       {!user && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.75rem",
-            padding: "0.875rem 1.25rem",
-            borderRadius: "12px",
-            background: "var(--color-accent-light)",
-            border: "1px solid var(--color-accent)",
-            marginBottom: "1.5rem",
-            fontSize: "0.875rem",
-          }}
-        >
-          <UserPlus size={18} style={{ color: "var(--color-accent)", flexShrink: 0 }} />
-          <span>
-            Checking out as guest.{" "}
-            <Link href="/auth/login" style={{ color: "var(--color-accent)", fontWeight: 600, textDecoration: "none" }}>
-              Log in
-            </Link>{" "}
-            or{" "}
-            <Link href="/auth/register" style={{ color: "var(--color-accent)", fontWeight: 600, textDecoration: "none" }}>
-              create an account
-            </Link>{" "}
-            to track orders easily.
-          </span>
-        </motion.div>
+        <div className="flex items-start gap-3 mb-6 border-2 border-line-strong border-l-[6px] border-l-hivis bg-surface-1 px-4 py-3 text-sm">
+          <UserCircle size={20} className="shrink-0 mt-px" />
+          <p className="m-0">
+            <strong className="u-cond font-bold mr-1.5">{t("guestTitle")}.</strong>
+            {t.rich("guestBody", {
+              login: (chunks) => <Link href="/auth/login" className="font-semibold underline decoration-2 underline-offset-2">{chunks}</Link>,
+              register: (chunks) => <Link href="/auth/register" className="font-semibold underline decoration-2 underline-offset-2">{chunks}</Link>,
+            })}
+          </p>
+        </div>
       )}
 
-      {/* Step Indicator */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="flex items-center gap-0 mb-8 max-[480px]:mb-6 p-1 rounded-2xl bg-surface-1"
-      >
-        {steps.map((s, i) => {
-          const Icon = stepIcons[i];
-          const isActive = i === step;
-          const isDone = i < step;
-          return (
-            <button
-              key={i}
-              onClick={() => i < step && setStep(i)}
-              style={{
-                flex: 1,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "0.5rem",
-                padding: "0.75rem 1rem",
-                borderRadius: "12px",
-                border: "none",
-                cursor: i <= step ? "pointer" : "default",
-                background: isActive ? "var(--color-bg)" : "transparent",
-                boxShadow: isActive ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
-                fontWeight: isActive ? 700 : 500,
-                fontSize: "0.8125rem",
-                color: isActive ? "var(--color-text)" : isDone ? "var(--color-accent)" : "var(--color-text-tertiary)",
-                transition: "all 0.2s",
-              }}
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-6 lg:gap-8 items-start">
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
+          <ol className="list-none m-0 p-0 flex flex-col gap-3">
+            {/* 01 — Contact */}
+            <StepBlock
+              index={0}
+              title={steps[0]}
+              state={stateOf(0)}
+              changeLabel={t("change")}
+              onChange={() => setStep(0)}
+              summary={
+                <span className="break-all">
+                  {contact.email}
+                  {contact.phone ? ` · ${contact.phone}` : ""}
+                </span>
+              }
             >
-              {isDone ? (
-                <div style={{ width: "1.25rem", height: "1.25rem", borderRadius: "50%", background: "var(--color-accent)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Check size={12} weight="bold" />
-                </div>
-              ) : (
-                <Icon size={16} />
-              )}
-              <span className="inline max-[480px]:hidden">{s}</span>
-            </button>
-          );
-        })}
-      </motion.div>
+              <div>
+                <label htmlFor="co-email" className="field-label">{t("email")} *</label>
+                <input
+                  id="co-email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="name@company.co.uk"
+                  className={fieldCls(!!errors.contact?.email)}
+                  {...register("contact.email")}
+                />
+                {errors.contact?.email && <span className={errCls}>{errors.contact.email.message}</span>}
+                {!user && <span className="block mt-1 text-xs text-ink-subtle">{t("emailHint")}</span>}
+              </div>
+              <div>
+                <label htmlFor="co-phone" className="field-label">
+                  {t("phone")} <span className="font-normal normal-case text-ink-subtle">({t("optional")})</span>
+                </label>
+                <input
+                  id="co-phone"
+                  type="tel"
+                  autoComplete="tel"
+                  placeholder={phoneHint}
+                  className={fieldCls(!!errors.contact?.phone)}
+                  {...register("contact.phone")}
+                />
+                {errors.contact?.phone && <span className={errCls}>{errors.contact.phone.message}</span>}
+                <span className="block mt-1 text-xs text-ink-subtle">{t("phoneHint")}</span>
+              </div>
+              <div>
+                <button type="button" onClick={goNext} className="btn-yellow">
+                  {t("nextDelivery")} <ArrowRight size={18} />
+                </button>
+              </div>
+            </StepBlock>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 lg:gap-10 items-start">
-        {/* Form Section */}
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <AnimatePresence mode="wait">
-            {step === 0 && (
-              <motion.div
-                key="contact"
-                variants={stepVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ duration: 0.25 }}
-                className="flex flex-col gap-5 max-sm:gap-4 p-8 max-sm:p-5 border border-line rounded-xl max-sm:rounded-lg bg-surface"
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
-                  <div style={{ width: "2rem", height: "2rem", borderRadius: "10px", background: "var(--color-accent-light)", color: "var(--color-accent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <EnvelopeSimple size={16} />
-                  </div>
-                  <h2 style={{ fontSize: "1.125rem", fontWeight: 700 }}>{t("contact")}</h2>
+            {/* 02 — Delivery address + service */}
+            <StepBlock
+              index={1}
+              title={steps[1]}
+              state={stateOf(1)}
+              changeLabel={t("change")}
+              onChange={() => setStep(1)}
+              summary={
+                <dl className="m-0 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1">
+                  <dt className="u-cond text-xs font-bold text-ink-subtle">{t("shipping")}</dt>
+                  <dd className="m-0 text-ink">
+                    {ship.firstName} {ship.lastName}, {ship.address1}
+                    {ship.address2 ? `, ${ship.address2}` : ""}, {ship.city} {ship.postalCode}, {countryName}
+                  </dd>
+                  <dt className="u-cond text-xs font-bold text-ink-subtle">{t("shippingMethod")}</dt>
+                  <dd className="m-0 text-ink">
+                    {methodName(selectedMethod)} — {finalShipping > 0 ? money(finalShipping) : t("free")}
+                  </dd>
+                </dl>
+              }
+            >
+              <fieldset className="m-0 p-0 border-0 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <legend className="sr-only">{t("shipping")}</legend>
+                <div>
+                  <label htmlFor="co-first" className="field-label">{t("firstName")} *</label>
+                  <input id="co-first" autoComplete="given-name" placeholder="Jane" className={fieldCls(!!errors.shipping?.firstName)} {...register("shipping.firstName")} />
+                  {errors.shipping?.firstName && <span className={errCls}>{errors.shipping.firstName.message}</span>}
                 </div>
                 <div>
-                  <label style={labelStyle}>{t("email")} *</label>
-                  <InputWithIcon
-                    icon={EnvelopeSimple}
-                    placeholder="your@email.com"
-                    error={errors.contact?.email?.message}
-                    {...register("contact.email")}
-                  />
-                  {!user && (
-                    <span style={{ fontSize: "0.75rem", color: "var(--color-text-tertiary)", marginTop: "0.25rem", display: "block" }}>
-                      Order confirmation will be sent to this email
-                    </span>
-                  )}
+                  <label htmlFor="co-last" className="field-label">{t("lastName")} *</label>
+                  <input id="co-last" autoComplete="family-name" placeholder="Smith" className={fieldCls(!!errors.shipping?.lastName)} {...register("shipping.lastName")} />
+                  {errors.shipping?.lastName && <span className={errCls}>{errors.shipping.lastName.message}</span>}
                 </div>
-                <div>
-                  <label style={labelStyle}>{t("phone")}</label>
-                  <InputWithIcon
-                    icon={Phone}
-                    placeholder={phoneHint}
-                    error={errors.contact?.phone?.message}
-                    {...register("contact.phone")}
-                  />
-                  <span style={{ fontSize: "0.75rem", color: "var(--color-text-tertiary)", marginTop: "0.25rem", display: "block" }}>
-                    Include country code (e.g. +371, +44, +49)
-                  </span>
+                <div className="sm:col-span-2">
+                  <label htmlFor="co-addr1" className="field-label">{t("address")} *</label>
+                  <input id="co-addr1" autoComplete="address-line1" placeholder="14 Station Road" className={fieldCls(!!errors.shipping?.address1)} {...register("shipping.address1")} />
+                  {errors.shipping?.address1 && <span className={errCls}>{errors.shipping.address1.message}</span>}
                 </div>
-                <Button color="primary" size="lg" onPress={goNext} style={{ marginTop: "0.5rem" }}>
-                  Continue to Shipping <CaretRight size={16} />
-                </Button>
-              </motion.div>
-            )}
-
-            {step === 1 && (
-              <motion.div
-                key="shipping"
-                variants={stepVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ duration: 0.25 }}
-                className="flex flex-col gap-5 max-sm:gap-4 p-8 max-sm:p-5 border border-line rounded-xl max-sm:rounded-lg bg-surface"
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
-                  <div style={{ width: "2rem", height: "2rem", borderRadius: "10px", background: "var(--color-accent-light)", color: "var(--color-accent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <MapPin size={16} />
-                  </div>
-                  <h2 style={{ fontSize: "1.125rem", fontWeight: 700 }}>{t("shipping")}</h2>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label style={labelStyle}>{t("firstName")} *</label>
-                    <input style={{ ...inputPlainStyle, borderColor: errors.shipping?.firstName ? "var(--color-danger)" : undefined }} placeholder="John" {...register("shipping.firstName")} />
-                    {errors.shipping?.firstName && <span style={errorStyle}>{errors.shipping.firstName.message}</span>}
-                  </div>
-                  <div>
-                    <label style={labelStyle}>{t("lastName")} *</label>
-                    <input style={{ ...inputPlainStyle, borderColor: errors.shipping?.lastName ? "var(--color-danger)" : undefined }} placeholder="Doe" {...register("shipping.lastName")} />
-                    {errors.shipping?.lastName && <span style={errorStyle}>{errors.shipping.lastName.message}</span>}
-                  </div>
-                </div>
-
-                <div>
-                  <label style={labelStyle}>{t("address")} *</label>
-                  <InputWithIcon icon={MapPin} placeholder="123 Main Street" error={errors.shipping?.address1?.message} {...register("shipping.address1")} />
-                </div>
-                <div>
-                  <label style={labelStyle}>{t("apartment")}</label>
-                  <input style={inputPlainStyle} placeholder="Apt 4B (optional)" {...register("shipping.address2")} />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label style={labelStyle}>{t("city")} *</label>
-                    <input style={{ ...inputPlainStyle, borderColor: errors.shipping?.city ? "var(--color-danger)" : undefined }} placeholder="Riga" {...register("shipping.city")} />
-                    {errors.shipping?.city && <span style={errorStyle}>{errors.shipping.city.message}</span>}
-                  </div>
-                  <div>
-                    <label style={labelStyle}>{t("province")}</label>
-                    <input style={inputPlainStyle} placeholder="Region (optional)" {...register("shipping.province")} />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label style={labelStyle}>{t("postalCode")} *</label>
-                    <input style={{ ...inputPlainStyle, borderColor: errors.shipping?.postalCode ? "var(--color-danger)" : undefined }} placeholder="LV-1001" {...register("shipping.postalCode")} />
-                    {errors.shipping?.postalCode && <span style={errorStyle}>{errors.shipping.postalCode.message}</span>}
-                  </div>
-                  <div>
-                    <label style={labelStyle}>{t("country")} *</label>
-                    <select
-                      style={{
-                        ...selectStyle,
-                        borderColor: errors.shipping?.country ? "var(--color-danger)" : undefined,
-                      }}
-                      {...register("shipping.country")}
-                    >
-                      <option value="">Select country...</option>
-                      {COUNTRIES.map((c) => (
-                        <option key={c.code} value={c.code}>{c.name}</option>
-                      ))}
-                    </select>
-                    {errors.shipping?.country && <span style={errorStyle}>{errors.shipping.country.message}</span>}
-                  </div>
-                </div>
-
-                {/* Shipping Method Cards */}
-                <div>
-                  <label style={{ ...labelStyle, marginBottom: "0.75rem" }}>{t("shippingMethod")}</label>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
-                    {availableMethods.map((m) => {
-                      const isSelected = selectedMethod === m.key;
-                      return (
-                        <label
-                          key={m.key}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "1rem",
-                            padding: "1rem 1.25rem",
-                            borderRadius: "12px",
-                            border: `1.5px solid ${isSelected ? "var(--color-accent)" : "var(--color-border)"}`,
-                            background: isSelected ? "var(--color-accent-light)" : "var(--color-bg)",
-                            cursor: "pointer",
-                            transition: "all 0.15s",
-                          }}
-                        >
-                          <input type="radio" value={m.key} {...register("shippingMethod")} style={{ display: "none" }} />
-                          <div
-                            style={{
-                              width: "1.25rem",
-                              height: "1.25rem",
-                              borderRadius: "50%",
-                              border: `2px solid ${isSelected ? "var(--color-accent)" : "var(--color-border)"}`,
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              flexShrink: 0,
-                            }}
-                          >
-                            {isSelected && <div style={{ width: "0.5rem", height: "0.5rem", borderRadius: "50%", background: "var(--color-accent)" }} />}
-                          </div>
-                          <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: "0.875rem", fontWeight: 600 }}>{m.label}</div>
-                            <div style={{ fontSize: "0.75rem", color: "var(--color-text-tertiary)" }}>{m.time}</div>
-                          </div>
-                          <span style={{ fontSize: "0.875rem", fontWeight: 700, color: m.price === 0 ? "#3F7A54" : "var(--color-text)" }}>
-                            {m.price === 0 ? "Free" : formatPrice(convert(m.price), currency)}
-                          </span>
-                        </label>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.5rem" }}>
-                  <Button variant="bordered" size="lg" onPress={() => setStep(0)} style={{ flex: "0 0 auto" }}>
-                    Back
-                  </Button>
-                  <Button color="primary" size="lg" onPress={goNext} style={{ flex: 1 }}>
-                    Review Order <CaretRight size={16} />
-                  </Button>
-                </div>
-              </motion.div>
-            )}
-
-            {step === 2 && (
-              <motion.div
-                key="review"
-                variants={stepVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ duration: 0.25 }}
-                className="flex flex-col gap-5 max-sm:gap-4 p-8 max-sm:p-5 border border-line rounded-xl max-sm:rounded-lg bg-surface"
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
-                  <div style={{ width: "2rem", height: "2rem", borderRadius: "10px", background: "var(--color-accent-light)", color: "var(--color-accent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <CreditCard size={16} />
-                  </div>
-                  <h2 style={{ fontSize: "1.125rem", fontWeight: 700 }}>{t("review")}</h2>
-                </div>
-
-                {/* Order Items */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
-                  {cart.items.map((item, i) => (
-                    <motion.div
-                      key={item.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.05 }}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "1rem",
-                        padding: "0.875rem 0",
-                        borderBottom: i < cart.items.length - 1 ? "1px solid var(--color-border)" : "none",
-                      }}
-                    >
-                      <div style={{
-                        position: "relative",
-                        width: "56px",
-                        height: "56px",
-                        borderRadius: "10px",
-                        overflow: "hidden",
-                        background: "#fff",
-                        border: "1px solid var(--color-border)",
-                        flexShrink: 0,
-                      }}>
-                        {item.imageUrl ? (
-                          <Image src={item.imageUrl} alt={item.name} fill sizes="56px" style={{ objectFit: "contain", padding: "4px" }} />
-                        ) : (
-                          <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--color-text-tertiary)" }}>
-                            <ImageBroken size={18} />
-                          </div>
-                        )}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: "0.8125rem", fontWeight: 600, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.name}</div>
-                        <div style={{ fontSize: "0.75rem", color: "var(--color-text-tertiary)" }}>Qty: {item.quantity}</div>
-                      </div>
-                      <span style={{ fontSize: "0.875rem", fontWeight: 700, flexShrink: 0 }}>
-                        {formatPrice(convert(item.price * item.quantity), currency)}
-                      </span>
-                    </motion.div>
-                  ))}
-                </div>
-
-                <div style={{ marginTop: "0.25rem" }}>
-                  <label style={{ display: "flex", alignItems: "flex-start", gap: "0.625rem", cursor: "pointer" }}>
-                    <input
-                      type="checkbox"
-                      {...register("acceptedPolicies")}
-                      style={{
-                        width: "1.125rem",
-                        height: "1.125rem",
-                        marginTop: "0.125rem",
-                        accentColor: "var(--color-accent)",
-                        flexShrink: 0,
-                        cursor: "pointer",
-                      }}
-                    />
-                    <span className="text-[0.8125rem] leading-[1.5] [&_a]:text-brand [&_a]:font-semibold [&_a]:no-underline hover:[&_a]:underline">
-                      {t.rich("acceptPolicies", {
-                        terms: (chunks) => <Link href="/policies/terms" target="_blank">{chunks}</Link>,
-                        privacy: (chunks) => <Link href="/policies/privacy" target="_blank">{chunks}</Link>,
-                      })}
-                      {" *"}
-                    </span>
+                <div className="sm:col-span-2">
+                  <label htmlFor="co-addr2" className="field-label">
+                    {t("apartment")} <span className="font-normal normal-case text-ink-subtle">({t("optional")})</span>
                   </label>
-                  {errors.acceptedPolicies && (
-                    <span style={errorStyle}>{t("acceptPoliciesRequired")}</span>
-                  )}
+                  <input id="co-addr2" autoComplete="address-line2" placeholder="Unit 3" className="field" {...register("shipping.address2")} />
                 </div>
+                <div>
+                  <label htmlFor="co-city" className="field-label">{t("city")} *</label>
+                  <input id="co-city" autoComplete="address-level2" placeholder="Leeds" className={fieldCls(!!errors.shipping?.city)} {...register("shipping.city")} />
+                  {errors.shipping?.city && <span className={errCls}>{errors.shipping.city.message}</span>}
+                </div>
+                <div>
+                  <label htmlFor="co-province" className="field-label">
+                    {t("province")} <span className="font-normal normal-case text-ink-subtle">({t("optional")})</span>
+                  </label>
+                  <input id="co-province" autoComplete="address-level1" className="field" {...register("shipping.province")} />
+                </div>
+                <div>
+                  <label htmlFor="co-postcode" className="field-label">{t("postalCode")} *</label>
+                  <input id="co-postcode" autoComplete="postal-code" placeholder="LS1 4AP" className={`${fieldCls(!!errors.shipping?.postalCode)} uppercase`} {...register("shipping.postalCode")} />
+                  {errors.shipping?.postalCode && <span className={errCls}>{errors.shipping.postalCode.message}</span>}
+                </div>
+                <div>
+                  <label htmlFor="co-country" className="field-label">{t("country")} *</label>
+                  <select id="co-country" autoComplete="country" className={fieldCls(!!errors.shipping?.country)} {...register("shipping.country")}>
+                    <option value="">{t("selectCountry")}</option>
+                    {COUNTRIES.map((c) => (
+                      <option key={c.code} value={c.code}>{c.name}</option>
+                    ))}
+                  </select>
+                  {errors.shipping?.country && <span className={errCls}>{errors.shipping.country.message}</span>}
+                </div>
+              </fieldset>
 
-                <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.5rem" }}>
-                  <Button variant="bordered" size="lg" onPress={() => setStep(1)} style={{ flex: "0 0 auto" }}>
-                    Back
-                  </Button>
-                  <motion.div style={{ flex: 1 }} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                    <Button
-                      type="submit"
-                      color="primary"
-                      size="lg"
-                      isLoading={submitting}
-                      style={{ width: "100%" }}
-                      startContent={!submitting ? <Lock size={16} /> : undefined}
-                    >
-                      {t("placeOrder")}
-                    </Button>
-                  </motion.div>
+              <fieldset className="m-0 p-0 border-0">
+                <legend className="field-label mb-2">{t("shippingMethod")}</legend>
+                <div className="border-2 border-line-strong divide-y divide-line">
+                  {SHIPPING_METHODS.map((m) => {
+                    const isSelected = selectedMethod === m.key;
+                    const price = shippingCost(m.key, discountedSubtotal);
+                    return (
+                      <label
+                        key={m.key}
+                        className={`flex items-center gap-3.5 px-4 py-3 cursor-pointer transition-colors ${
+                          isSelected ? "bg-brand-soft" : "bg-surface hover:bg-surface-1"
+                        }`}
+                      >
+                        <input type="radio" value={m.key} className="sr-only peer" {...register("shippingMethod")} />
+                        <span
+                          className={`w-5 h-5 shrink-0 flex items-center justify-center border-2 border-line-strong peer-focus-visible:outline-2 peer-focus-visible:outline-link ${
+                            isSelected ? "bg-coal text-hivis" : "bg-surface"
+                          }`}
+                          aria-hidden="true"
+                        >
+                          {isSelected && <Check size={12} />}
+                        </span>
+                        <Truck size={18} className="shrink-0 text-ink-muted" />
+                        <span className="flex-1 min-w-0">
+                          <span className="block font-semibold text-sm text-ink">{methodName(m.key)}</span>
+                          <span className="block font-mono text-xs text-ink-muted">{t("workingDays", { range: zone.days[m.key], zone: t(`zones.${zone.key}`) })}</span>
+                        </span>
+                        <span className={`font-display font-extrabold text-lg tabular-nums ${price === 0 ? "text-success" : "text-ink"}`}>
+                          {price === 0 ? t("free") : money(price)}
+                        </span>
+                      </label>
+                    );
+                  })}
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                {errors.shippingMethod && <span className={errCls}>{errors.shippingMethod.message}</span>}
+              </fieldset>
+
+              <div className="flex gap-3 flex-wrap">
+                <button type="button" onClick={() => setStep(0)} className="btn-line">
+                  <ArrowLeft size={18} /> {t("back")}
+                </button>
+                <button type="button" onClick={goNext} className="btn-yellow flex-1">
+                  {t("nextReview")} <ArrowRight size={18} />
+                </button>
+              </div>
+            </StepBlock>
+
+            {/* 03 — Check & pay */}
+            <StepBlock index={2} title={steps[2]} state={stateOf(2)} changeLabel={t("change")}>
+              <table className="w-full border-collapse text-sm">
+                <caption className="text-left field-label">{t("itemsHeading")}</caption>
+                <tbody>
+                  {cart.items.map((item) => (
+                    <tr key={item.id} className="border-t border-line first:border-t-2 first:border-line-strong">
+                      <td className="py-2.5 pr-3 font-mono text-xs text-ink-muted whitespace-nowrap align-top">
+                        {t("qtyTimes", { qty: item.quantity })}
+                      </td>
+                      <td className="py-2.5 pr-3 align-top">
+                        <span className="font-semibold text-ink line-clamp-2 [overflow-wrap:anywhere]">{item.name}</span>
+                        {item.variantName && <span className="block text-xs text-ink-muted">{item.variantName}</span>}
+                      </td>
+                      <td className="py-2.5 text-right font-mono tabular-nums whitespace-nowrap align-top">
+                        {money(item.price * item.quantity)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <div>
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    {...register("acceptedPolicies")}
+                    className="w-5 h-5 mt-0.5 shrink-0 cursor-pointer accent-coal"
+                  />
+                  <span className="text-sm leading-normal [&_a]:font-semibold [&_a]:underline [&_a]:decoration-2 [&_a]:decoration-hivis [&_a]:underline-offset-2 hover:[&_a]:decoration-ink">
+                    {t.rich("acceptPolicies", {
+                      terms: (chunks) => <Link href="/policies/terms" target="_blank">{chunks}</Link>,
+                      privacy: (chunks) => <Link href="/policies/privacy" target="_blank">{chunks}</Link>,
+                    })}
+                    {" *"}
+                  </span>
+                </label>
+                {errors.acceptedPolicies && <span className={errCls}>{t("acceptPoliciesRequired")}</span>}
+              </div>
+
+              <div className="flex items-baseline justify-between gap-4 border-t-2 border-line-strong pt-3">
+                <span className="u-cond font-extrabold text-lg">{t("total")}</span>
+                <span className="font-display font-extrabold text-2xl tabular-nums">{money(grandTotal)}</span>
+              </div>
+
+              <div className="flex gap-3 flex-wrap">
+                <button type="button" onClick={() => setStep(1)} className="btn-line" disabled={submitting}>
+                  <ArrowLeft size={18} /> {t("back")}
+                </button>
+                <button type="submit" className="btn-yellow flex-1" disabled={submitting} aria-busy={submitting}>
+                  {submitting ? (
+                    <>
+                      <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent animate-spin" aria-hidden="true" />
+                      {t("processing")}
+                    </>
+                  ) : (
+                    <>
+                      <Lock size={18} /> {t("placeOrder")}
+                    </>
+                  )}
+                </button>
+              </div>
+            </StepBlock>
+          </ol>
         </form>
 
-        {/* Order Summary Sidebar */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="p-7 max-sm:p-5 border border-line rounded-xl max-sm:rounded-lg bg-surface h-fit lg:sticky lg:top-[calc(var(--header-height)+var(--announcement-height)+1rem)] max-lg:static max-lg:order-first"
-        >
-          <h3 style={{ fontWeight: 700, fontSize: "1.0625rem", marginBottom: "1.25rem" }}>{t("orderSummary")}</h3>
+        {/* Summary panel */}
+        <aside className="border-2 border-line-strong bg-surface lg:sticky lg:top-[calc(var(--header-height)+var(--announcement-height)+1rem)]">
+          <div className="flex items-baseline justify-between gap-3 px-5 py-3 bg-coal">
+            <h2 className="m-0 text-xl text-hivis">{t("orderSummary")}</h2>
+            <span className="font-mono text-xs text-on-dark tabular-nums">{tc("itemCount", { count: cart.itemCount })}</span>
+          </div>
 
-          {/* Free shipping progress */}
           {amountToFreeShipping > 0 && (
-            <div style={{
-              padding: "0.75rem 1rem",
-              borderRadius: "10px",
-              background: "var(--color-bg-secondary)",
-              marginBottom: "1.25rem",
-              fontSize: "0.8125rem",
-            }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
-                <Truck size={14} style={{ color: "var(--color-accent)" }} />
-                <span>Add <strong>{formatPrice(amountToFreeShipping, currency)}</strong> more for free shipping</span>
-              </div>
-              <div style={{ height: 4, borderRadius: 2, background: "var(--color-border)", overflow: "hidden" }}>
-                <div style={{
-                  width: `${Math.min((subtotalConverted / freeShippingThreshold) * 100, 100)}%`,
-                  height: "100%",
-                  background: "var(--color-accent)",
-                  borderRadius: 2,
-                  transition: "width 0.3s",
-                }} />
+            <div className="px-5 py-3 border-b border-line bg-surface-1">
+              <p className="m-0 mb-2 flex items-center gap-2 text-sm font-semibold text-ink">
+                <Truck size={16} />
+                {tc("freeDeliveryRemaining", { amount: money(amountToFreeShipping) })}
+              </p>
+              <div className="grid grid-cols-10 gap-0.5" aria-hidden="true">
+                {Array.from({ length: 10 }, (_, i) => (
+                  <span key={i} className={`h-2 border border-line-strong ${i < meterFilled ? "bg-hivis" : "bg-surface"}`} />
+                ))}
               </div>
             </div>
           )}
 
-          {/* Mini item list */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem", marginBottom: "1.25rem", paddingBottom: "1.25rem", borderBottom: "1px solid var(--color-border)" }}>
+          <ul className="list-none m-0 px-5 py-2 border-b border-line">
             {cart.items.map((item) => (
-              <div key={item.id} style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                <div style={{
-                  position: "relative",
-                  width: "40px",
-                  height: "40px",
-                  borderRadius: "8px",
-                  overflow: "hidden",
-                  background: "#fff",
-                  border: "1px solid var(--color-border)",
-                  flexShrink: 0,
-                }}>
-                  {item.imageUrl ? (
-                    <Image src={item.imageUrl} alt={item.name} fill sizes="40px" style={{ objectFit: "contain", padding: "2px" }} />
-                  ) : (
-                    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#ccc" }}>
-                      <ImageBroken size={14} />
-                    </div>
-                  )}
-                  <div style={{
-                    position: "absolute",
-                    top: "-4px",
-                    right: "-4px",
-                    width: "18px",
-                    height: "18px",
-                    borderRadius: "50%",
-                    background: "var(--color-text-secondary)",
-                    color: "#fff",
-                    fontSize: "0.625rem",
-                    fontWeight: 700,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}>
-                    {item.quantity}
-                  </div>
-                </div>
-                <span style={{ fontSize: "0.75rem", flex: 1, minWidth: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", color: "var(--color-text-secondary)" }}>
-                  {item.name}
-                </span>
-                <span style={{ fontSize: "0.75rem", fontWeight: 600, flexShrink: 0 }}>
-                  {formatPrice(convert(item.price * item.quantity), currency)}
-                </span>
-              </div>
+              <li key={item.id} className="flex items-baseline gap-2.5 py-1.5 text-xs">
+                <span className="font-mono text-ink-subtle tabular-nums shrink-0">{item.quantity}×</span>
+                <span className="flex-1 min-w-0 truncate text-ink-muted">{item.name}</span>
+                <span className="font-mono font-semibold tabular-nums shrink-0">{money(item.price * item.quantity)}</span>
+              </li>
             ))}
-          </div>
+          </ul>
 
-          {/* Promo / discount block */}
-          <div style={{ marginBottom: "1rem", paddingBottom: "1rem", borderBottom: "1px solid var(--color-border)" }}>
+          {/* Discount */}
+          <div className="px-5 py-4 border-b border-line">
             {discount ? (
-              <div style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                padding: "0.625rem 0.75rem",
-                borderRadius: "10px",
-                background: "#E4EEE9",
-                border: "1px solid #BFD6CC",
-                fontSize: "0.8125rem",
-              }}>
-                <Tag size={14} style={{ color: "#2E5E4E", flexShrink: 0 }} />
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 700, color: "#234A3D" }}>
-                    {discount.percent}% OFF applied
-                  </div>
-                  <div style={{ color: "#2E5E4E", fontSize: "0.6875rem" }}>
-                    {discount.type === "welcome" ? "Welcome discount" : `Code: ${discount.code}`}
+              <div className="flex items-center gap-2.5 border-2 border-success px-3 py-2 text-sm">
+                <Tag size={16} className="shrink-0 text-success" />
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-ink">{t("discountOff", { percent: discount.percent })}</div>
+                  <div className="font-mono text-xs text-ink-muted">
+                    {discount.type === "welcome" ? t("welcomeDiscount") : t("codeLabel", { code: discount.code })}
                   </div>
                 </div>
                 {discount.source === "code" && (
                   <button
                     type="button"
                     onClick={removeDiscount}
-                    aria-label="Remove discount"
-                    style={{ background: "none", border: "none", cursor: "pointer", color: "#2E5E4E", padding: 4, display: "flex" }}
+                    aria-label={t("removeDiscount")}
+                    className="flex p-1 bg-transparent border-0 cursor-pointer text-ink-muted hover:text-danger"
                   >
-                    <XIcon size={14} />
+                    <XIcon size={16} />
                   </button>
                 )}
               </div>
             ) : (
               <div>
-                <label style={{ ...labelStyle, marginBottom: "0.375rem" }}>Promo code</label>
-                <div style={{ display: "flex", gap: "0.5rem" }}>
+                <label htmlFor="co-promo" className="field-label">{t("promoLabel")}</label>
+                <div className="flex">
                   <input
+                    id="co-promo"
                     type="text"
                     value={promoInput}
                     onChange={(e) => { setPromoInput(e.target.value.toUpperCase()); setPromoError(null); }}
+                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); applyPromo(); } }}
                     placeholder="NEWS-XXXXXX"
-                    style={{ ...inputPlainStyle, fontSize: "0.8125rem", letterSpacing: "0.5px" }}
+                    className="field font-mono tracking-wide !border-r-0"
                   />
                   <button
                     type="button"
                     onClick={applyPromo}
                     disabled={!promoInput.trim() || applyingPromo}
-                    style={{
-                      padding: "0 0.875rem",
-                      borderRadius: "12px",
-                      border: "none",
-                      background: "var(--color-accent)",
-                      color: "#fff",
-                      fontWeight: 600,
-                      fontSize: "0.8125rem",
-                      cursor: promoInput.trim() && !applyingPromo ? "pointer" : "not-allowed",
-                      opacity: promoInput.trim() && !applyingPromo ? 1 : 0.5,
-                    }}
+                    className="btn-ink shrink-0 !min-h-[44px]"
                   >
-                    {applyingPromo ? "…" : "Apply"}
+                    {applyingPromo ? "…" : t("promoApply")}
                   </button>
                 </div>
-                {promoError && <span style={errorStyle}>{promoError}</span>}
+                {promoError && <span className={errCls}>{promoError}</span>}
               </div>
             )}
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem", fontSize: "0.875rem" }}>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "var(--color-text-secondary)" }}>Subtotal</span>
-              <span style={{ fontWeight: 500 }}>{formatPrice(convert(cart.subtotal), currency)}</span>
+          <dl className="m-0 px-5 py-3 text-sm">
+            <div className="flex justify-between gap-4 py-1.5">
+              <dt className="text-ink-muted">{t("subtotal")}</dt>
+              <dd className="m-0 font-mono tabular-nums">{money(cart.subtotal)}</dd>
             </div>
             {discount && (
-              <div style={{ display: "flex", justifyContent: "space-between", color: "#2E5E4E" }}>
-                <span>Discount ({discount.percent}%)</span>
-                <span style={{ fontWeight: 600 }}>−{formatPrice(convert(discountAmount), currency)}</span>
+              <div className="flex justify-between gap-4 py-1.5 text-success">
+                <dt>{t("discount", { percent: discount.percent })}</dt>
+                <dd className="m-0 font-mono font-semibold tabular-nums">−{money(discountAmount)}</dd>
               </div>
             )}
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "var(--color-text-secondary)" }}>Shipping</span>
-              <span style={{ fontWeight: 500, color: finalShipping === 0 ? "#3F7A54" : undefined }}>
-                {finalShipping > 0 ? formatPrice(convert(finalShipping), currency) : "Free"}
-              </span>
+            <div className="flex justify-between gap-4 py-1.5">
+              <dt className="text-ink-muted">{t("delivery")}</dt>
+              <dd className={`m-0 font-mono tabular-nums ${finalShipping === 0 ? "text-success font-semibold" : ""}`}>
+                {finalShipping > 0 ? money(finalShipping) : t("free")}
+              </dd>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span style={{ color: "var(--color-text-secondary)" }}>Tax (21%)</span>
-              <span style={{ fontWeight: 500 }}>{formatPrice(convert(taxOnDiscounted), currency)}</span>
+            <div className="flex justify-between gap-4 py-1.5">
+              <dt className="text-ink-muted">{t("tax")}</dt>
+              <dd className="m-0 font-mono tabular-nums">{money(taxOnDiscounted)}</dd>
             </div>
-            <div style={{
-              display: "flex",
-              justifyContent: "space-between",
-              fontWeight: 800,
-              fontSize: "1.125rem",
-              borderTop: "2px solid var(--color-border)",
-              paddingTop: "0.875rem",
-              marginTop: "0.375rem",
-            }}>
-              <span>Total</span>
-              <span>{formatPrice(convert(discountedSubtotal + taxOnDiscounted + finalShipping), currency)}</span>
-            </div>
+          </dl>
+
+          <div className="flex items-baseline justify-between gap-4 px-5 py-3 bg-hivis text-coal border-y-2 border-coal">
+            <span className="u-cond font-extrabold text-lg">{t("total")}</span>
+            <span className="font-display font-extrabold text-2xl tabular-nums">{money(grandTotal)}</span>
           </div>
 
-          <div style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "0.5rem",
-            marginTop: "1.5rem",
-            paddingTop: "1.25rem",
-            borderTop: "1px solid var(--color-border)",
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", fontSize: "0.75rem", color: "var(--color-text-tertiary)" }}>
-              <ShieldCheck size={14} />
-              Secure checkout with SSL encryption
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", fontSize: "0.75rem", color: "var(--color-text-tertiary)" }}>
-              <Lock size={14} />
-              Your data is protected
-            </div>
-          </div>
+          <ul className="list-none m-0 px-5 py-3 flex flex-col gap-1.5 text-xs text-ink-subtle">
+            <li className="flex items-center gap-1.5"><ShieldCheck size={14} />{t("secureNote")}</li>
+            <li className="flex items-center gap-1.5"><Lock size={14} />{t("privacyNote")}</li>
+          </ul>
 
           <MerchantInfo title={t("merchantInfo")} />
-        </motion.div>
+        </aside>
       </div>
     </div>
   );
