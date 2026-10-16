@@ -2,7 +2,7 @@ import { spawn, execSync } from "child_process";
 import fs from "node:fs";
 
 const DB_PORTS = [51213, 51214, 51215];
-const NEXT_PORT = 3000;
+const NEXT_PORT = Number(process.env.PORT) || 3000;
 
 function killPort(port) {
   try {
@@ -55,7 +55,7 @@ if (!needsLocalDb) {
   console.log("[dev] DATABASE_URL points to a remote database — skipping local prisma dev.");
 } else {
   console.log("[dev] Starting Prisma Postgres...");
-  db = spawn("npx", ["prisma", "dev"], {
+  db = spawn(process.execPath, ["./node_modules/prisma/build/index.js", "dev"], {
     stdio: ["ignore", "pipe", "pipe"],
     env: { ...process.env, FORCE_COLOR: "1" },
   });
@@ -66,10 +66,10 @@ let nextStarted = false;
 function startNext() {
   if (nextStarted) return;
   nextStarted = true;
-  console.log("[dev] Starting Next.js...\n");
-  const next = spawn("npx", ["next", "dev"], {
+  console.log(`[dev] Starting Next.js on port ${NEXT_PORT}...\n`);
+  const next = spawn(process.execPath, ["./node_modules/next/dist/bin/next", "dev", "-p", String(NEXT_PORT)], {
     stdio: "inherit",
-    env: { ...process.env, FORCE_COLOR: "1" },
+    env: { ...process.env, PORT: String(NEXT_PORT), FORCE_COLOR: "1" },
   });
   next.on("exit", (code) => {
     db?.kill();

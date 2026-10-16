@@ -25,6 +25,7 @@ import {
 } from "@/lib/shipping";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs/Breadcrumbs";
 import { MerchantInfo } from "@/components/checkout/MerchantInfo";
+import { PayntWidget } from "@/components/checkout/PayntWidget";
 import { toast } from "sonner";
 import { ArrowRight, ArrowLeft, Check, Lock, ShieldCheck, Tag, Truck, UserCircle, X as XIcon } from "@phosphor-icons/react";
 
@@ -117,6 +118,14 @@ export default function CheckoutPage() {
   const { currency, convert } = useCurrency();
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [payntData, setPayntData] = useState<{
+    orderId: string;
+    orderNumber: string;
+    checkoutId: string;
+    scriptUrl: string;
+    integrity?: string;
+    shopperResultUrl: string;
+  } | null>(null);
   const [discount, setDiscount] = useState<AppliedDiscount | null>(null);
   const [promoInput, setPromoInput] = useState("");
   const [promoError, setPromoError] = useState<string | null>(null);
@@ -245,7 +254,16 @@ export default function CheckoutPage() {
       }
 
       const order = await res.json();
-      if (order.paymentLink) {
+      if (order.checkoutId && order.scriptUrl && order.shopperResultUrl) {
+        setPayntData({
+          orderId: order.id,
+          orderNumber: order.orderNumber,
+          checkoutId: order.checkoutId,
+          scriptUrl: order.scriptUrl,
+          integrity: order.integrity,
+          shopperResultUrl: order.shopperResultUrl,
+        });
+      } else if (order.paymentLink) {
         window.location.href = order.paymentLink;
       } else {
         toast.success(t("orderPlaced"));
@@ -476,66 +494,100 @@ export default function CheckoutPage() {
 
             {/* 03 — Check & pay */}
             <StepBlock index={2} title={steps[2]} state={stateOf(2)} changeLabel={t("change")}>
-              <table className="w-full border-collapse text-sm">
-                <caption className="text-left field-label">{t("itemsHeading")}</caption>
-                <tbody>
-                  {cart.items.map((item) => (
-                    <tr key={item.id} className="border-t border-line first:border-t-2 first:border-line-strong">
-                      <td className="py-2.5 pr-3 font-mono text-xs text-ink-muted whitespace-nowrap align-top">
-                        {t("qtyTimes", { qty: item.quantity })}
-                      </td>
-                      <td className="py-2.5 pr-3 align-top">
-                        <span className="font-semibold text-ink line-clamp-2 [overflow-wrap:anywhere]">{item.name}</span>
-                        {item.variantName && <span className="block text-xs text-ink-muted">{item.variantName}</span>}
-                      </td>
-                      <td className="py-2.5 text-right font-mono tabular-nums whitespace-nowrap align-top">
-                        {money(item.price * item.quantity)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              {payntData ? (
+                <div className="flex flex-col gap-5">
+                  <div className="p-4 border-2 border-line-strong bg-surface-1">
+                    <div className="flex items-center justify-between text-xs font-mono text-ink-muted mb-1">
+                      <span>ORDER #{payntData.orderNumber}</span>
+                      <span className="font-bold text-ink text-sm">{money(grandTotal)}</span>
+                    </div>
+                    <p className="text-xs text-ink-muted m-0">
+                      Enter your card details below to complete payment via SetoPay / PayNT.
+                    </p>
+                  </div>
 
-              <div>
-                <label className="flex items-start gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    {...register("acceptedPolicies")}
-                    className="w-5 h-5 mt-0.5 shrink-0 cursor-pointer accent-coal"
+                  <PayntWidget
+                    checkoutId={payntData.checkoutId}
+                    scriptUrl={payntData.scriptUrl}
+                    integrity={payntData.integrity}
+                    shopperResultUrl={payntData.shopperResultUrl}
+                    locale={locale}
                   />
-                  <span className="text-sm leading-normal [&_a]:font-semibold [&_a]:underline [&_a]:decoration-2 [&_a]:decoration-hivis [&_a]:underline-offset-2 hover:[&_a]:decoration-ink">
-                    {t.rich("acceptPolicies", {
-                      terms: (chunks) => <Link href="/policies/terms" target="_blank">{chunks}</Link>,
-                      privacy: (chunks) => <Link href="/policies/privacy" target="_blank">{chunks}</Link>,
-                    })}
-                    {" *"}
-                  </span>
-                </label>
-                {errors.acceptedPolicies && <span className={errCls}>{t("acceptPoliciesRequired")}</span>}
-              </div>
 
-              <div className="flex items-baseline justify-between gap-4 border-t-2 border-line-strong pt-3">
-                <span className="u-cond font-extrabold text-lg">{t("total")}</span>
-                <span className="font-display font-extrabold text-2xl tabular-nums">{money(grandTotal)}</span>
-              </div>
+                  <div className="pt-2 border-t border-line">
+                    <button
+                      type="button"
+                      onClick={() => setPayntData(null)}
+                      className="btn-line text-xs py-2 px-3 flex items-center gap-1.5"
+                    >
+                      <ArrowLeft size={14} /> {t("back")}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <table className="w-full border-collapse text-sm">
+                    <caption className="text-left field-label">{t("itemsHeading")}</caption>
+                    <tbody>
+                      {cart.items.map((item) => (
+                        <tr key={item.id} className="border-t border-line first:border-t-2 first:border-line-strong">
+                          <td className="py-2.5 pr-3 font-mono text-xs text-ink-muted whitespace-nowrap align-top">
+                            {t("qtyTimes", { qty: item.quantity })}
+                          </td>
+                          <td className="py-2.5 pr-3 align-top">
+                            <span className="font-semibold text-ink line-clamp-2 [overflow-wrap:anywhere]">{item.name}</span>
+                            {item.variantName && <span className="block text-xs text-ink-muted">{item.variantName}</span>}
+                          </td>
+                          <td className="py-2.5 text-right font-mono tabular-nums whitespace-nowrap align-top">
+                            {money(item.price * item.quantity)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
 
-              <div className="flex gap-3 flex-wrap">
-                <button type="button" onClick={() => setStep(1)} className="btn-line" disabled={submitting}>
-                  <ArrowLeft size={18} /> {t("back")}
-                </button>
-                <button type="submit" className="btn-yellow flex-1" disabled={submitting} aria-busy={submitting}>
-                  {submitting ? (
-                    <>
-                      <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent animate-spin" aria-hidden="true" />
-                      {t("processing")}
-                    </>
-                  ) : (
-                    <>
-                      <Lock size={18} /> {t("placeOrder")}
-                    </>
-                  )}
-                </button>
-              </div>
+                  <div>
+                    <label className="flex items-start gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        {...register("acceptedPolicies")}
+                        className="w-5 h-5 mt-0.5 shrink-0 cursor-pointer accent-coal"
+                      />
+                      <span className="text-sm leading-normal [&_a]:font-semibold [&_a]:underline [&_a]:decoration-2 [&_a]:decoration-hivis [&_a]:underline-offset-2 hover:[&_a]:decoration-ink">
+                        {t.rich("acceptPolicies", {
+                          terms: (chunks) => <Link href="/policies/terms" target="_blank">{chunks}</Link>,
+                          privacy: (chunks) => <Link href="/policies/privacy" target="_blank">{chunks}</Link>,
+                        })}
+                        {" *"}
+                      </span>
+                    </label>
+                    {errors.acceptedPolicies && <span className={errCls}>{t("acceptPoliciesRequired")}</span>}
+                  </div>
+
+                  <div className="flex items-baseline justify-between gap-4 border-t-2 border-line-strong pt-3">
+                    <span className="u-cond font-extrabold text-lg">{t("total")}</span>
+                    <span className="font-display font-extrabold text-2xl tabular-nums">{money(grandTotal)}</span>
+                  </div>
+
+                  <div className="flex gap-3 flex-wrap">
+                    <button type="button" onClick={() => setStep(1)} className="btn-line" disabled={submitting}>
+                      <ArrowLeft size={18} /> {t("back")}
+                    </button>
+                    <button type="submit" className="btn-yellow flex-1" disabled={submitting} aria-busy={submitting}>
+                      {submitting ? (
+                        <>
+                          <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent animate-spin" aria-hidden="true" />
+                          {t("processing")}
+                        </>
+                      ) : (
+                        <>
+                          <Lock size={18} /> {t("placeOrder")}
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </>
+              )}
             </StepBlock>
           </ol>
         </form>
