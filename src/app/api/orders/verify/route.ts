@@ -2,62 +2,89 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendOrderConfirmationEmail, sendOrderInvoiceEmail } from "@/lib/email";
 import { scheduleEmail } from "@/lib/email-jobs";
+import { getPaymentStatus, isPaymentSuccessful, isPaymentPending } from "@/lib/paynt";
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
+    const resourcePath = searchParams.get("resourcePath");
+    const orderId = searchParams.get("orderId");
+    const checkoutId = searchParams.get("checkoutId") || searchParams.get("id");
     const paymentLinkId = searchParams.get("paymentLinkId");
-    const checkoutId = searchParams.get("checkoutId");
 
-    if (!paymentLinkId || !checkoutId) {
+    if (!resourcePath && (!paymentLinkId || !checkoutId)) {
       return NextResponse.json(
-        { error: "paymentLinkId and checkoutId are required" },
+        { error: "resourcePath or (paymentLinkId and checkoutId) is required" },
         { status: 400 }
       );
     }
 
-    // Find the order by the paymentId (which holds the payment link id)
-    const order = await prisma.order.findFirst({
-      where: { paymentId: paymentLinkId },
-      include: { items: true },
-    });
+    // Find the order by orderId, paymentId (checkoutId or paymentLinkId)
+    let order = null;
+    if (orderId) {
+      order = await prisma.order.findUnique({
+        where: { id: orderId },
+        include: { items: true },
+      });
+    }
+
+    if (!order && checkoutId) {
+      order = await prisma.order.findFirst({
+        where: { paymentId: checkoutId },
+        include: { items: true },
+      });
+    }
+
+    if (!order && paymentLinkId) {
+      order = await prisma.order.findFirst({
+        where: { paymentId: paymentLinkId },
+        include: { items: true },
+      });
+    }
 
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    // If order is already paid, return it immediately to avoid duplicate processing
+    // Idempotency: If order is already paid, return it immediately to avoid duplicate processing
     if (order.paymentStatus === "PAID") {
       return NextResponse.json(order);
     }
 
-    // Call Pay By Link API to check status
-    const entityId = process.env.PAYBYLINK_ENTITY_ID || "";
-    const baseUrl = process.env.PAYBYLINK_BASE_URL || "https://eu-prod.oppwa.com";
-    const statusUrl = `${baseUrl}/paybylink/v1/${paymentLinkId}/checkouts/${checkoutId}/payment?entityId=${entityId}`;
+    let paymentData: any = null;
 
-    const response = await fetch(statusUrl, {
-      method: "GET",
-      headers: {
-        "Authorization": `Bearer ${process.env.PAYBYLINK_AUTH_TOKEN}`,
-      },
-    });
+    if (resourcePath) {
+      // Call PayNT / OPPWA Copy & Pay status verification
+      paymentData = await getPaymentStatus(resourcePath);
+    } else {
+      // Legacy Pay By Link status verification fallback
+      const entityId = process.env.PAYBYLINK_ENTITY_ID || process.env.PAYNT_ENTITY_ID || "";
+      const baseUrl = process.env.PAYBYLINK_BASE_URL || process.env.PAYNT_BASE_URL || "https://eu-test.oppwa.com";
+      const statusUrl = `${baseUrl}/paybylink/v1/${paymentLinkId}/checkouts/${checkoutId}/payment?entityId=${entityId}`;
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Pay By Link status check error:", response.status, errorText);
-      return NextResponse.json(
-        { error: "Failed to verify payment status with provider" },
-        { status: 502 }
-      );
+      const token = process.env.PAYBYLINK_AUTH_TOKEN || process.env.PAYNT_BEARER_TOKEN || "";
+      const response = await fetch(statusUrl, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Pay By Link status check error:", response.status, errorText);
+        return NextResponse.json(
+          { error: "Failed to verify payment status with provider" },
+          { status: 502 }
+        );
+      }
+      paymentData = await response.json();
     }
 
-    const paymentData = await response.json();
-    console.log("Pay By Link verification response:", JSON.stringify(paymentData));
+    console.log("PayNT/OPPWA verification response:", JSON.stringify(paymentData));
 
-    // OPPWA success regex pattern
-    const successRegex = /^(000\.000\.|000\.100\.1|000\.[36])/;
-    const isSuccess = successRegex.test(paymentData.result?.code || "");
+    const isSuccess = isPaymentSuccessful(paymentData?.result?.code);
+    const isPending = isPaymentPending(paymentData?.result?.code);
 
     if (isSuccess) {
       // Get exact amount and currency paid from Oppwa
@@ -147,6 +174,15 @@ export async function GET(request: NextRequest) {
       scheduleEmail(`order confirmation ${updatedOrder.orderNumber}`, () => sendOrderConfirmationEmail(emailPayload));
       scheduleEmail(`order invoice ${updatedOrder.orderNumber}`, () => sendOrderInvoiceEmail(emailPayload));
 
+      return NextResponse.json(updatedOrder);
+    } else if (isPending) {
+      const updatedOrder = await prisma.order.update({
+        where: { id: order.id },
+        data: {
+          paymentStatus: "PENDING",
+        },
+        include: { items: true },
+      });
       return NextResponse.json(updatedOrder);
     } else {
       const updatedOrder = await prisma.order.update({

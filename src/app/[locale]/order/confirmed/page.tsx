@@ -25,65 +25,85 @@ function ConfirmedContent() {
   const { clearCart } = useCart();
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId");
-  const paymentLinkId = searchParams.get("id");
-  const checkoutId = searchParams.get("checkoutId");
+  const resourcePath = searchParams.get("resourcePath");
+  const checkoutId = searchParams.get("checkoutId") || searchParams.get("id");
+  const paymentLinkId = searchParams.get("paymentLinkId");
 
   const [order, setOrder] = useState<OrderDetail | null>(null);
-  const [loading, setLoading] = useState(!!orderId || (!!paymentLinkId && !!checkoutId));
+  const [loading, setLoading] = useState(
+    Boolean(resourcePath || orderId || (paymentLinkId && checkoutId))
+  );
 
   useEffect(() => {
-    if (paymentLinkId && checkoutId) {
-      let isSubscribed = true;
+    let isSubscribed = true;
 
-      const checkStatus = () => {
-        fetch(`/api/orders/verify?paymentLinkId=${paymentLinkId}&checkoutId=${checkoutId}`)
-          .then((res) => res.json())
-          .then((data) => {
-            if (!isSubscribed) return;
-            if (data?.id) {
-              setOrder(data);
-              if (data.paymentStatus === "PAID") {
-                clearCart();
-                setLoading(false);
-                clearInterval(intervalId);
-              } else if (data.paymentStatus === "FAILED") {
-                setLoading(false);
-                clearInterval(intervalId);
-              }
+    if (resourcePath) {
+      // OPPWA Copy & Pay Throttling Rule:
+      // Maximum 2 verification calls per minute allowed per checkoutId.
+      // Call verify endpoint ONCE upon return (do not poll in a loop).
+      const verifyUrl = `/api/orders/verify?resourcePath=${encodeURIComponent(resourcePath)}&orderId=${encodeURIComponent(orderId || "")}&checkoutId=${encodeURIComponent(checkoutId || "")}`;
+
+      fetch(verifyUrl)
+        .then((res) => res.json())
+        .then((data) => {
+          if (!isSubscribed) return;
+          if (data?.id) {
+            setOrder(data);
+            if (data.paymentStatus === "PAID") {
+              clearCart();
             }
-          })
-          .catch(() => {
-            if (isSubscribed) {
-              setOrder(null);
-              setLoading(false);
-              clearInterval(intervalId);
+          }
+        })
+        .catch((err) => {
+          console.error("Order verification failed:", err);
+          if (isSubscribed) setOrder(null);
+        })
+        .finally(() => {
+          if (isSubscribed) setLoading(false);
+        });
+    } else if (paymentLinkId && checkoutId) {
+      fetch(`/api/orders/verify?paymentLinkId=${encodeURIComponent(paymentLinkId)}&checkoutId=${encodeURIComponent(checkoutId)}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (!isSubscribed) return;
+          if (data?.id) {
+            setOrder(data);
+            if (data.paymentStatus === "PAID") {
+              clearCart();
             }
-          });
-      };
-
-      // Poll every 2 seconds (callbacks above only read intervalId asynchronously)
-      const intervalId = setInterval(checkStatus, 2000);
-
-      // Run immediately
-      checkStatus();
-
-      return () => {
-        isSubscribed = false;
-        clearInterval(intervalId);
-      };
+          }
+        })
+        .catch((err) => {
+          console.error("Legacy verification failed:", err);
+          if (isSubscribed) setOrder(null);
+        })
+        .finally(() => {
+          if (isSubscribed) setLoading(false);
+        });
     } else if (orderId) {
       fetch(`/api/orders/${orderId}`)
         .then((res) => res.json())
         .then((data) => {
+          if (!isSubscribed) return;
           setOrder(data?.id ? data : null);
           if (data?.paymentStatus === "PAID") {
             clearCart();
           }
         })
-        .catch(() => setOrder(null))
-        .finally(() => setLoading(false));
+        .catch(() => {
+          if (isSubscribed) setOrder(null);
+        })
+        .finally(() => {
+          if (isSubscribed) setLoading(false);
+        });
+    } else {
+      setLoading(false);
     }
-  }, [orderId, paymentLinkId, checkoutId, clearCart]);
+
+    return () => {
+      isSubscribed = false;
+    };
+  }, [orderId, resourcePath, checkoutId, paymentLinkId, clearCart]);
 
   if (loading) {
     return (
