@@ -37,7 +37,7 @@ function getFrom(): string {
 }
 
 function getReplyTo(): string | undefined {
-  return process.env.SMTP_REPLY_TO || undefined;
+  return COMPANY.email;
 }
 
 function getSiteUrl(): string {
@@ -430,7 +430,7 @@ export async function sendOrderInvoiceEmail(data: OrderEmailData): Promise<boole
 
       <p style="color:${MUTED};font-size:12px;margin:0;line-height:1.6;border-top:1px solid ${RULE};padding-top:12px;">
         VAT is included in the prices shown where applicable. Keep this invoice as your proof of purchase.<br />
-        Questions about this invoice: reply to this email or write to <a href="mailto:info@solvetaworld.com" style="color:${LINK};">info@solvetaworld.com</a>.
+        Questions about this invoice: reply to this email or write to <a href="mailto:${COMPANY.email}" style="color:${LINK};">${COMPANY.email}</a>.
       </p>
     `,
       { preheader: `Invoice for order #${id} — ${formatEur(toNum(data.total))}` },

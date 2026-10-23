@@ -24,5 +24,5 @@ export const COMPANY: {
   registeredOffice:
     "Dept 6953, 196 High Road, Wood Green, London, United Kingdom, N22 8HH",
   phone: "+44 7481 359087",
-  email: "info@solvetaworld.com",
+  email: "support@solvetaworld.com",
 };
