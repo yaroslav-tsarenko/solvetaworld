@@ -9,7 +9,7 @@ import { Link } from "@/i18n/routing";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs/Breadcrumbs";
 import { JsonLd } from "@/components/shared/SEO/JsonLd";
 
-export const revalidate = 60;
+export const revalidate = 86400;
 
 interface ProductPageProps {
   params: Promise<{ slug: string; locale: string }>;
